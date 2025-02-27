@@ -49,17 +49,16 @@ const handleSubmit = async (e) => {
         <form onSubmit={handleSubmit} className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border-4 border-yellow-400 space-y-6 relative overflow-hidden">
           {/* Fondo temático Pokémon */}
           <div className="absolute inset-0 z-0 pointer-events-none">
-            <div className="h-1/2 bg-red-600"></div>
+            <div className="h-2/3 bg-red-600"></div>
             <div className="h-4 bg-black"></div>
-            <div className="h-1/2 bg-white"></div>
             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full border-4 border-black">
               <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 border-black"></div>
             </div>
           </div>
           
           {/* Contenido del formulario */}
-          <div className="relative z-10 bg-white bg-opacity-90 p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-red-600 mb-6 text-center">¡Conviértete en Entrenador!</h2>
+          <div className="relative bg-white bg-opacity-90 p-6 rounded-lg">
+            <h2 className="text-4xl font-bold text-red-600 mb-6 text-center">¡Conviértete en Entrenador!</h2>
 
             <div className="space-y-4">
               <div className="flex flex-col">
@@ -87,7 +86,7 @@ const handleSubmit = async (e) => {
                   name="email" 
                   value={formData.email || ''} 
                   onChange={handleChange}
-                  className="px-4 py-2 border-2 border-yellow-400 rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
+                  className="px-4 py-2 border-2 border-yellow-400 rounded-full"
                   placeholder="entrenador@pokemon.com" 
                 />
               </div>
