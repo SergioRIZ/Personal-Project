@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import Formulario from './components/formulario'
+import Formulario from './formulario'
 
 
 createRoot(document.getElementById('root')).render(
