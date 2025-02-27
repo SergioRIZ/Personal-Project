@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 
+
 /* Definimos un componente funcional de React llamado form
 Donde utilizamos el hook useState para crear un estado llamado formData.
 SetFormData servira para actualizar el estado FormData cuando sea necesario */
@@ -41,7 +42,7 @@ const handleSubmit = async (e) => {
         return;
     }
 }
-
+// Creamos un formulario sencillo para la creacion de el usuario (Lo ideal es mandarlo al servidor, pero como no se crearlo me jodo)
     return (
         <form onSubmit={handleSubmit}>
             <label>
