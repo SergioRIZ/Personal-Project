@@ -1,7 +1,7 @@
 import Page404 from './pages/404.jsx';
 import Home from './pages/Home'
 import Login from './pages/Login';
-import Register from './pages/Register';
+import Register from './pages/Register.jsx';
 import {Router} from './Router/Router.jsx';
 
 const AppRoutes = [
