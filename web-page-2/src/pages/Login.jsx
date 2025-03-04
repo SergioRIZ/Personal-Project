@@ -282,9 +282,9 @@ export default function Login() {
                   {/* Footer */}
                   <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
                       <p className="text-sm text-gray-600">
-                          ¿No tienes una cuenta? 
+                          No account? 
                           <Link to="/register" className="ml-1 font-medium text-red-600 hover:text-red-500">
-                              Regístrate
+                              Sign-up
                           </Link>
                       </p>
                       
