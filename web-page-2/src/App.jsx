@@ -1,6 +1,6 @@
 import Page404 from './pages/404.jsx';
 import Home from './pages/Home'
-import Login from './pages/Login';
+import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import {Router} from './Router/Router.jsx';
 
