@@ -1,16 +1,6 @@
 import { EVENTS } from '../const';
 import { useState, useEffect } from "react";
-import PropTypes from 'prop-types'
 
-Router.propTypes = {
-  routes: PropTypes.arrayOf(
-    PropTypes.shape({
-      path: PropTypes.string.isRequired,
-      Component: PropTypes.elementType.isRequired
-    })
-  ),
-  defaultComponent: PropTypes.elementType
-}
 export function Router ({routes = [], defaultComponent: DefaultComponent = () => <></>}) {
     const [currentPath, setCurrentPath] = useState(window.location.pathname)
 

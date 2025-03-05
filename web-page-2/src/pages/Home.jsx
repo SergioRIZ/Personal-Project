@@ -28,10 +28,6 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      
-      <div className="mt-8 text-white text-center">
-        <p className="text-sm">¡Catch, train and !</p>
-      </div>
     </div>
   );
 }
