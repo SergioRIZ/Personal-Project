@@ -92,27 +92,8 @@ export default function Register() {
   };
 
   return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center relative bg-gradient-to-b from-blue-100 to-blue-200 overflow-hidden">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
           {/* Pokémon-themed Background Elements */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-              {/* Poké Ball Background Pattern */}
-              <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                  <div className="absolute w-32 h-32 bg-red-500 rounded-full top-10 left-10"></div>
-                  <div className="absolute w-48 h-48 bg-white rounded-full border-4 border-black top-1/3 right-20">
-                      <div className="absolute top-1/2 left-0 w-full h-4 bg-black"></div>
-                  </div>
-                  <div className="absolute w-24 h-24 bg-red-500 rounded-full bottom-20 right-40"></div>
-                  <div className="absolute w-40 h-40 bg-white rounded-full border-4 border-black bottom-10 left-1/4">
-                      <div className="absolute top-1/2 left-0 w-full h-4 bg-black"></div>
-                  </div>
-              </div>
-
-              {/* Subtle Pokémon Silhouettes */}
-              <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-blue-200 to-transparent opacity-20">
-                  <div className="absolute bottom-0 left-10 w-24 h-24 bg-black opacity-10 rounded-full"></div>
-                  <div className="absolute bottom-0 right-10 w-32 h-32 bg-black opacity-10 rounded-full"></div>
-              </div>
-          </div>
           
           {/* Existing form content remains the same, just wrapped in relative positioning */}
           <div className="relative z-10 w-full flex flex-col items-center">
