@@ -306,12 +306,6 @@ export default function Login() {
                       </div>
                   </div>
               </div>
-              
-              {/* Texto abajo del formulario */}
-              <div className="text-center mt-6 text-sm text-black">
-                  <p>© {new Date().getFullYear()} Liga Pokémon. Todos los derechos reservados.</p>
-                  <p className="mt-1">Diseñado para entrenadores de todas las regiones.</p>
-              </div>
           </div>
       </div>
   );

@@ -65,13 +65,14 @@ export default function Register() {
       setIsSubmitting(true);
       
       if (validateForm()) {
+        
           try {
-              console.log('Datos del formulario:', formData);
+              
               
               await new Promise(resolve => setTimeout(resolve, 800));
               
               setFormSuccess(true);
-              
+
               setTimeout(() => {
                   setFormData({
                       username: '',
@@ -91,151 +92,154 @@ export default function Register() {
       setIsSubmitting(false);
   };
 
+
   return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
           {/* Pokémon-themed Background Elements */}
           
           {/* Existing form content remains the same, just wrapped in relative positioning */}
-          <div className="relative z-10 w-full flex flex-col items-center">
+          <div className="relative">
               <div className="mb-6 text-center">
-                  <h1 className="text-4xl font-bold text-red-600 mb-2">Centro Pokémon</h1>
-                  <p className="text-gray-600">¡Regístrate para comenzar tu aventura!</p>
+                  <h1 className="text-4xl font-bold text-red-600 mb-2">Pokemon Center</h1>
+                  <p className="text-gray-600">Log-In to start your adventure!</p>
               </div>
               
-              <form onSubmit={handleSubmit} className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border-4 border-yellow-400 space-y-6 relative overflow-hidden">
+              <form onSubmit={handleSubmit} className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border-4 space-y-6 relative overflow-hidden">
                   {/* Existing form background and content remains the same */}
                   <div className="absolute inset-0 z-0 pointer-events-none">
-                      <div className="h-2/3 bg-red-600"></div>
-                      <div className="h-4 bg-black"></div>
-                      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full border-4 border-black">
-                          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 border-black"></div>
+                      <div className="h-2/3"></div>
+                      <div className="h-4"></div>
+                      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-4 border-black">
+                          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-black"></div>
                       </div>
                   </div>
                   
-                  {/* Rest of the form remains exactly the same as in the original component */}
-                  <div className="relative bg-white bg-opacity-90 p-6 rounded-lg">
-                      <h2 className="text-4xl font-bold text-red-600 mb-6 text-center">¡Conviértete en Entrenador!</h2>
-                      
-                      {formSuccess && (
-                          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                              ¡Felicidades! Tu cuenta de entrenador ha sido creada exitosamente.
-                          </div>
-                      )}
-                      
-                      {errors.submit && (
-                          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                              {errors.submit}
-                          </div>
-                      )}
+                                  <div className="relative bg-white bg-opacity-90 p-6 rounded-lg">
+                                      <h2 className="text-3xl font-bold text-red-600 mb-6 text-center">Become a pokemon master!</h2>
+                                      
+                                      {formSuccess && (
+                                          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                                              Congratulations! Your trainer account has been created.
+                                          </div>
+                                      )}
+                                      
+                                      {errors.submit && (
+                                          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                              {errors.submit}
+                                          </div>
+                                      )}
 
-                      <div className="space-y-4">
-                          <div className="flex flex-col">
-                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="username">
-                                  Nombre de Entrenador
-                              </label>
-                              <input 
-                                  type="text" 
-                                  id="username"
-                                  name="username" 
-                                  value={formData.username} 
-                                  onChange={handleChange}
-                                  className={`px-4 py-2 border-2 ${errors.username ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
-                                  placeholder="Ash Ketchum" 
-                              />
-                              {errors.username && (
-                                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
-                              )}
-                          </div>
-                          
-                          <div className="flex flex-col">
-                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-                                  PokéEmail
-                              </label>
-                              <input 
-                                  type="email" 
-                                  id="email"
-                                  name="email" 
-                                  value={formData.email} 
-                                  onChange={handleChange}
-                                  className={`px-4 py-2 border-2 ${errors.email ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
-                                  placeholder="entrenador@pokemon.com" 
-                              />
-                              {errors.email && (
-                                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                              )}
-                          </div>
-                          
-                          <div className="flex flex-col">
-                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="password">
-                                  Contraseña Secreta
-                              </label>
-                              <input 
-                                  type="password" 
-                                  id="password"
-                                  name="password" 
-                                  value={formData.password} 
-                                  onChange={handleChange}
-                                  className={`px-4 py-2 border-2 ${errors.password ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
-                                  placeholder="••••••••" 
-                              />
-                              {errors.password && (
-                                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                              )}
-                          </div>
-                          
-                          <div className="flex flex-col">
-                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
-                                  Confirmar Contraseña Secreta
-                              </label>
-                              <input 
-                                  type="password"
-                                  id="confirmPassword" 
-                                  name="confirmPassword" 
-                                  value={formData.confirmPassword} 
-                                  onChange={handleChange}
-                                  className={`px-4 py-2 border-2 ${errors.confirmPassword ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
-                                  placeholder="••••••••" 
-                              />
-                              {errors.confirmPassword && (
-                                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                              )}
-                          </div>
-                          
-                          <div className="pt-2">
-                              <button 
-                                  type="submit"
-                                  disabled={isSubmitting}
-                                  className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-red-600 hover:bg-red-700'} text-white py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-bold flex items-center justify-center`}
-                              >
-                                  {isSubmitting ? (
-                                      <>
-                                          <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                          </svg>
-                                          <span>Procesando...</span>
-                                      </>
-                                  ) : (
-                                      <span>¡Hazte con todos!</span>
-                                  )}
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-              </form>
-              
-  <p className="relative z-10 text-center text-sm text-gray-700 mt-4 bg-yellow-100 border-2 border-yellow-400 py-3 px-4 rounded-xl shadow-sm">
-    ¿Ya tienes un PokéDex? <a href="/login" className="text-red-600 font-bold hover:text-red-700 transition-colors">
-        ¡Inicia tu aventura! 
-        <span className="ml-1 inline-block">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-        </span>
-    </a>
-</p>
+                                      <div className="space-y-4">
+                                          <div className="flex flex-col">
+                                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="username">
+                                                  Trainer Name
+                                              </label>
+                                              <input 
+                                                  type="text" 
+                                                  id="username"
+                                                  name="username" 
+                                                  value={formData.username} 
+                                                  onChange={handleChange}
+                                                  className={`px-4 py-2 border-2 ${errors.username ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
+                                                  placeholder="Ash Ketchum" 
+                                              />
+                                              {errors.username && (
+                                                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                                              )}
+                                          </div>
+                                          
+                                          <div className="flex flex-col">
+                                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+                                                  PokeMail
+                                              </label>
+                                              <input 
+                                                  type="email" 
+                                                  id="email"
+                                                  name="email" 
+                                                  value={formData.email} 
+                                                  onChange={handleChange}
+                                                  className={`px-4 py-2 border-2 ${errors.email ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
+                                                  placeholder="entrenador@pokemon.com" 
+                                              />
+                                              {errors.email && (
+                                                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                              )}
+                                          </div>
+                                          
+                                          <div className="flex flex-col">
+                                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="password">
+                                                  Password
+                                              </label>
+                                              <input 
+                                                  type="password" 
+                                                  id="password"
+                                                  name="password" 
+                                                  value={formData.password} 
+                                                  onChange={handleChange}
+                                                  className={`px-4 py-2 border-2 ${errors.password ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
+                                                  placeholder="••••••••" 
+                                              />
+                                              {errors.password && (
+                                                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                                              )}
+                                          </div>
+                                          
+                                          <div className="flex flex-col">
+                                              <label className="text-sm font-medium text-gray-700 mb-1" htmlFor="confirmPassword">
+                                                  Confirm password
+                                              </label>
+                                              <input 
+                                                  type="password"
+                                                  id="confirmPassword" 
+                                                  name="confirmPassword" 
+                                                  value={formData.confirmPassword} 
+                                                  onChange={handleChange}
+                                                  className={`px-4 py-2 border-2 ${errors.confirmPassword ? 'border-red-500' : 'border-yellow-400'} rounded-full focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all`}
+                                                  placeholder="••••••••" 
+                                              />
+                                              {errors.confirmPassword && (
+                                                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                                              )}
+                                          </div>
+                                          
+                                          <div className="pt-2">
+                                              <Link
+                                                  type="submit"
+                                                  disabled={isSubmitting}
+                                                  className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-red-600 hover:bg-red-700'} text-white py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-bold flex items-center justify-center`}
+                                                  to="/team-builder"
+                                             >
+                                                  
+                                                {isSubmitting ? (
+                                                    
+                                                      <>
+                                                          <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                          </svg>
+                                                          <span>Processing...</span>
+                                                          
+                                                      </>
+                                                  ) : (
+                                                      <span>Create account</span>
+                                                  )}
+                                              </Link>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </form>
+                              
+                  <p className="relative z-10 text-center text-sm text-gray-700 mt-4 bg-yellow-100 border-2 border-yellow-400 py-3 px-4 rounded-xl shadow-sm">
+                    ¿Already an account? <Link to="/login" className="text-red-600 font-bold hover:text-red-700 transition-colors">
+                        ¡Start your adventure! 
+                        <span className="ml-1 inline-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </Link>
+                </p>
 
-{/* Footer */}
 <div className="max-w-md w-full mt-4 flex space-x-4">
     <Link 
         to="/" 
@@ -245,16 +249,6 @@ export default function Register() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         HOME
-    </Link>
-    
-    <Link
-        to="/login" 
-        className="flex-1 px-4 py-3 bg-yellow-400 text-gray-800 hover:bg-yellow-500 font-bold rounded-xl border-2 border-yellow-500 transition-all duration-300 flex items-center justify-center group"
-    >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-        </svg>
-        LOG-IN
     </Link>
 </div>
           </div>
