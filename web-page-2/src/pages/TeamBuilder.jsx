@@ -6,36 +6,40 @@ const PokemonTeamBuilder = () => {
     const [selectedPokemon, setSelectedPokemon] = useState([]);
     const [isBuilding, setIsBuilding] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectAll, setSelectAll] = useState(false);
-    const [allPokemon, setAllPokemon] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [searchResults, setSearchResults] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const limit = 20; // Cantidad de Pokémon por página
 
-    // Cargar Pokémon de la API
+    // Búsqueda de Pokémon directamente por nombre o tipo
     useEffect(() => {
-        const fetchPokemon = async () => {
+        const searchPokemon = async () => {
+            if (!searchTerm || searchTerm.length < 1) {
+                setSearchResults([]);
+                return;
+            }
+
             try {
                 setLoading(true);
-                // Calcular el offset basado en la página actual
-                const offset = (currentPage - 1) * limit;
-                // Hacer la petición a la API
-                const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
+                // Usar la API para buscar por nombre
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1304`);
                 
                 if (!response.ok) {
-                    throw new Error('Error al cargar los Pokémon');
+                    throw new Error('Error al buscar Pokémon');
                 }
                 
                 const data = await response.json();
                 
-                // Calcular el total de páginas
-                setTotalPages(Math.ceil(data.count / limit));
+                // Filtrar resultados que coincidan con el término de búsqueda
+                const matchingPokemon = data.results.filter(pokemon => 
+                    pokemon.name.includes(searchTerm.toLowerCase())
+                );
                 
-                // Para cada Pokémon, obtener más detalles
+                // Limitar a 10 resultados máximo para mejorar el rendimiento
+                const limitedResults = matchingPokemon.slice(0, 15);
+                
+                // Obtener detalles para los Pokémon filtrados
                 const pokemonDetails = await Promise.all(
-                    data.results.map(async (pokemon) => {
+                    limitedResults.map(async (pokemon) => {
                         const detailResponse = await fetch(pokemon.url);
                         if (!detailResponse.ok) {
                             throw new Error(`Error al cargar detalles de ${pokemon.name}`);
@@ -50,32 +54,23 @@ const PokemonTeamBuilder = () => {
                     })
                 );
                 
-                setAllPokemon(pokemonDetails);
+                setSearchResults(pokemonDetails);
                 setError(null);
             } catch (err) {
-                setError(err.message);
-                console.error('Error fetching Pokémon:', err);
+                setError("Error de búsqueda. Inténtalo de nuevo.");
+                console.error('Error searching Pokémon:', err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPokemon();
-    }, [currentPage]);
+        // Usar un temporizador para evitar muchas solicitudes mientras el usuario escribe
+        const timer = setTimeout(() => {
+            searchPokemon();
+        }, 500);
 
-    // Filtrar Pokémon basado en término de búsqueda
-    const filteredPokemon = allPokemon.filter(pokemon => 
-        pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pokemon.types.some(type => type.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-
-    // Efecto para manejar selección de todos
-    useEffect(() => {
-        if (selectAll) {
-            const pokemonToSelect = filteredPokemon.slice(0, 6); // Solo selecciona hasta 6 máximo
-            setSelectedPokemon(pokemonToSelect);
-        }
-    }, [selectAll, searchTerm]);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const handleTeamNameChange = (e) => {
         setTeamName(e.target.value);
@@ -83,18 +78,6 @@ const PokemonTeamBuilder = () => {
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setSelectAll(false); // Resetear selectAll cuando cambia la búsqueda
-    };
-
-    const handleSelectAll = () => {
-        if (!selectAll && filteredPokemon.length > 0) {
-            const pokemonToSelect = filteredPokemon.slice(0, 6); // Solo selecciona hasta 6 máximo
-            setSelectedPokemon(pokemonToSelect);
-            setSelectAll(true);
-        } else {
-            setSelectedPokemon([]);
-            setSelectAll(false);
-        }
     };
 
     const handlePokemonSelect = (pokemon) => {
@@ -105,34 +88,25 @@ const PokemonTeamBuilder = () => {
 
     const handleRemovePokemon = (pokemon) => {
         setSelectedPokemon(selectedPokemon.filter(p => p.id !== pokemon.id));
-        setSelectAll(false);
-    };
-
-    const handlePageChange = (newPage) => {
-        if (newPage > 0 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-            setSearchTerm('');
-        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (teamName && selectedPokemon.length > 0) {
             setIsBuilding(true);
-            // Simulate team creation process
+            // Simular proceso de creación de equipo
             setTimeout(() => {
                 alert(`Equipo "${teamName}" creado exitosamente con ${selectedPokemon.length} Pokémon!`);
                 setIsBuilding(false);
-                // Opcional: resetear formulario después de crear equipo
+                // Reset opcional
                 // setTeamName('');
                 // setSelectedPokemon([]);
                 // setSearchTerm('');
-                // setSelectAll(false);
             }, 1500);
         }
     };
 
-    // Obtener tipos de Pokémon con colores asociados
+    // Obtener colores de tipo para los Pokémon
     const getTypeColor = (type) => {
         const typeColors = {
             normal: 'bg-gray-400',
@@ -163,20 +137,12 @@ const PokemonTeamBuilder = () => {
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
             {/* Header con logotipo */}
             <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full relative">
-    {/* Red top half */}
-    <div className="absolute top-0 left-0 w-full h-1/2 bg-red-500 rounded-t-full overflow-hidden">
-    </div>
-    {/* White bottom half */}
-    <div className="absolute bottom-0.5 left-0 w-full h-1/2 bg-white rounded-b-full border-t border-black">
-        <div className="absolute top-0 left-0 w-full h-1/8 bg-black"></div>
-    </div>
-    
-    {/* Center button */}
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-4xl border-6 border-gray-700 z-10"></div>
-    
-    {/* Black border */}
-    <div className="absolute inset-0 border-6 border-black rounded-full pointer-events-none"></div>
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full relative">
+                    {/* Pokeball design */}
+                    <div className="absolute top-0 left-0 w-full h-1/2 bg-red-500 rounded-t-full"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white rounded-b-full"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full border-4 border-gray-700 z-10"></div>
+                    <div className="absolute inset-0 border-4 border-black rounded-full pointer-events-none"></div>
                 </div>
                 <h1 className="text-5xl text-red-600 mb-2">Pokemon League</h1>
             </div>
@@ -206,10 +172,10 @@ const PokemonTeamBuilder = () => {
                                 />
                             </div>
                             
-                            {/* Filtro de búsqueda */}
+                            {/* Búsqueda de Pokémon */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="searchPokemon">
-                                    Buscar Pokémon (por nombre o tipo)
+                                    Buscar Pokémon
                                 </label>
                                 <div className="relative">
                                     <input
@@ -218,7 +184,7 @@ const PokemonTeamBuilder = () => {
                                         value={searchTerm}
                                         onChange={handleSearchChange}
                                         className="py-3 px-4 w-full border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Ej. Pikachu, fuego, agua..."
+                                        placeholder="Escribe un nombre de Pokémon..."
                                     />
                                     {searchTerm && (
                                         <button
@@ -232,107 +198,71 @@ const PokemonTeamBuilder = () => {
                                 </div>
                             </div>
                             
-                            {/* Botón de seleccionar todos + Paginación */}
-                            <div className="flex justify-between items-center">
-                                <label className="block text-sm font-medium text-gray-700">
+                            {/* Resultados de búsqueda */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Pokémon Disponibles
                                 </label>
-                                <div className="flex space-x-2">
-                                    <button
-                                        type="button"
-                                        onClick={handleSelectAll}
-                                        disabled={selectedPokemon.length >= 6 && !selectAll}
-                                        className={`text-sm px-3 py-1 rounded-md ${
-                                            selectAll 
-                                            ? 'bg-red-500 text-white' 
-                                            : 'bg-gray-200 hover:bg-gray-300'
-                                        } ${selectedPokemon.length >= 6 && !selectAll ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        {selectAll ? 'Deseleccionar' : 'Selec. todos'}
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            {/* Lista de Pokémon filtrados */}
-                            <div className="max-h-64 overflow-y-auto p-2 border border-gray-200 rounded-lg">
-                                {loading ? (
-                                    <div className="flex justify-center items-center py-8">
-                                        <svg className="animate-spin h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </div>
-                                ) : error ? (
-                                    <div className="text-center py-4 text-red-500">
-                                        Error: {error}. Por favor, intenta de nuevo.
-                                    </div>
-                                ) : filteredPokemon.length > 0 ? (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {filteredPokemon.map(pokemon => (
-                                            <button
-                                                key={pokemon.id}
-                                                type="button"
-                                                onClick={() => handlePokemonSelect(pokemon)}
-                                                disabled={selectedPokemon.length >= 6 && !selectedPokemon.some(p => p.id === pokemon.id)}
-                                                className={`p-2 rounded-lg border transition-all flex items-center ${
-                                                    selectedPokemon.some(p => p.id === pokemon.id) 
-                                                    ? 'bg-green-100 border-green-500' 
-                                                    : 'bg-white hover:bg-gray-100 border-gray-200'
-                                                } ${selectedPokemon.length >= 6 && !selectedPokemon.some(p => p.id === pokemon.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <img 
-                                                    src={pokemon.sprite} 
-                                                    alt={pokemon.name} 
-                                                    className="w-12 h-12"
-                                                />
-                                                <div className="ml-2 text-left">
-                                                    <div className="font-semibold text-sm">{pokemon.name}</div>
-                                                    <div className="flex mt-1 space-x-1">
-                                                        {pokemon.types.map(type => (
-                                                            <span 
-                                                                key={`${pokemon.id}-${type}`} 
-                                                                className={`px-2 py-0.5 rounded-full text-white text-xs ${getTypeColor(type)}`}
-                                                            >
-                                                                {type}
-                                                            </span>
-                                                        ))}
+                                <div className="max-h-64 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                                    {loading ? (
+                                        <div className="flex justify-center items-center py-8">
+                                            <svg className="animate-spin h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </div>
+                                    ) : error ? (
+                                        <div className="text-center py-4 text-red-500">
+                                            Error: {error}
+                                        </div>
+                                    ) : searchResults.length > 0 ? (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {searchResults.map(pokemon => (
+                                                <button
+                                                    key={pokemon.id}
+                                                    type="button"
+                                                    onClick={() => handlePokemonSelect(pokemon)}
+                                                    disabled={selectedPokemon.length >= 6 && !selectedPokemon.some(p => p.id === pokemon.id)}
+                                                    className={`p-2 rounded-lg border transition-all flex items-center ${
+                                                        selectedPokemon.some(p => p.id === pokemon.id) 
+                                                        ? 'bg-green-100 border-green-500' 
+                                                        : 'bg-white hover:bg-gray-100 border-gray-200'
+                                                    } ${selectedPokemon.length >= 6 && !selectedPokemon.some(p => p.id === pokemon.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    <img 
+                                                        src={pokemon.sprite} 
+                                                        alt={pokemon.name} 
+                                                        className="w-12 h-12"
+                                                    />
+                                                    <div className="ml-2 text-left">
+                                                        <div className="font-semibold text-sm">{pokemon.name}</div>
+                                                        <div className="flex mt-1 space-x-1">
+                                                            {pokemon.types.map(type => (
+                                                                <span 
+                                                                    key={`${pokemon.id}-${type}`} 
+                                                                    className={`px-2 py-0.5 rounded-full text-white text-xs ${getTypeColor(type)}`}
+                                                                >
+                                                                    {type}
+                                                                </span>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="col-span-3 py-4 text-center text-gray-500">
-                                        No se encontraron Pokémon con "{searchTerm}"
-                                    </div>
-                                )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : searchTerm && searchTerm.length > 1 ? (
+                                        <div className="py-4 text-center text-gray-500">
+                                            No se encontraron Pokémon con "{searchTerm}"
+                                        </div>
+                                    ) : (
+                                        <div className="py-4 text-center text-gray-500">
+                                            Escribe al menos 2 caracteres para buscar
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             
-                            {/* Paginación */}
-                            {!searchTerm && (
-                                <div className="flex justify-center items-center space-x-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage === 1 || loading}
-                                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        &lt;
-                                    </button>
-                                    <span className="text-sm text-gray-700">
-                                        Página {currentPage} de {totalPages}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage === totalPages || loading}
-                                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        &gt;
-                                    </button>
-                                </div>
-                            )}
-                            
+                            {/* Equipo seleccionado */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Equipo Actual ({selectedPokemon.length}/6)
@@ -366,6 +296,7 @@ const PokemonTeamBuilder = () => {
                                 </div>
                             </div>
                             
+                            {/* Botón para crear equipo */}
                             <div>
                                 <button
                                     type="submit"
@@ -393,13 +324,6 @@ const PokemonTeamBuilder = () => {
                     </div>
                     
                     <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-                        <p className="text-sm text-gray-600">
-                            ¿Necesitas ayuda? 
-                            <Link to="/help" className="ml-1 font-medium text-red-600 hover:text-red-500">
-                                Guía de Equipo
-                            </Link>
-                        </p>
-                        
                         <div className="flex space-x-4">
                             <Link to="/" className="text-sm text-gray-600 hover:text-gray-900 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
