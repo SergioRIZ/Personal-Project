@@ -1,6 +1,6 @@
-import { Link } from '../Link.jsx'
+import { Link } from "../../Link";
 import React, {useState} from "react";
-import '../css/register.css'
+import './css/register.css'
 
 
 export default function Register() {

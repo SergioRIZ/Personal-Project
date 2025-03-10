@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "../Link";
-import { FaGoogle, FaFacebook, FaTwitter } from 'react-icons/fa';
-import '../css/register.css';
+import { Link } from "../../Link";
+import './css/register.css';
 
 export default function Login() {
   const [formData, setFormData] = useState({

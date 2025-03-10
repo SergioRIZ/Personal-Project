@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '../Link';
+import { Link } from '../../Link';
 
 const PokemonTeamBuilder = () => {
     const [teamName, setTeamName] = useState('');

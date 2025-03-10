@@ -1,9 +1,9 @@
-import Page404 from './pages/404.jsx';
-import Home from './pages/Home'
-import Login from './pages/Login.jsx';
-import Pokedex from './pages/pokedex.jsx';
-import Register from './pages/Register.jsx';
-import PokemonTeamBuilder from './pages/TeamBuilder.jsx';
+import Page404 from './components/pages/404.jsx';
+import Home from './components/pages/Home'
+import Login from './components/pages/Login.jsx';
+import Pokedex from './components/pages/pokedex.jsx';
+import Register from './components/pages/Register.jsx';
+import PokemonTeamBuilder from './components/pages/TeamBuilder.jsx';
 import {Router} from './Router/Router.jsx';
 
 const AppRoutes = [
@@ -39,4 +39,3 @@ function App(){
 }
 
 export default App;
-
