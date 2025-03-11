@@ -1,5 +1,5 @@
 import Page404 from './components/pages/404.jsx';
-import Home from './components/pages/Home'
+import Home from './components/pages/Home.jsx'
 import Login from './components/pages/Login.jsx';
 import Pokedex from './components/pages/Pokedex/pokedex.jsx';
 import Register from './components/pages/Register.jsx';

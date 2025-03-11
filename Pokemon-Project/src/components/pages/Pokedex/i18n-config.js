@@ -1,7 +1,7 @@
 import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { initReactI18next } from '../../../../node_modules/react-i18next';
 
-// Initialize i18next with translations
+
 i18next
   .use(initReactI18next)
   .init({
@@ -23,9 +23,10 @@ i18next
           hidden: "Hidden",
           noResults: "No Pokémon found",
           tryAgain: "Try another search term",
-          dataProvided: "Data provided by",
           m: "m",
-          kg: "kg"
+          kg: "kg",
+          startSearching: "Start searching to see Pokémon",
+          typeToSearch: "Type the name or number of a Pokémon"
         }
       },
       es: {
@@ -45,13 +46,14 @@ i18next
           hidden: "Oculta",
           noResults: "No se encontraron Pokémon",
           tryAgain: "Intenta con otro término de búsqueda",
-          dataProvided: "Datos proporcionados por",
           m: "m",
-          kg: "kg"
+          kg: "kg",
+          startSearching: "Empieza a buscar para ver Pokémon",
+          typeToSearch: "Escribe el nombre o número de un Pokémon"
         }
       }
     },
-    lng: "es", // Default language
+    lng: "es", 
     fallbackLng: "en",
     interpolation: {
       escapeValue: false
