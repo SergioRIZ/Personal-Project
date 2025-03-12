@@ -1,8 +1,8 @@
 import Page404 from './components/pages/404.jsx';
 import Home from './components/pages/Home.jsx'
-import Login from './components/pages/Login.jsx';
+import Login from './components/pages/Login/Login.jsx';
 import Pokedex from './components/pages/Pokedex/pokedex.jsx';
-import Register from './components/pages/Register.jsx';
+import SignUp from './components/pages/SignUp/SignUp.jsx';
 import PokemonTeamBuilder from './components/pages/TeamBuilder.jsx';
 import {Router} from './Router/Router.jsx';
 
@@ -16,8 +16,8 @@ const AppRoutes = [
         Component: Login
     },
     {
-        path: '/register',
-        Component: Register
+        path: '/signup',
+        Component: SignUp
     },
     {
         path: '/team-builder',

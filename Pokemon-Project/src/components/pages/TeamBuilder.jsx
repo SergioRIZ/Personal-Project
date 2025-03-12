@@ -136,16 +136,21 @@ const PokemonTeamBuilder = () => {
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
             {/* Header con logotipo */}
-            <div className="mb-8 text-center">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full relative">
-                    {/* Pokeball design */}
-                    <div className="absolute top-0 left-0 w-full h-1/2 bg-red-500 rounded-t-full"></div>
-                    <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white rounded-b-full"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full border-4 border-gray-700 z-10"></div>
-                    <div className="absolute inset-0 border-4 border-black rounded-full pointer-events-none"></div>
-                </div>
-                <h1 className="text-5xl text-red-600 mb-2">Pokemon League</h1>
-            </div>
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full relative">
+    {/* Red top half */}
+    <div className="absolute top-0 left-0 w-full h-1/2 bg-red-500 rounded-t-full overflow-hidden">
+    </div>
+    {/* White bottom half */}
+    <div className="absolute bottom-0.5 left-0 w-full h-1/2 bg-white rounded-b-full border-t border-black">
+        <div className="absolute top-0 left-0 w-full h-1/8 bg-black"></div>
+    </div>
+    
+    {/* Center button */}
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-4xl border-6 border-gray-700 z-10"></div>
+    
+    {/* Black border */}
+    <div className="absolute inset-0 border-6 border-black rounded-full pointer-events-none"></div>
+</div>
             
             <div className="max-w-md w-full mx-auto">
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
