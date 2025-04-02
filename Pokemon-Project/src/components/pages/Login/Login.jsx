@@ -1,5 +1,6 @@
 import React from "react";
 import "../css/register.css";
+import { Link } from "../../../Link";
 
 // Importamos los componentes usando el archivo de índice
 import {
@@ -25,13 +26,13 @@ export default function Login() {
   } = useLoginForm();
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
+    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 py-6 flex flex-col items-center justify-center p-4">
       <LoginHeader />
       
       <div className="max-w-md w-full mx-auto">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
-          {/* Barra superior colorida */}
-          <div className="h-3 bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500"></div>
+          {/* Barra superior colorida con los colores del Pokedex */}
+          <div className="h-3 bg-gradient-to-r from-green-600 to-slate-700"></div>
           
           {/* Área de contenido */}
           <div className="p-8">
@@ -50,7 +51,7 @@ export default function Login() {
             )}
             
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-800">Acceso de Entrenador</h2>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700">Acceso de Entrenador</h2>
               <p className="text-gray-600 mt-2">Ingresa tus credenciales para continuar</p>
             </div>
             

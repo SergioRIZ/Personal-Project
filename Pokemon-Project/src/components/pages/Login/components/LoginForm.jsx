@@ -1,7 +1,6 @@
 import React from "react";
 import FormInput from "./FormInput";
 import PasswordInput from "./PasswordInput";
-import SocialLoginButtons from "./SocialLoginButton";
 
 const LoginForm = ({
   formData,
@@ -52,7 +51,7 @@ const LoginForm = ({
               type="checkbox"
               checked={formData.rememberMe}
               onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
             />
             <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
               Recordar sesión
@@ -60,17 +59,17 @@ const LoginForm = ({
           </div>
           
           <div className="text-sm">
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+            <a href="#" className="font-medium text-green-600 hover:text-green-800 transition-colors duration-200">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
         </div>
         
-        <div>
+        <div className="overflow-hidden rounded-xl">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200`}
+            className={`w-full flex items-center justify-center py-3 px-4 border-0 shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-600 to-slate-700 hover:from-green-700 hover:to-slate-800 cursor-pointer'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200`}
           >
             {isSubmitting ? (
               <>
@@ -92,12 +91,7 @@ const LoginForm = ({
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">O continúa con</span>
-          </div>
         </div>
-        
-        <SocialLoginButtons />
       </div>
     </>
   );

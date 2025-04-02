@@ -111,19 +111,30 @@ const Pokedex = () => {
 
   return (
 <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 py-6">
-  <div className="px-4">
-    <div className="absolute left-4 top-4">
+  <div className="px-4 flex justify-between items-center">
+    <div className="absolute left-4 top-4 flex space-x-6">
       <Link 
         to="/" 
-        className="bg-gradient-to-r from-green-500 to-slate-600 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex items-center"
+        className="text-gray-700 hover:text-gray-900 border-b border-transparent hover:border-gray-700 transition-all duration-300"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
         HOME
       </Link>
+
+    
+      <Link
+        to="/login"
+        className="text-gray-700 hover:text-gray-900 border-b border-transparent hover:border-gray-700 transition-all duration-300"
+      > 
+        LOGIN
+      </Link>
+      <Link
+        to="/signup"
+        className="text-gray-700 hover:text-gray-900 border-b border-transparent hover:border-gray-700 transition-all duration-300"
+      > 
+        SIGN-UP
+      </Link>
     </div>
-  </div>
+    </div>
 
   <div className="container mx-auto px-4 pt-10">
     <header className="text-center mb-8">
