@@ -46,14 +46,15 @@ const PokeBall = ({ size = "w-24 h-24" }) => {
       </div>
       
       {/* White bottom half */}
-      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white rounded-b-full border-t border-black">
-        <div className="absolute top-0 left-0 w-full h-1 bg-black"></div>
+      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-white rounded-b-full">
       </div>
+      
+      {/* Línea horizontal central con border-radius para no sobresalir */}
+      <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 h-1.5 bg-black z-5 overflow-hidden rounded-full"></div>
       
       {/* Center button */}
       <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full border-4 border-gray-700 z-10 transition-all duration-300 ${isHovered ? 'scale-110 bg-gray-100' : ''}`}>
-        {/* Button press animation */}
-        <div className={`absolute inset-0 bg-gray-200 rounded-full scale-0 transition-transform duration-300 ${isHovered ? 'scale-50 animate-ping' : ''}`}></div>
+        {/* Eliminada la animación de botón que causaba la rayita blanca */}
       </div>
       
       {/* Black border */}

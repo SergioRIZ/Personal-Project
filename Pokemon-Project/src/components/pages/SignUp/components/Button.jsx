@@ -1,3 +1,4 @@
+
 import React from "react";
 
 const Button = ({
@@ -16,8 +17,8 @@ const Button = ({
       className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white ${
         disabled || isLoading
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-      } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${className}`}
+          : "bg-gradient-to-r from-green-600 to-slate-700 hover:from-green-700 hover:to-slate-800"
+      } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${className}`}
     >
       {isLoading ? (
         <>

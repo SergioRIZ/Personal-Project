@@ -3,22 +3,13 @@ import { Link } from "../../../../Link";
 
 const LoginFooter = () => {
   return (
-    <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+    <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-center">
       <p className="text-sm text-gray-600">
         ¿No tienes una cuenta? 
         <Link to="/signup" className="ml-1 font-medium text-green-600 hover:text-green-800 transition-colors duration-200">
           Regístrate
         </Link>
       </p>
-      
-      <div className="flex space-x-4">
-        <Link to="/" className="text-sm text-green-600 hover:text-green-800 transition-colors duration-200 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          Inicio
-        </Link>
-      </div>
     </div>
   );
 };

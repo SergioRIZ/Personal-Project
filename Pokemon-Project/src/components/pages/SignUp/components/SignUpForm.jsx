@@ -82,7 +82,7 @@ const SignUpForm = ({
   
     return (
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Trainer Account</h2>
+        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700">Trainer Account</h2>
         <p className="text-gray-600 mt-2">Create your account and start your adventure!</p>
         
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">

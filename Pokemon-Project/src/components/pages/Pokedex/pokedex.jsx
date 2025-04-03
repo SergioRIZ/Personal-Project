@@ -113,13 +113,6 @@ const Pokedex = () => {
 <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 py-6">
   <div className="px-4 flex justify-between items-center">
     <div className="absolute left-4 top-4 flex space-x-6">
-      <Link 
-        to="/" 
-        className="text-gray-700 hover:text-gray-900 border-b border-transparent hover:border-gray-700 transition-all duration-300"
-      >
-        HOME
-      </Link>
-
     
       <Link
         to="/login"

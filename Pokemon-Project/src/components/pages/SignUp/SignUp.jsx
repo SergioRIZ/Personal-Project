@@ -4,6 +4,7 @@ import SignUpForm from "./components/SignUpForm";
 import SignUpFooter from "./components/SignUpFooter";
 import SocialAuth from "./components/SocialAuth";
 import Alert from "./components/Alert";
+import DropdownMenu from "./components/DropdownMenu";
 import useForm from "./hooks/useForm";
 import { validateSignUpForm } from "./hooks/validation";
 
@@ -42,21 +43,24 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[url('/pokemon-background.svg')] p-4 bg-no-repeat bg-cover bg-center">
+    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 py-6 flex flex-col items-center justify-center p-4 relative">
+      {/* Dropdown Menu */}
+      <DropdownMenu />
+
       {/* Header with logo */}
       <SignUpHeader isSubmitting={isSubmitting} />
       
       <div className="max-w-md w-full mx-auto">
         {/* Main card */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all hover:scale-102">
-          {/* Colorful top bar */}
-          <div className="h-3 bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500"></div>
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
+          {/* Colorful top bar - usando los mismos colores que el login */}
+          <div className="h-3 bg-gradient-to-r from-green-600 to-slate-700"></div>
           
           {/* Content area */}
           <div className="p-8">
             {/* Success message */}
             {formSuccess && (
-              <Alert 
+              <Alert
                 type={Alert.types.SUCCESS}
                 message="Congratulations! Your trainer account has been created."
                 action={{
@@ -68,14 +72,14 @@ const SignUp = () => {
             
             {/* Error message */}
             {errors.submit && (
-              <Alert 
+              <Alert
                 type={Alert.types.ERROR}
                 message={errors.submit}
               />
             )}
-            
+                      
             {/* Registration form */}
-            <SignUpForm 
+            <SignUpForm
               formData={formData}
               errors={errors}
               isSubmitting={isSubmitting}
