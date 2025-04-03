@@ -4,6 +4,7 @@ import Pokedex from './components/pages/Pokedex/pokedex.jsx';
 import SignUp from './components/pages/SignUp/SignUp.jsx';
 import PokemonTeamBuilder from './components/pages/TeamBuilder.jsx';
 import {Router} from './Router/Router.jsx';
+import { ThemeProvider } from './components/pages/Pokedex/ThemeProvider'; // Importa el ThemeProvider
 
 const AppRoutes = [
     {
@@ -25,11 +26,12 @@ const AppRoutes = [
 ]
 
 function App(){
-
     return(
-        <main>
-            <Router routes={AppRoutes} defaultComponent={Page404}/>
-        </main>
+        <ThemeProvider> {/* Envuelve toda la aplicación con ThemeProvider */}
+            <main>
+                <Router routes={AppRoutes} defaultComponent={Page404}/>
+            </main>
+        </ThemeProvider>
     )
 }
 

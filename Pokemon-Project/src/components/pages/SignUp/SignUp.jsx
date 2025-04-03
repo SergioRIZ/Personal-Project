@@ -4,7 +4,6 @@ import SignUpForm from "./components/SignUpForm";
 import SignUpFooter from "./components/SignUpFooter";
 import SocialAuth from "./components/SocialAuth";
 import Alert from "./components/Alert";
-import DropdownMenu from "./components/DropdownMenu";
 import useForm from "./hooks/useForm";
 import { validateSignUpForm } from "./hooks/validation";
 
@@ -44,8 +43,6 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 py-6 flex flex-col items-center justify-center p-4 relative">
-      {/* Dropdown Menu */}
-      <DropdownMenu />
 
       {/* Header with logo */}
       <SignUpHeader isSubmitting={isSubmitting} />
