@@ -11,7 +11,7 @@ const SearchBar = ({ searchTerm, handleSearch }) => {
       type="text"
       placeholder={t('searchPlaceholder')}
       className="w-full p-4 pl-12 border-2 border-slate-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg bg-white/90 backdrop-blur-sm transition-all duration-300"
-      value={searchTerm}
+      value={searchTerm.toString()}
       onChange={handleSearch}
     />
     <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
