@@ -5,6 +5,7 @@ import SignUp from './components/pages/SignUp/SignUp.jsx';
 import PokemonTeamBuilder from './components/pages/TeamBuilder.jsx';
 import {Router} from './Router/Router.jsx';
 
+
 const AppRoutes = [
     {
         path: '/login',
@@ -21,7 +22,12 @@ const AppRoutes = [
     {
         path: '/',
         Component: Pokedex
+    },
+    {
+
+
     }
+
 ]
 
 function App(){
