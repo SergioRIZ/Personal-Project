@@ -14,7 +14,7 @@ const LanguageSelector = ({ currentLanguage, setCurrentLanguage }) => {
   <div className="inline-flex shadow-lg rounded-lg overflow-hidden">
     <button 
       onClick={() => changeLanguage('es')} 
-      className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
+      className={`px-4 py-2 font-medium text-sm transition-all duration-300 cursor-pointer ${
         currentLanguage === 'es' 
           ? 'bg-gradient-to-r from-green-600 to-slate-600 text-white font-semibold' 
           : 'bg-gradient-to-r from-green-50 to-slate-200 text-slate-700 hover:from-green-100 hover:to-slate-300'
@@ -25,7 +25,7 @@ const LanguageSelector = ({ currentLanguage, setCurrentLanguage }) => {
     <div className="w-px bg-slate-300"></div>
     <button 
       onClick={() => changeLanguage('en')} 
-      className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
+      className={`px-4 py-2 font-medium text-sm transition-all duration-300 cursor-pointer ${
         currentLanguage === 'en' 
           ? 'bg-gradient-to-r from-green-600 to-slate-600 text-white font-semibold' 
           : 'bg-gradient-to-r from-green-50 to-slate-200 text-slate-700 hover:from-green-100 hover:to-slate-300'
