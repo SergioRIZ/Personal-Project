@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
+import tailwindcss from '@tailwindcss/vite'
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  base: '/Personal-Project/', // Reemplaza con el nombre de tu repositorio
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
 })
