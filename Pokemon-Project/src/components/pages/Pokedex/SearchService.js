@@ -2,7 +2,7 @@
 
 // Función para obtener datos básicos de todos los Pokémon (nombres e IDs)
 export const fetchPokemonBasicData = async () => {
-    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1304');
+    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1267');
     const data = await response.json();
     
     // Extraer id del url y combinarlo con el nombre

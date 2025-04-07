@@ -7,18 +7,18 @@ const PokemonAbilities = ({ abilities, abilityDescriptions }) => {
   
   return (
     <div className="mt-3">
-      <h4 className="text-xs font-bold text-slate-600 mb-1">{t('abilities')}:</h4>
+      <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">{t('abilities')}:</h4>
       <div className="flex flex-wrap gap-1">
         {abilities.map((ability) => {
           const abilityInfo = abilityDescriptions[ability.ability.name];
           const abilityKey = `abilities.${ability.ability.name}`;
           
-          // Intentar obtener la traducción de la habilidad, o usar el nombre formateado si no existe
+          // Try to get the ability translation, or use the formatted name if it doesn't exist
           const abilityName = t(abilityKey, {
             defaultValue: abilityInfo?.name || ability.ability.name.replace('-', ' ')
           });
           
-          // Intentar obtener la descripción traducida, o usar la descripción en inglés si existe
+          // Try to get the translated description, or use the English description if it exists
           const abilityDescription = t(`${abilityKey}.description`, {
             defaultValue: abilityInfo?.description || 'Cargando descripción...'
           });
@@ -38,10 +38,10 @@ const PokemonAbilities = ({ abilities, abilityDescriptions }) => {
           return (
             <Tooltip key={ability.ability.name} content={tooltipContent}>
               <span
-                className={`cursor-help px-2 py-1 bg-gradient-to-r from-green-50 to-slate-100 border border-slate-200 rounded text-xs capitalize text-green-700 shadow-sm ${ability.is_hidden ? 'italic' : ''}`}
+                className={`cursor-help px-2 py-1 bg-gradient-to-r from-green-50 to-slate-100 dark:from-green-900/30 dark:to-slate-700/40 border border-slate-200 dark:border-slate-600 rounded text-xs capitalize text-green-700 dark:text-green-400 shadow-sm transition-colors duration-300 ${ability.is_hidden ? 'italic' : ''}`}
               >
                 {abilityName}
-                {ability.is_hidden && <span className="text-xs ml-1 text-slate-500">({t('hidden').charAt(0)})</span>}
+                {ability.is_hidden && <span className="text-xs ml-1 text-slate-500 dark:text-slate-400">({t('hidden').charAt(0)})</span>}
               </span>
             </Tooltip>
           );

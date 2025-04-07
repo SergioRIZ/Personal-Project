@@ -11,7 +11,7 @@ i18next
           loading: "Loading Pokédex...",
           completed: "completed",
           errorTitle: "Error loading Pokédex!",
-          title: "National Pokédex",
+          title: "National Pokedex",
           searchPlaceholder: "Search by name or number...",
           showing: "Showing",
           of: "of",

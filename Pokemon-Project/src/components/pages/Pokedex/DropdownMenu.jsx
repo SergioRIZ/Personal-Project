@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from '../../../Link';
 
@@ -89,7 +88,7 @@ const DropdownMenu = () => {
       {/* Botón del menú - visible solo cuando showButton es true */}
       <button
         ref={buttonRef}
-        className={`fixed top-4 left-4 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-800 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 z-50 ${
+        className={`fixed top-4 left-4 w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-[#1a2234] dark:to-[#141b2d] rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 z-50 ${
           showButton ? 'block' : 'hidden'
         }`}
         onClick={openMenu}
@@ -110,7 +109,7 @@ const DropdownMenu = () => {
       {/* Menú lateral - con transición suave */}
       <div 
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full w-64 bg-gray-900 shadow-2xl transform transition-transform duration-500 ease-in-out z-45 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gray-900 dark:bg-[#1a2234] shadow-2xl transform transition-transform duration-500 ease-in-out z-45 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         onTransitionEnd={() => {
@@ -124,14 +123,14 @@ const DropdownMenu = () => {
         }}
       >
         {/* Encabezado del menú con botón de cerrar */}
-        <div className="p-6 bg-gray-900 border-b border-gray-800 flex items-center justify-between">
+        <div className="p-6 bg-gray-900 dark:bg-[#1a2234] border-b border-gray-800 flex items-center justify-between">
           <span className="text-lg font-bold text-white">Menu</span>
           <button 
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-800 transition-colors duration-200"
+            className="w-8 h-8 p-0 rounded-full bg-transparent hover:bg-gray-800 transition-colors duration-200 cursor-pointer relative"
             onClick={closeMenu}
             aria-label="Cerrar menú"
           >
-            <span className="text-white text-xl">&times;</span>
+            <span className="absolute inset-0 flex items-center justify-center text-white text-xl" style={{ lineHeight: 0, marginTop: "-4px" }}>&times;</span>
           </button>
         </div>
         
@@ -141,7 +140,7 @@ const DropdownMenu = () => {
             <Link
               key={index}
               to={item.to}
-              className="flex items-center px-6 py-4 text-white hover:bg-gray-800 transition-all duration-200 group border-l-0 border-transparent"
+              className="flex items-center px-6 py-4 text-white hover:bg-gray-800 dark:hover:bg-[#2a3245] transition-all duration-200 group border-l-0 border-transparent"
               onClick={(e) => {
                 if (item.onClick) {
                   e.preventDefault();

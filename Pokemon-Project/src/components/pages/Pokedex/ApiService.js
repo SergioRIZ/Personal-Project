@@ -1,7 +1,7 @@
 // Función para obtener la lista de Pokémon con detalles
 export const fetchPokemonList = async (setLoadingProgress) => {
     // Obtenemos la lista completa de Pokémon
-    const listResponse = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1304');
+    const listResponse = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1267');
     const listData = await listResponse.json();
     
     // Array para almacenar todos los detalles
