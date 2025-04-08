@@ -24,18 +24,18 @@ export const getTypeColor = (type) => {
   };
   
   // Función para obtener el color del stat
-  export const getStatColor = (statName) => {
-    const statColors = {
-      'hp': 'bg-red-500',
-      'attack': 'bg-orange-500',
-      'defense': 'bg-yellow-500',
-      'special-attack': 'bg-blue-500',
-      'special-defense': 'bg-green-500',
-      'speed': 'bg-purple-500'
-    };
-    
-    return statColors[statName] || 'bg-gray-500';
+export const getStatColor = (statName) => {
+  const statColors = {
+    'hp': 'bg-gradient-to-r from-rose-500 to-rose-600',
+    'attack': 'bg-gradient-to-r from-orange-500 to-orange-600',
+    'defense': 'bg-gradient-to-r from-amber-500 to-amber-600',
+    'special-attack': 'bg-gradient-to-r from-blue-500 to-indigo-600',
+    'special-defense': 'bg-gradient-to-r from-emerald-500 to-green-600',
+    'speed': 'bg-gradient-to-r from-purple-500 to-violet-600'
   };
+  
+  return statColors[statName] || 'bg-gradient-to-r from-gray-500 to-gray-600';
+};
   
   // Función para traducir nombres de stats
   export const translateStatName = (statName, currentLanguage) => {

@@ -6,14 +6,15 @@ const PokemonGrid = ({ filteredPokemon, currentLanguage, abilityDescriptions }) 
   return (
     <>
       {filteredPokemon.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 container mx-auto px-4">
           {filteredPokemon.map((pokemon) => (
-            <PokemonCard 
-              key={pokemon.id} 
-              pokemon={pokemon}
-              currentLanguage={currentLanguage}
-              abilityDescriptions={abilityDescriptions}
-            />
+            <div className="w-full" key={pokemon.id}>
+              <PokemonCard 
+                pokemon={pokemon}
+                currentLanguage={currentLanguage}
+                abilityDescriptions={abilityDescriptions}
+              />
+            </div>
           ))}
         </div>
       ) : (

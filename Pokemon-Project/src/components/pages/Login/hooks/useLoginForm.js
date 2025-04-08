@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { navigate } from "../../../../Link";
+import { navigate } from "../../../../navigation";
 
 export default function useLoginForm() {
   // Estados del formulario
