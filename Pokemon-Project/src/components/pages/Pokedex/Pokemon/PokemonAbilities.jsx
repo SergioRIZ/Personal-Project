@@ -25,7 +25,7 @@ const PokemonAbilities = ({ abilities, abilityDescriptions }) => {
           
           const tooltipContent = (
             <div>
-              <p className="font-bold text-slate-800 capitalize mb-1">
+              <p className="font-bold text-slate-800">
                 {abilityName}
                 {ability.is_hidden && <span className="ml-1 text-slate-500 text-xs italic">({t('hidden')})</span>}
               </p>
