@@ -22,16 +22,16 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }) => {
           {/* Left side: Pokemon Name with tooltip */}
           <div className="relative">
             <h2 
-              className="text-xl font-bold capitalize text-white dark:text-white truncate max-w-full"
+              className="text-1xl font-bold capitalize text-white dark:text-white truncate max-w-full"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
               {pokemonName}
             </h2>
             
-            {/* Tooltip for long names */}
+            {/* Tooltip for long names - MODIFIED TO APPEAR BELOW THE TEXT */}
             {showTooltip && (
-              <div className="absolute top-0 left-0 mt-1 px-3 py-1 bg-slate-800 text-white text-sm rounded shadow-lg z-50">
+              <div className="absolute left-0 top-full mt-1 px-3 py-1 bg-slate-800 text-white text-sm rounded shadow-lg z-50">
                 {pokemonName}
               </div>
             )}

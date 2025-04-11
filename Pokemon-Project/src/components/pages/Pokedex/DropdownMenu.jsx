@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from '../../../Link';
+import { useTranslation } from '../../../../node_modules/react-i18next';
 
 const DropdownMenu = () => {
+  const { t, i18n } = useTranslation();
+  
+  // Log para depuración - esto nos ayudará a ver el estado actual del idioma
+  console.log("Current language in DropdownMenu:", i18n.language);
+  
   // Estado principal para el menú
   const [isOpen, setIsOpen] = useState(false);
   // Estado separado para controlar la visibilidad del botón
@@ -23,10 +29,20 @@ const DropdownMenu = () => {
     </svg>
   );
 
-  const menuItems = [
+  // Use useEffect to ensure menuItems update when language changes
+  const [menuItems, setMenuItems] = useState([
     { label: 'Settings', to: '/settings', icon: <SettingsIcon /> },
     { label: 'Teams', to: '/team-builder', icon: <TeamsIcon /> },
-  ];
+  ]);
+  
+  // Actualizar los items del menú cuando cambia el idioma
+  useEffect(() => {
+    setMenuItems([
+      { label: t('settings', 'Settings'), to: '/settings', icon: <SettingsIcon /> },
+      { label: t('teams', 'Teams'), to: '/team-builder', icon: <TeamsIcon /> },
+    ]);
+    console.log("Menu items updated with translations:", t('settings', 'Settings'), t('teams', 'Teams'));
+  }, [t, i18n.language]); // Reaccionar a cambios en la función t o en el idioma
 
   // Función para abrir el menú
   const openMenu = () => {
@@ -84,7 +100,7 @@ const DropdownMenu = () => {
         }`}
         onClick={openMenu}
         aria-expanded={isOpen}
-        aria-label="Menu"
+        aria-label={t('menu', 'Menu')}
       >
         <span className="text-white text-xl">☰</span>
       </button>
@@ -113,17 +129,17 @@ const DropdownMenu = () => {
       >
         {/* Encabezado del menú */}
         <div className="p-6 bg-gray-900 dark:bg-[#1a2234] border-b border-gray-800 flex items-center justify-between">
-          <span className="text-lg font-bold text-white">Menu</span>
+          <span className="text-lg font-bold text-white">{t('menu', 'Menu')}</span>
           <button 
             className="w-8 h-8 p-0 rounded-full bg-transparent hover:bg-gray-800 transition-colors duration-200 cursor-pointer relative"
             onClick={closeMenu}
-            aria-label="Cerrar menú"
+            aria-label={t('closeMenu', 'Close menu')}
           >
             <span className="absolute inset-0 flex items-center justify-center text-white text-xl" style={{ lineHeight: 0, marginTop: "-4px" }}>&times;</span>
           </button>
         </div>
         
-        {/* Elementos del menú - MODIFICADO AQUÍ */}
+        {/* Elementos del menú */}
         <div className="py-4">
           {menuItems.map((item, index) => (
             <Link

@@ -1,7 +1,6 @@
 import i18next from 'i18next';
 import { initReactI18next } from '../../../../node_modules/react-i18next';
 
-
 i18next
   .use(initReactI18next)
   .init({
@@ -26,7 +25,14 @@ i18next
           m: "m",
           kg: "kg",
           startSearching: "Start searching to see Pokémon",
-          typeToSearch: "Type the name or number of a Pokémon"
+          typeToSearch: "Type the name or number of a Pokémon",
+          menu: "Menu",
+          closeMenu: "Close menu",
+          settings: "Settings",
+          teams: "Teams",
+          // New translations for Login/Signup
+          login: "LOGIN",
+          signup: "SIGN-UP"
         }
       },
       es: {
@@ -49,11 +55,18 @@ i18next
           m: "m",
           kg: "kg",
           startSearching: "Empieza a buscar para ver Pokémon",
-          typeToSearch: "Escribe el nombre o número de un Pokémon"
+          typeToSearch: "Escribe el nombre o número de un Pokémon",
+          menu: "Menú",
+          closeMenu: "Cerrar menú",
+          settings: "Configuración",
+          teams: "Equipos",
+          // New translations for Login/Signup
+          login: "INICIAR SESIÓN",
+          signup: "REGISTRARSE"
         }
       }
     },
-    lng: "es", 
+    lng: "es",
     fallbackLng: "en",
     interpolation: {
       escapeValue: false

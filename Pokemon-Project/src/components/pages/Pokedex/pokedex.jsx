@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../../../../node_modules/react-i18next';
 import './i18n-config';
-import { Link } from '../../../Link';
 
 // Import UI components
 import LanguageSelector from './LanguageSelector';
@@ -13,6 +12,7 @@ import PokemonGrid from './Pokemon/PokemonGrid';
 import AnimationsStyle from './AnimationStyle';
 import EmptyState from './EmptyState';
 import DropdownMenu from './DropdownMenu';
+import AuthLinks from './AuthLinks'; // Importar el nuevo componente de AuthLinks
 
 // Import API and data services
 import { fetchAbilityDescriptions } from './ApiService';
@@ -146,23 +146,8 @@ const Pokedex = () => {
         {/* Navigation dropdown menu */}
         <DropdownMenu/>
 
-        {/* Login/Signup links section */}
-        <div className="px-4 flex justify-between items-center">
-          <div className="absolute right-4 top-4 flex space-x-6">
-            <Link
-              to="/login"
-              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border-b border-transparent hover:border-gray-700 dark:hover:border-gray-300 transition-all duration-300"
-            > 
-              LOGIN
-            </Link>
-            <Link
-              to="/signup"
-              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border-b border-transparent hover:border-gray-700 dark:hover:border-gray-300 transition-all duration-300"
-            > 
-              SIGN-UP
-            </Link>
-          </div>
-        </div>
+        {/* Usar el nuevo componente AuthLinks en lugar de los enlaces directos */}
+        <AuthLinks />
 
         {/* Main content container */}
         <div className="container mx-auto px-4 pt-10">
