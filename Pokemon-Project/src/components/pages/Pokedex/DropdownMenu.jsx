@@ -39,7 +39,6 @@ const DropdownMenu = () => {
   useEffect(() => {
     setMenuItems([
       { label: t('settings', 'Settings'), to: '/settings', icon: <SettingsIcon /> },
-      { label: t('teams', 'Teams'), to: '/team-builder', icon: <TeamsIcon /> },
     ]);
     console.log("Menu items updated with translations:", t('settings', 'Settings'), t('teams', 'Teams'));
   }, [t, i18n.language]); // Reaccionar a cambios en la función t o en el idioma

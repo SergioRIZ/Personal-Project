@@ -4,8 +4,6 @@ import { Monitor, Moon } from 'lucide-react';
 const DisplaySettings = ({ 
   darkMode, 
   setDarkMode, 
-  battleAnimations, 
-  setBattleAnimations,
   textSpeed,
   setTextSpeed,
   isExpanded, 
@@ -68,23 +66,6 @@ const DisplaySettings = ({
               >
                 <span 
                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${darkMode ? 'translate-x-6' : 'translate-x-1'}`} 
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Battle Animations */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-blue-400">
-                Battle Animations
-              </label>
-              <div 
-                onClick={() => setBattleAnimations(!battleAnimations)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer ${battleAnimations ? 'bg-teal-500' : 'bg-gray-600'}`}
-              >
-                <span 
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${battleAnimations ? 'translate-x-6' : 'translate-x-1'}`} 
                 />
               </div>
             </div>

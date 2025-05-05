@@ -3,7 +3,6 @@ import Login from './components/pages/Login/Login.jsx';
 import Pokedex from './components/pages/Pokedex/pokedex.jsx';
 import Settings from './components/pages/Settings/Settings.jsx';
 import SignUp from './components/pages/SignUp/SignUp.jsx';
-import PokemonTeamBuilder from './components/pages/TeamBuilder.jsx';
 import {Router} from './Router/Router.jsx';
 
 
@@ -15,10 +14,6 @@ const AppRoutes = [
     {
         path: '/signup',
         Component: SignUp
-    },
-    {
-        path: '/team-builder',
-        Component: PokemonTeamBuilder
     },
     {
         path: '/',

@@ -2,8 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Database } from 'lucide-react';
 
 const NetworkSettings = ({ 
-  connectedToGTS = true,
-  setConnectedToGTS = () => {},
   autoUpdate = true,
   setAutoUpdate = () => {},
   mysteryGiftNotifications = true,
@@ -55,23 +53,6 @@ const NetworkSettings = ({
         }}
       >
         <div className="p-4">
-          {/* Global Trade System Toggle */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-blue-400">
-                Connect to Global Trade System
-              </label>
-              <div 
-                onClick={() => setConnectedToGTS(!connectedToGTS)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer ${connectedToGTS ? 'bg-teal-500' : 'bg-gray-600'}`}
-              >
-                <span 
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${connectedToGTS ? 'translate-x-6' : 'translate-x-1'}`} 
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Auto Updates Toggle */}
           <div className="mb-4">
             <div className="flex items-center justify-between">

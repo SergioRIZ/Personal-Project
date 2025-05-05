@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Pokeball from './Components/ui/Pokeball';
 import AudioSettings from './Components/AudioSettings';
 import DisplaySettings from './Components/DisplaySettings';
-import GameplaySettings from './Components/GameplaySettings';
 import AccountSettings from './Components/AccountSettings';
 import NetworkSettings from './Components/NetworkSettings';
 
@@ -19,11 +18,10 @@ const Settings = () => {
     account: false,
     network: false,
   });
-  const [autoSave, setAutoSave] = useState(true);
+
   const [battleAnimations, setBattleAnimations] = useState(true);
   const [textSpeed, setTextSpeed] = useState(2); // 0: Slow, 1: Normal, 2: Fast
-  const [difficulty, setDifficulty] = useState(1); // 0: Easy, 1: Normal, 2: Hard
-  const [favoriteType, setFavoriteType] = useState('electric');
+
 
   // Toggle section expansion
   const toggleSection = (section) => {
@@ -34,12 +32,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 py-6 transition-colors duration-300 flex justify-center items-start">
-      <div className="container max-w-4xl mx-auto px-6 pt-10">
-        {/* Main content card with unified border */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-green-200 dark:border-green-900 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 flex justify-center items-center transition-colors duration-300">
+      <div className="container max-w-4xl mx-auto px-6">
+        {/* Main content card without border */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
           {/* Header with Pokeball */}
-          <div className="bg-gradient-to-r from-green-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 p-6 border-b border-green-100 dark:border-green-900">
+          <div className="bg-gradient-to-r from-green-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <h1 
                 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-500 drop-shadow-md" 
@@ -75,19 +73,6 @@ const Settings = () => {
                 textSpeed={textSpeed}
                 setTextSpeed={setTextSpeed}
                 isExpanded={expandedSections.display}
-                toggleSection={toggleSection}
-              />
-            </div>
-            
-            <div className="mb-4">
-              <GameplaySettings 
-                autoSave={autoSave}
-                setAutoSave={setAutoSave}
-                difficulty={difficulty}
-                setDifficulty={setDifficulty}
-                favoriteType={favoriteType}
-                setFavoriteType={setFavoriteType}
-                isExpanded={expandedSections.gameplay}
                 toggleSection={toggleSection}
               />
             </div>
