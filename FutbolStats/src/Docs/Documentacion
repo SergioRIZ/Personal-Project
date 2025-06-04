@@ -1,0 +1,35 @@
+/*El operador condicional ( ? ) Es como un if...else pero mas corto y compacto, se usa así (se usa para valores nulos o indefinidos):
+function dinero (isMember){
+return isMember ? "20% de descuento" : "10% de descuento";
+}
+
+function age (IsOlder){
+IsOlder ? "Es mayor de edad" : "No es mayor de edad"}
+*/
+
+/*
+function dinero {(isMember)}{
+return isMember ? <Vip/> : <Normal/>;}
+*/ 
+
+/* 
+import React from 'react';
+import AdminPanel from './AdminPanel';
+import LoginForm from './LoginForm';
+const isLoggedIn = true;
+
+return (
+<div>
+{isLoggedIn? ( 
+<AdminPanel/>) :
+(<LoginFrom/>)}
+ </div>
+)
+-------------------------------------------------------------------------------------------------
+<div>
+{isLoggedIn && <AdminPanel/>}
+</div>
+
+/*
+<!-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------!
+*/
