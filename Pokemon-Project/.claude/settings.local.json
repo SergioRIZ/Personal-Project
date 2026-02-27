@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(npm install:*)",
+      "Bash(xargs rm -f)",
+      "Bash(npm run test:run)",
+      "Bash(npm run build)",
+      "Bash(del \"C:\\\\Users\\\\Usuario\\\\Desktop\\\\PROYECTOS\\\\Personal-Project\\\\Pokemon-Project\\\\src\\\\components\\\\pages\\\\Pokedex\\\\i18n-config.js\")",
+      "Bash(grep -c \"prefers-color-scheme\" dist/assets/index-*.css)"
+    ]
+  }
+}
