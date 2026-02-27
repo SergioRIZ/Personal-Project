@@ -63,13 +63,12 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
             ) : (
               <div className="flex flex-wrap gap-1">
                 {weakTypes.map(type => (
-                  <span
-                    key={type}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[10px] font-semibold ${getTypeColor(type)}`}
-                  >
-                    {translateType(type, i18n.language)}
+                  <span key={type} className="inline-flex items-center gap-1">
+                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}>
+                      {translateType(type, i18n.language)}
+                    </span>
                     {weaknesses[type] > 1 && (
-                      <span className="bg-black/20 rounded-full px-1 py-px font-black text-[9px]">
+                      <span className="text-[10px] font-black text-red-400 dark:text-red-300">
                         ×{weaknesses[type]}
                       </span>
                     )}
@@ -92,11 +91,8 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
                 {immuneTypes.map(type => (
                   <span
                     key={type}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[10px] font-semibold ${getTypeColor(type)}`}
+                    className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 opacity-80" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
-                    </svg>
                     {translateType(type, i18n.language)}
                   </span>
                 ))}
@@ -117,7 +113,7 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
                 {resistTypes.map(type => (
                   <span
                     key={type}
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-white text-[10px] font-semibold opacity-70 hover:opacity-100 transition-opacity ${getTypeColor(type)}`}
+                    className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 opacity-70 hover:opacity-100 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
                   >
                     {translateType(type, i18n.language)}
                   </span>
@@ -162,7 +158,7 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
               {coveredTypes.map(type => (
                 <span
                   key={type}
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-white text-[10px] font-semibold ${getTypeColor(type)}`}
+                  className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
                 >
                   {translateType(type, i18n.language)}
                 </span>

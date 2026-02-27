@@ -52,12 +52,12 @@ const Profile = () => {
         {/* User card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
           <div className="h-2 bg-gradient-to-r from-green-600 to-teal-500" />
-          <div className="p-6 flex items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-2xl select-none shadow-lg shrink-0">
+          <div className="p-4 sm:p-6 flex flex-wrap items-center gap-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-xl sm:text-2xl select-none shadow-lg shrink-0">
               {user.email?.[0]?.toUpperCase() ?? '?'}
             </div>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                 {t('profile_title')}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
@@ -67,7 +67,7 @@ const Profile = () => {
                 </p>
               )}
             </div>
-            <div className="ml-auto shrink-0 flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto flex-wrap">
               <Link
                 to="/teams"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-green-700 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"

@@ -62,7 +62,7 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
           </div>
         </div>
 
-        <div className="relative h-52 w-full flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/50 rounded-lg mb-3 overflow-hidden">
+        <div className="relative h-40 sm:h-52 w-full flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/50 rounded-lg mb-3 overflow-hidden">
           <div className="absolute inset-0 opacity-10 flex items-center justify-center">
             <div className="w-28 h-28 border-4 border-slate-300 dark:border-slate-600 rounded-full" />
           </div>

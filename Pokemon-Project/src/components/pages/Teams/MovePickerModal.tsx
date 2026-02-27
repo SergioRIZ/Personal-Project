@@ -21,29 +21,17 @@ function formatMoveName(slug: string): string {
     .join(' ');
 }
 
-// Category icons with colored pill backgrounds
+// Category icons — official Pokémon game sprites
 const PhysicalIcon = () => (
-  <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-orange-100 dark:bg-orange-900/30 text-orange-500 dark:text-orange-400" title="Physical">
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M13.707 3.293a1 1 0 00-1.414 0l-8 8a1 1 0 000 1.414l8 8a1 1 0 001.414 0l8-8a1 1 0 000-1.414l-8-8z"/>
-    </svg>
-  </span>
+  <img src="/Physic.png" alt="Physical" title="Physical" className="w-8 h-8 object-contain" />
 );
 
 const SpecialIcon = () => (
-  <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400" title="Special">
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-    </svg>
-  </span>
+  <img src="/Special.png" alt="Special" title="Special" className="w-8 h-8 object-contain" />
 );
 
 const StatusIcon = () => (
-  <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500" title="Status">
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-    </svg>
-  </span>
+  <img src="/Status.png" alt="Status" title="Status" className="w-8 h-8 object-contain" />
 );
 
 const CATEGORY_ICON: Record<string, React.ReactNode> = {
@@ -139,10 +127,10 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
         {/* ── Column headers ───────────────────────────────────────── */}
         {!loadingList && allMoves.length > 0 && (
           <div className="px-5 py-1.5 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30 shrink-0">
-            <span className="w-[4.5rem] text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider shrink-0">Type</span>
+            <span className="w-[3.75rem] text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider shrink-0">Type</span>
             <span className="flex-1 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider">Move</span>
-            <span className="w-7 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider text-center shrink-0">Pwr</span>
-            <span className="w-5 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider text-center shrink-0">Cat</span>
+            <span className="w-8 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider text-center shrink-0">Pwr</span>
+            <span className="w-8 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider text-center shrink-0">Cat</span>
           </div>
         )}
 
@@ -178,9 +166,9 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                     }`}
                   >
                     {/* Type badge */}
-                    <div className="shrink-0 mt-1 w-[4.5rem]">
+                    <div className="shrink-0 mt-1 w-[3.75rem]">
                       {detail ? (
-                        <span className={`inline-flex items-center justify-center w-full px-1.5 py-0.5 rounded-md text-white text-[10px] font-bold tracking-wide ${getTypeColor(detail.type)}`}>
+                        <span className={`inline-flex items-center justify-center w-full px-1 py-0.5 rounded-md text-white text-[10px] font-bold capitalize shadow-sm border border-white/20 ${getTypeColor(detail.type)}`}>
                           {translateType(detail.type, i18n.language)}
                         </span>
                       ) : (
@@ -201,7 +189,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                       {/* Description — always shown */}
                       {detail ? (
                         detail.shortEffect ? (
-                          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5 leading-relaxed line-clamp-2">
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed line-clamp-2">
                             {detail.shortEffect}
                           </p>
                         ) : null
@@ -214,7 +202,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                     </div>
 
                     {/* Power */}
-                    <div className="shrink-0 flex flex-col items-center mt-0.5 w-7">
+                    <div className="shrink-0 flex flex-col items-center mt-0.5 w-8">
                       {detail ? (
                         <>
                           <span className={`text-sm font-black tabular-nums leading-tight ${
@@ -224,19 +212,19 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                           }`}>
                             {detail.power != null ? detail.power : '—'}
                           </span>
-                          <span className="text-[9px] font-semibold text-gray-300 dark:text-gray-600 uppercase">pwr</span>
+                          <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">pwr</span>
                         </>
                       ) : (
-                        <span className="w-7 h-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                        <span className="w-8 h-4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
                       )}
                     </div>
 
                     {/* Category icon */}
-                    <div className="shrink-0 mt-0.5 w-5">
+                    <div className="shrink-0 mt-0 w-8">
                       {detail ? (
                         CATEGORY_ICON[detail.damageClass] ?? null
                       ) : (
-                        <span className="w-5 h-5 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse block" />
+                        <span className="w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse block" />
                       )}
                     </div>
 

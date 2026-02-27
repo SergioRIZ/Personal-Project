@@ -24,7 +24,7 @@ export default function Login() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
           <div className="h-3 bg-gradient-to-r from-green-600 to-slate-700" />
 
-          <div className="p-8">
+          <div className="p-5 sm:p-8">
             {formSuccess && (
               <Alert type="success" message="¡Bienvenido de vuelta, entrenador! Preparando tu viaje..." />
             )}
@@ -32,8 +32,8 @@ export default function Login() {
               <Alert type="error" message={errors.submit} />
             )}
 
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-slate-300">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-slate-300">
                 Acceso de Entrenador
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mt-2">Ingresa tus credenciales para continuar</p>

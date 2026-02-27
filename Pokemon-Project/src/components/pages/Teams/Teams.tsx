@@ -59,12 +59,12 @@ const Teams: React.FC = () => {
         {/* Page header */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
           <div className="h-2 bg-gradient-to-r from-green-600 to-teal-500" />
-          <div className="p-6 flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="p-4 sm:p-6 flex items-center justify-between gap-3 sm:gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {t('teams_title')}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                 {t('teams_subtitle')}
               </p>
             </div>

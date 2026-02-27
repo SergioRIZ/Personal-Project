@@ -8,6 +8,7 @@ export interface TeamMember {
   pokemon_types: string[];
   slot: number;
   moves: string[];
+  ability: string | null;
 }
 
 export interface Team {
@@ -24,6 +25,7 @@ export interface TeamMemberInput {
   pokemon_types: string[];
   slot: number;
   moves?: string[];
+  ability?: string | null;
 }
 
 export async function fetchTeams(userId: string): Promise<Team[]> {
@@ -101,6 +103,15 @@ export async function updateMemberMoves(teamId: string, slot: number, moves: str
   const { error } = await supabase
     .from('team_members')
     .update({ moves })
+    .eq('team_id', teamId)
+    .eq('slot', slot);
+  if (error) throw error;
+}
+
+export async function updateMemberAbility(teamId: string, slot: number, ability: string | null): Promise<void> {
+  const { error } = await supabase
+    .from('team_members')
+    .update({ ability })
     .eq('team_id', teamId)
     .eq('slot', slot);
   if (error) throw error;

@@ -113,9 +113,9 @@ const Pokedex = () => {
       <DropdownMenu />
       <AuthLinks />
 
-      <div className="container mx-auto px-4 pt-10">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-500 mb-2 drop-shadow-md">
+      <div className="container mx-auto px-4 pt-16 sm:pt-10">
+        <header className="text-center mb-6 sm:mb-8 px-10 sm:px-0">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-500 mb-2 drop-shadow-md">
             {t('title')}
           </h1>
           {settings.generations.length > 0 && (

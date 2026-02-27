@@ -109,6 +109,12 @@ i18next
           teams_move_search: "Search moves...",
           teams_no_moves: "No moves assigned",
           teams_loading_moves: "Loading moves...",
+          // Abilities
+          teams_ability: "Ability",
+          teams_no_ability: "No ability selected",
+          teams_choose_ability: "Choose Ability",
+          teams_hidden_ability: "Hidden",
+          teams_loading_abilities: "Loading abilities...",
         }
       },
       es: {
@@ -215,6 +221,12 @@ i18next
           teams_move_search: "Buscar movimientos...",
           teams_no_moves: "Sin movimientos asignados",
           teams_loading_moves: "Cargando movimientos...",
+          // Abilities
+          teams_ability: "Habilidad",
+          teams_no_ability: "Sin habilidad seleccionada",
+          teams_choose_ability: "Elegir Habilidad",
+          teams_hidden_ability: "Oculta",
+          teams_loading_abilities: "Cargando habilidades...",
         }
       }
     },

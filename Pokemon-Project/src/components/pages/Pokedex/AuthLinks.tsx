@@ -63,7 +63,7 @@ const AuthLinks = () => {
             <Link
               key={key}
               to={to}
-              className={`relative px-5 py-2 text-sm font-medium transition-all duration-300 ${
+              className={`relative px-2 sm:px-5 py-2 text-sm font-medium transition-all duration-300 ${
                 hovered === key
                   ? 'bg-white/20 dark:bg-gray-700/50 text-green-700 dark:text-green-400'
                   : 'text-gray-700 dark:text-gray-300'
@@ -72,10 +72,10 @@ const AuthLinks = () => {
               onMouseLeave={() => setHovered(null)}
             >
               <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                   {icon}
                 </svg>
-                {label}
+                <span className="hidden sm:inline">{label}</span>
               </div>
               <span className={`absolute bottom-0 left-0 w-full h-0.5 ${hovered === key ? 'bg-green-500' : 'bg-transparent'} transition-colors duration-300`} />
             </Link>

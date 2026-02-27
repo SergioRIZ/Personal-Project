@@ -12,7 +12,7 @@ interface Props {
 
 const TeamCard: React.FC<Props> = ({ team }) => {
   const { t } = useTranslation();
-  const { deleteTeam, renameTeam, removeMember, updateMemberMoves } = useTeams();
+  const { deleteTeam, renameTeam, removeMember, updateMemberMoves, updateMemberAbility } = useTeams();
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState(team.name);
@@ -106,6 +106,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
                 onAdd={() => setPickerSlot(slot)}
                 onRemove={handleRemoveMember}
                 onUpdateMoves={(s, moves) => updateMemberMoves(team.id, s, moves)}
+                onUpdateAbility={(s, ability) => updateMemberAbility(team.id, s, ability)}
               />
             ))}
           </div>

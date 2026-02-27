@@ -8,6 +8,7 @@ import {
   upsertTeamMember,
   removeTeamMember,
   updateMemberMoves as updateMemberMovesApi,
+  updateMemberAbility as updateMemberAbilityApi,
   type Team,
   type TeamMember,
   type TeamMemberInput,
@@ -22,6 +23,7 @@ interface TeamsContextValue {
   addMember: (teamId: string, member: TeamMemberInput) => Promise<void>;
   removeMember: (teamId: string, slot: number) => Promise<void>;
   updateMemberMoves: (teamId: string, slot: number, moves: string[]) => Promise<void>;
+  updateMemberAbility: (teamId: string, slot: number, ability: string | null) => Promise<void>;
 }
 
 const TeamsContext = createContext<TeamsContextValue | null>(null);
@@ -132,8 +134,25 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateMemberAbility = async (teamId: string, slot: number, ability: string | null): Promise<void> => {
+    // Optimistic update
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return {
+        ...t,
+        members: t.members.map(m => m.slot === slot ? { ...m, ability } : m),
+      };
+    }));
+    try {
+      await updateMemberAbilityApi(teamId, slot, ability);
+    } catch (err) {
+      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      console.error(err);
+    }
+  };
+
   return (
-    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves }}>
+    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility }}>
       {children}
     </TeamsContext.Provider>
   );

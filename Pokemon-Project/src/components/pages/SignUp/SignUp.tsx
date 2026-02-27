@@ -44,7 +44,7 @@ const SignUp = () => {
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
           <div className="h-3 bg-gradient-to-r from-green-600 to-slate-700"></div>
 
-          <div className="p-8">
+          <div className="p-5 sm:p-8">
             {formSuccess && (
               <Alert
                 type={Alert.types.SUCCESS}
