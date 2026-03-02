@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useCollection } from '../../../context/CollectionContext';
@@ -38,7 +38,7 @@ const Profile = () => {
       {/* Back button */}
       <div className="max-w-4xl mx-auto mb-6">
         <Link
-          to="/"
+          to="/pokedex"
           className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-700 dark:hover:text-green-400 transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -124,7 +124,7 @@ const Profile = () => {
                   {t('profile_no_pokemon')}
                 </p>
                 <Link
-                  to="/"
+                  to="/pokedex"
                   className="text-sm text-green-600 dark:text-green-400 hover:underline"
                 >
                   {t('profile_go_pokedex')}

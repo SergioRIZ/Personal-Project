@@ -89,8 +89,7 @@ const CollectionAnalytics: React.FC = () => {
               {t('analytics_type_dist')}
             </h3>
             {typesLoading ? (
-              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
-                <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin shrink-0" />
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-gray-400 dark:text-gray-500 w-fit">
                 {t('analytics_types_loading')}
               </div>
             ) : sortedTypes.length === 0 ? (
@@ -100,17 +99,17 @@ const CollectionAnalytics: React.FC = () => {
                 {sortedTypes.map(([type, count]) => (
                   <div key={type} className="flex items-center gap-2">
                     <span
-                      className={`text-[10px] font-medium text-white px-1.5 py-0.5 rounded-full w-16 text-center shrink-0 ${getTypeColor(type)}`}
+                      className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
                     >
                       {translateType(type, i18n.language)}
                     </span>
-                    <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div className="flex-1 bg-gray-100 dark:bg-gray-700 h-3 overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${getTypeColor(type)}`}
+                        className={`h-full transition-all duration-500 ${getTypeColor(type)}`}
                         style={{ width: `${(count / maxTypeCount) * 100}%` }}
                       />
                     </div>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300 w-5 text-right shrink-0">
+                    <span className="text-x font-bold text-gray-600 dark:text-gray-300 w-5 text-right">
                       {count}
                     </span>
                   </div>

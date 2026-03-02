@@ -41,7 +41,7 @@ const Teams: React.FC = () => {
       {/* Back link */}
       <div className="max-w-5xl mx-auto mb-4">
         <Link
-          to="/"
+          to="/pokedex"
           className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-700 dark:hover:text-green-400 transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

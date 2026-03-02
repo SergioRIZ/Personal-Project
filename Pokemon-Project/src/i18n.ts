@@ -115,6 +115,24 @@ i18next
           teams_choose_ability: "Choose Ability",
           teams_hidden_ability: "Hidden",
           teams_loading_abilities: "Loading abilities...",
+          // Competitive (item / nature / EVs)
+          teams_competitive: "Competitive",
+          teams_item: "Item",
+          teams_choose_item: "Held item (e.g. Choice Scarf)",
+          teams_nature: "Nature",
+          teams_choose_nature: "Select nature",
+          teams_evs: "EVs",
+          teams_ev_remaining: "remaining",
+          teams_export_showdown: "Export",
+          teams_copied: "Copied!",
+          teams_edit: "Edit",
+          // Hero section
+          hero_title: "PokeLab Studio",
+          hero_tagline: "Check the pokedex and build your ultimate team",
+          hero_stat_types: "Types",
+          hero_stat_gens: "Gens",
+          hero_cta_explore: "Explore Pokédex",
+          hero_cta_teams: "Build a Team",
         }
       },
       es: {
@@ -227,6 +245,24 @@ i18next
           teams_choose_ability: "Elegir Habilidad",
           teams_hidden_ability: "Oculta",
           teams_loading_abilities: "Cargando habilidades...",
+          // Competitive (item / nature / EVs)
+          teams_competitive: "Competitivo",
+          teams_item: "Objeto",
+          teams_choose_item: "Objeto equipado (ej. Pañuelo Elección)",
+          teams_nature: "Naturaleza",
+          teams_choose_nature: "Selecciona naturaleza",
+          teams_evs: "EVs",
+          teams_ev_remaining: "restantes",
+          teams_export_showdown: "Exportar",
+          teams_copied: "¡Copiado!",
+          teams_edit: "Editar",
+          // Hero section
+          hero_title: "PokeLab Studio",
+          hero_tagline: "Consulta la pokedex y construye tu equipo definitivo",
+          hero_stat_types: "Tipos",
+          hero_stat_gens: "Gens",
+          hero_cta_explore: "Explorar Pokédex",
+          hero_cta_teams: "Crear Equipo",
         }
       }
     },

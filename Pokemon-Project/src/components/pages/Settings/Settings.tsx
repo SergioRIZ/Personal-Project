@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pokeball from './Components/ui/Pokeball';
 import AppearanceSettings from './Components/AppearanceSettings';
@@ -35,7 +35,7 @@ const Settings = () => {
           <div className="bg-gradient-to-r from-green-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-400">
+                <h1 className=" md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-400">
                   {t('settings')}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

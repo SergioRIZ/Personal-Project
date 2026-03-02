@@ -9,9 +9,13 @@ import {
   removeTeamMember,
   updateMemberMoves as updateMemberMovesApi,
   updateMemberAbility as updateMemberAbilityApi,
+  updateMemberItem as updateMemberItemApi,
+  updateMemberNature as updateMemberNatureApi,
+  updateMemberEVs as updateMemberEVsApi,
   type Team,
   type TeamMember,
   type TeamMemberInput,
+  type EVSpread,
 } from '../lib/teams';
 
 interface TeamsContextValue {
@@ -24,6 +28,9 @@ interface TeamsContextValue {
   removeMember: (teamId: string, slot: number) => Promise<void>;
   updateMemberMoves: (teamId: string, slot: number, moves: string[]) => Promise<void>;
   updateMemberAbility: (teamId: string, slot: number, ability: string | null) => Promise<void>;
+  updateMemberItem: (teamId: string, slot: number, item: string | null) => Promise<void>;
+  updateMemberNature: (teamId: string, slot: number, nature: string | null) => Promise<void>;
+  updateMemberEVs: (teamId: string, slot: number, evs: EVSpread | null) => Promise<void>;
 }
 
 const TeamsContext = createContext<TeamsContextValue | null>(null);
@@ -135,13 +142,9 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateMemberAbility = async (teamId: string, slot: number, ability: string | null): Promise<void> => {
-    // Optimistic update
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
-      return {
-        ...t,
-        members: t.members.map(m => m.slot === slot ? { ...m, ability } : m),
-      };
+      return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, ability } : m) };
     }));
     try {
       await updateMemberAbilityApi(teamId, slot, ability);
@@ -151,8 +154,47 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateMemberItem = async (teamId: string, slot: number, item: string | null): Promise<void> => {
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, item } : m) };
+    }));
+    try {
+      await updateMemberItemApi(teamId, slot, item);
+    } catch (err) {
+      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      console.error(err);
+    }
+  };
+
+  const updateMemberNature = async (teamId: string, slot: number, nature: string | null): Promise<void> => {
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, nature } : m) };
+    }));
+    try {
+      await updateMemberNatureApi(teamId, slot, nature);
+    } catch (err) {
+      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      console.error(err);
+    }
+  };
+
+  const updateMemberEVs = async (teamId: string, slot: number, evs: EVSpread | null): Promise<void> => {
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, evs } : m) };
+    }));
+    try {
+      await updateMemberEVsApi(teamId, slot, evs);
+    } catch (err) {
+      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      console.error(err);
+    }
+  };
+
   return (
-    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility }}>
+    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature, updateMemberEVs }}>
       {children}
     </TeamsContext.Provider>
   );

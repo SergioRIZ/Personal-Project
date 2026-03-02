@@ -8,7 +8,6 @@ import ErrorMessage from './ErrorMessage';
 import PokemonGrid from './Pokemon/PokemonGrid';
 import AnimationsStyle from './AnimationStyle';
 import EmptyState from './EmptyState';
-import DropdownMenu from './DropdownMenu';
 import AuthLinks from './AuthLinks';
 
 import { fetchAbilityDescriptions, type AbilityMap } from './ApiService';
@@ -19,7 +18,6 @@ import { useSettings, GENERATION_RANGES } from '../../../context/SettingsContext
 const Pokedex = () => {
   const { t } = useTranslation();
   const { settings } = useSettings();
-
   const [allPokemonBasic, setAllPokemonBasic] = useState<PokemonBasic[]>([]);
   const [displayedPokemon, setDisplayedPokemon] = useState<unknown[]>([]);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -110,7 +108,6 @@ const Pokedex = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 py-6 transition-colors duration-300">
-      <DropdownMenu />
       <AuthLinks />
 
       <div className="container mx-auto px-4 pt-16 sm:pt-10">

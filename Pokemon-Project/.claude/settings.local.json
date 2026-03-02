@@ -7,7 +7,9 @@
       "Bash(npm run test:run)",
       "Bash(npm run build)",
       "Bash(del \"C:\\\\Users\\\\Usuario\\\\Desktop\\\\PROYECTOS\\\\Personal-Project\\\\Pokemon-Project\\\\src\\\\components\\\\pages\\\\Pokedex\\\\i18n-config.js\")",
-      "Bash(grep -c \"prefers-color-scheme\" dist/assets/index-*.css)"
+      "Bash(grep -c \"prefers-color-scheme\" dist/assets/index-*.css)",
+      "WebFetch(domain:pokeapi.co)",
+      "Bash(pnpm dev:*)"
     ]
   }
 }
