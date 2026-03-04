@@ -4,7 +4,7 @@ import { useTeams } from '../../../context/TeamsContext';
 import TeamSlot from './TeamSlot';
 import TypeCoveragePanel from './TypeCoveragePanel';
 import PokemonPickerModal from './PokemonPickerModal';
-import type { Team, EVSpread } from '../../../lib/teams';
+import type { Team, EVSpread, IVSpread } from '../../../lib/teams';
 
 interface Props {
   team: Team;
@@ -15,7 +15,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
   const {
     deleteTeam, renameTeam, removeMember,
     updateMemberMoves, updateMemberAbility,
-    updateMemberItem, updateMemberNature, updateMemberEVs,
+    updateMemberItem, updateMemberNature, updateMemberEVs, updateMemberIVs,
   } = useTeams();
 
   const [editing, setEditing] = useState(false);
@@ -69,6 +69,12 @@ const TeamCard: React.FC<Props> = ({ team }) => {
             .filter(([, v]) => v > 0)
             .map(([k, v]) => `${v} ${EXPORT_STAT[k]}`);
           if (evParts.length > 0) lines.push(`EVs: ${evParts.join(' / ')}`);
+        }
+        if (m.ivs) {
+          const ivParts = (Object.entries(m.ivs) as [keyof IVSpread, number][])
+            .filter(([, v]) => v > 0)
+            .map(([k, v]) => `${v} ${EXPORT_STAT[k]}`);
+          if (ivParts.length > 0) lines.push(`IVs: ${ivParts.join(' / ')}`);
         }
         if (m.nature) lines.push(`${m.nature} Nature`);
         (m.moves ?? []).forEach(move => lines.push(`- ${fmtSlug(move)}`));
@@ -164,6 +170,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
                 onUpdateItem={(s, item) => updateMemberItem(team.id, s, item)}
                 onUpdateNature={(s, nature) => updateMemberNature(team.id, s, nature)}
                 onUpdateEVs={(s, evs) => updateMemberEVs(team.id, s, evs)}
+                onUpdateIVs={(s, ivs) => updateMemberIVs(team.id, s, ivs)}
               />
             ))}
           </div>

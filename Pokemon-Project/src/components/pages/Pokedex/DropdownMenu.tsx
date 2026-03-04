@@ -91,7 +91,7 @@ const DropdownMenu = () => {
 
   return (
     <div className="z-50">
-      {/* Hamburger button — light: white pill, dark: dark pill */}
+      {/* Hamburger button */}
       <button
         ref={buttonRef}
         className={`fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 z-50 border border-gray-200 dark:border-gray-700 transition-colors duration-300 ${showButton ? 'block' : 'hidden'}`}
@@ -171,15 +171,22 @@ const DropdownMenu = () => {
           ))}
         </div>
         
-        <div className='border-t border-gray-100 dark:border-gray-700 py-2 px-3'>
-      <button
-        onClick={() => updateSetting('darkMode', !settings.darkMode)}
-        aria-label={settings.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        className="w-9 h-9 flex items-center justify-center rounded-full bg-white/60 dark:bg-gray-700/60 text-slate-600 dark:text-yellow-300 hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-200 cursor-pointer backdrop-blur-sm shadow border border-white/40 dark:border-gray-600"
-      >
-        {settings.darkMode ? <SunIcon /> : <MoonIcon />}
-      </button>
-          </div>
+        {/* Dark mode toggle */}
+        <div className="border-t border-gray-100 dark:border-gray-700 px-5 py-3">
+          <button
+            onClick={() => updateSetting('darkMode', !settings.darkMode)}
+            aria-label={settings.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="flex items-center gap-3 w-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg px-1 py-2 transition-colors duration-200 cursor-pointer"
+          >
+            <div className="flex items-center w-8 justify-center">
+              {settings.darkMode ? <SunIcon size={20} className="text-yellow-400" /> : <MoonIcon size={20} className="text-slate-500" />}
+            </div>
+            <span className="font-medium">
+              {settings.darkMode ? t('lightMode', 'Light mode') : t('darkMode', 'Dark mode')}
+            </span>
+          </button>
+        </div>
+
         {/* Logout (logged in) / Login+SignUp (guest) */}
         <div className="border-t border-gray-100 dark:border-gray-700 p-4">
           {user ? (

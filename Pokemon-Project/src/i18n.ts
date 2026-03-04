@@ -123,6 +123,7 @@ i18next
           teams_choose_nature: "Select nature",
           teams_evs: "EVs",
           teams_ev_remaining: "remaining",
+          teams_ivs: "IVs",
           teams_export_showdown: "Export",
           teams_copied: "Copied!",
           teams_edit: "Edit",
@@ -133,6 +134,9 @@ i18next
           hero_stat_gens: "Gens",
           hero_cta_explore: "Explore Pokédex",
           hero_cta_teams: "Build a Team",
+          hero_feat_pokedex: "Browse stats, abilities & moves for every Pokémon",
+          hero_feat_teams: "Build competitive teams & export to Showdown",
+          hero_feat_collection: "Track and organize your favorite Pokémon",
         }
       },
       es: {
@@ -253,6 +257,7 @@ i18next
           teams_choose_nature: "Selecciona naturaleza",
           teams_evs: "EVs",
           teams_ev_remaining: "restantes",
+          teams_ivs: "IVs",
           teams_export_showdown: "Exportar",
           teams_copied: "¡Copiado!",
           teams_edit: "Editar",
@@ -263,6 +268,9 @@ i18next
           hero_stat_gens: "Gens",
           hero_cta_explore: "Explorar Pokédex",
           hero_cta_teams: "Crear Equipo",
+          hero_feat_pokedex: "Consulta estadísticas, habilidades y movimientos de cada Pokémon",
+          hero_feat_teams: "Crea equipos competitivos y expórtalos a Showdown",
+          hero_feat_collection: "Registra y organiza tus Pokémon favoritos",
         }
       }
     },

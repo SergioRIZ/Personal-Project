@@ -5,6 +5,11 @@ export interface EVSpread {
   spa: number; spd: number; spe: number;
 }
 
+export interface IVSpread {
+  hp: number; atk: number; def: number;
+  spa: number; spd: number; spe: number;
+}
+
 export interface TeamMember {
   id: string;
   team_id: string;
@@ -17,6 +22,7 @@ export interface TeamMember {
   item: string | null;
   nature: string | null;
   evs: EVSpread | null;
+  ivs: IVSpread | null;
 }
 
 export interface Team {
@@ -37,6 +43,7 @@ export interface TeamMemberInput {
   item?: string | null;
   nature?: string | null;
   evs?: EVSpread | null;
+  ivs?: IVSpread | null;
 }
 
 export async function fetchTeams(userId: string): Promise<Team[]> {
@@ -150,6 +157,15 @@ export async function updateMemberEVs(teamId: string, slot: number, evs: EVSprea
   const { error } = await supabase
     .from('team_members')
     .update({ evs })
+    .eq('team_id', teamId)
+    .eq('slot', slot);
+  if (error) throw error;
+}
+
+export async function updateMemberIVs(teamId: string, slot: number, ivs: IVSpread | null): Promise<void> {
+  const { error } = await supabase
+    .from('team_members')
+    .update({ ivs })
     .eq('team_id', teamId)
     .eq('slot', slot);
   if (error) throw error;

@@ -12,10 +12,12 @@ import {
   updateMemberItem as updateMemberItemApi,
   updateMemberNature as updateMemberNatureApi,
   updateMemberEVs as updateMemberEVsApi,
+  updateMemberIVs as updateMemberIVsApi,
   type Team,
   type TeamMember,
   type TeamMemberInput,
   type EVSpread,
+  type IVSpread,
 } from '../lib/teams';
 
 interface TeamsContextValue {
@@ -31,6 +33,7 @@ interface TeamsContextValue {
   updateMemberItem: (teamId: string, slot: number, item: string | null) => Promise<void>;
   updateMemberNature: (teamId: string, slot: number, nature: string | null) => Promise<void>;
   updateMemberEVs: (teamId: string, slot: number, evs: EVSpread | null) => Promise<void>;
+  updateMemberIVs: (teamId: string, slot: number, ivs: IVSpread | null) => Promise<void>;
 }
 
 const TeamsContext = createContext<TeamsContextValue | null>(null);
@@ -193,8 +196,21 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateMemberIVs = async (teamId: string, slot: number, ivs: IVSpread | null): Promise<void> => {
+    setTeams(prev => prev.map(t => {
+      if (t.id !== teamId) return t;
+      return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, ivs } : m) };
+    }));
+    try {
+      await updateMemberIVsApi(teamId, slot, ivs);
+    } catch (err) {
+      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      console.error(err);
+    }
+  };
+
   return (
-    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature, updateMemberEVs }}>
+    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature, updateMemberEVs, updateMemberIVs }}>
       {children}
     </TeamsContext.Provider>
   );

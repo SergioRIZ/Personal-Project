@@ -75,7 +75,7 @@ export default function useLoginForm() {
     }
 
     setFormSuccess(true);
-    setTimeout(() => navigate('/'), 1500);
+    setTimeout(() => navigate('/pokedex'), 1500);
   };
 
   const toggleShowPassword = () => setShowPassword(prev => !prev);
