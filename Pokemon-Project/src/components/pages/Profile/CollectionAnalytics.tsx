@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCollection } from '../../../context/CollectionContext';
 import { useTypeDistribution } from '../../../hooks/useTypeDistribution';
-import { getTypeColor, translateType } from '../Pokedex/utils';
+import { getTypeColor, translateType, getTypeSpriteUrl } from '../Pokedex/utils';
+
 
 const GENERATION_RANGES = [
   { gen: 1, min: 1,   max: 151  },
@@ -98,11 +99,12 @@ const CollectionAnalytics: React.FC = () => {
               <div className="space-y-1.5">
                 {sortedTypes.map(([type, count]) => (
                   <div key={type} className="flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
-                    >
-                      {translateType(type, i18n.language)}
-                    </span>
+                    <img
+                      src={getTypeSpriteUrl(type)}
+                      alt={translateType(type, i18n.language)}
+                      title={translateType(type, i18n.language)}
+                      className="w-8 h-8 object-contain drop-shadow-lg shrink-0"
+                    />
                     <div className="flex-1 bg-gray-100 dark:bg-gray-700 h-3 overflow-hidden">
                       <div
                         className={`h-full transition-all duration-500 ${getTypeColor(type)}`}

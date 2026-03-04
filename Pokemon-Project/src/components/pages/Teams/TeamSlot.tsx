@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getTypeColor, translateType } from '../Pokedex/utils';
+import { getTypeSpriteUrl } from '../Pokedex/utils';
 import { useMoveDetails } from '../../../hooks/useMoveDetails';
 import { usePokemonAbilities } from '../../../hooks/usePokemonAbilities';
 import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
@@ -201,14 +201,15 @@ const TeamSlot: React.FC<Props> = ({
           </p>
 
           {/* Type badges */}
-          <div className="flex flex-wrap justify-center gap-1.5">
+          <div className="flex flex-wrap justify-center gap-10">
             {member.pokemon_types.map(type => (
-              <span
+              <img
                 key={type}
-                className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
-              >
-                {translateType(type, 'en')}
-              </span>
+                src={getTypeSpriteUrl(type)}
+                alt={type}
+                title={type}
+                className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200"
+              />
             ))}
           </div>
         </div>

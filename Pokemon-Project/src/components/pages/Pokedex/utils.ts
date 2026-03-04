@@ -75,3 +75,14 @@ const TYPE_TRANSLATIONS: Record<string, Record<string, string>> = {
 
 export const translateType = (type: string, currentLanguage: string): string =>
   TYPE_TRANSLATIONS[type]?.[currentLanguage] ?? type;
+
+/* ── Type sprite icons (sprites-master/*.png) ────────────────────────── */
+
+const TYPE_SPRITE_ID: Record<PokemonType, number> = {
+  normal: 1, fighting: 2, flying: 3, poison: 4, ground: 5, rock: 6,
+  bug: 7, ghost: 8, steel: 9, fire: 10, water: 11, grass: 12,
+  electric: 13, psychic: 14, ice: 15, dragon: 16, dark: 17, fairy: 18,
+};
+
+export const getTypeSpriteUrl = (type: string): string =>
+  `/sprites-master/${TYPE_SPRITE_ID[type as PokemonType] ?? 1}.png`;

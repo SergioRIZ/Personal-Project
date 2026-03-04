@@ -2,6 +2,7 @@ import React from 'react';
 import PokemonCard from './PokemonCard';
 import NoResults from '../NoResults';
 import type { AbilityMap } from '../ApiService';
+import { navigate } from '../../../../navigation';
 
 interface Props {
   filteredPokemon: unknown[];
@@ -17,7 +18,11 @@ const PokemonGrid = ({ filteredPokemon, currentLanguage, abilityDescriptions }: 
       {filteredPokemon.map(pokemon => {
         const p = pokemon as { id: number };
         return (
-          <div className="w-full" key={p.id}>
+          <div
+            className="w-full cursor-pointer"
+            key={p.id}
+            onClick={() => navigate(`/pokemon/${p.id}`)}
+          >
             <PokemonCard
               pokemon={pokemon as Parameters<typeof PokemonCard>[0]['pokemon']}
               currentLanguage={currentLanguage}

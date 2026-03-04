@@ -127,6 +127,13 @@ i18next
           teams_export_showdown: "Export",
           teams_copied: "Copied!",
           teams_edit: "Edit",
+          // Detail modal
+          detail_category: "Category",
+          detail_ability: "Ability",
+          detail_gender: "Gender",
+          detail_weaknesses: "Weaknesses",
+          detail_genderless: "Genderless",
+          detail_no_description: "No description available",
           // Hero section
           hero_title: "PokeLab Studio",
           hero_tagline: "Check the pokedex and build your ultimate team",
@@ -261,6 +268,13 @@ i18next
           teams_export_showdown: "Exportar",
           teams_copied: "¡Copiado!",
           teams_edit: "Editar",
+          // Detail modal
+          detail_category: "Categoría",
+          detail_ability: "Habilidad",
+          detail_gender: "Género",
+          detail_weaknesses: "Debilidades",
+          detail_genderless: "Sin género",
+          detail_no_description: "Sin descripción disponible",
           // Hero section
           hero_title: "PokeLab Studio",
           hero_tagline: "Consulta la pokedex y construye tu equipo definitivo",

@@ -1,5 +1,4 @@
-import React from 'react';
-import { getTypeColor, translateType } from '../utils';
+import { translateType, getTypeSpriteUrl } from '../utils';
 
 interface PokemonTypeEntry {
   type: { name: string };
@@ -10,17 +9,16 @@ interface Props {
   currentLanguage: string;
 }
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-
 const PokemonTypes = ({ types, currentLanguage }: Props) => (
-  <div className="flex flex-wrap gap-2 justify-center mb-1">
+  <div className="flex flex-wrap gap-20 justify-center items-center">
     {types.map(({ type }) => (
-      <span
+      <img
         key={type.name}
-        className={`px-3 py-1 rounded-md text-white text-sm font-bold ${getTypeColor(type.name)} hover:scale-105 transition-all duration-200 border border-opacity-50 shadow-sm`}
-      >
-        {capitalize(translateType(type.name, currentLanguage))}
-      </span>
+        src={getTypeSpriteUrl(type.name)}
+        alt={translateType(type.name, currentLanguage)}
+        title={translateType(type.name, currentLanguage)}
+        className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200 "
+      />
     ))}
   </div>
 );

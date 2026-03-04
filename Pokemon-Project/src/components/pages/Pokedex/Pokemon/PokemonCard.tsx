@@ -74,7 +74,7 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
           />
           {user && (
             <button
-              onClick={() => isCollected ? removePokemon(pokemon.id) : addPokemon(pokemon.id, pokemon.name)}
+              onClick={(e) => { e.stopPropagation(); isCollected ? removePokemon(pokemon.id) : addPokemon(pokemon.id, pokemon.name); }}
               aria-label={isCollected ? t('collection_remove') : t('collection_add')}
               title={isCollected ? t('collection_remove') : t('collection_add')}
               className={`absolute top-2 right-2 z-30 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition-all duration-200 cursor-pointer ${
@@ -88,20 +88,9 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
               </svg>
             </button>
           )}
-          {pokemon.types.length === 1 ? (
-            <div className="absolute bottom-2 right-2 z-20">
-              <PokemonTypes types={pokemon.types} currentLanguage={currentLanguage} />
-            </div>
-          ) : (
-            <>
-              <div className="absolute bottom-2 left-2 z-20">
-                <PokemonTypes types={[pokemon.types[0]]} currentLanguage={currentLanguage} />
-              </div>
-              <div className="absolute bottom-2 right-2 z-20">
-                <PokemonTypes types={[pokemon.types[1]]} currentLanguage={currentLanguage} />
-              </div>
-            </>
-          )}
+          <div className="absolute bottom-1.5 inset-x-0 z-20 flex justify-center gap-2">
+            <PokemonTypes types={pokemon.types} currentLanguage={currentLanguage} />
+          </div>
         </div>
 
         <PokemonStats stats={pokemon.stats} currentLanguage={currentLanguage} />

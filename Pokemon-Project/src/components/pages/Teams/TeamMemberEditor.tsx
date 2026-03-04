@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { getTypeColor, translateType } from '../Pokedex/utils';
+import { getTypeSpriteUrl } from '../Pokedex/utils';
 import { useMoveDetails } from '../../../hooks/useMoveDetails';
 import { usePokemonAbilities } from '../../../hooks/usePokemonAbilities';
 import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
@@ -276,12 +276,13 @@ const TeamMemberEditor: React.FC<Props> = ({
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {member.pokemon_types.map(type => (
-                    <span
+                    <img
                       key={type}
-                      className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 ${getTypeColor(type)}`}
-                    >
-                      {translateType(type, 'en')}
-                    </span>
+                      src={getTypeSpriteUrl(type)}
+                      alt={type}
+                      title={type}
+                      className="w-20 h-20 object-contain drop-shadow-lg"
+                    />
                   ))}
                 </div>
               </div>
@@ -511,11 +512,14 @@ const TeamMemberEditor: React.FC<Props> = ({
                           className="group flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         >
                           {detail ? (
-                            <span className={`shrink-0 px-2 py-0.5 rounded-md text-white text-[10px] font-bold capitalize shadow-sm border border-white/20 ${getTypeColor(detail.type)}`}>
-                              {translateType(detail.type, 'en')}
-                            </span>
+                            <img
+                              src={getTypeSpriteUrl(detail.type)}
+                              alt={detail.type}
+                              title={detail.type}
+                              className="shrink-0 w-7 h-7 object-contain drop-shadow-lg"
+                            />
                           ) : (
-                            <span className="shrink-0 w-12 h-5 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                            <span className="shrink-0 w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                           )}
 
                           <button

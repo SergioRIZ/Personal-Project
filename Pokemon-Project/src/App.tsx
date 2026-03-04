@@ -15,6 +15,7 @@ const Settings = lazy(() => import('./components/pages/Settings/Settings'));
 const SignUp = lazy(() => import('./components/pages/SignUp/SignUp'));
 const Profile = lazy(() => import('./components/pages/Profile/Profile'));
 const Teams = lazy(() => import('./components/pages/Teams/Teams'));
+const PokemonDetail = lazy(() => import('./components/pages/Pokedex/Pokemon/PokemonDetail'));
 const Page404 = lazy(() => import('./components/pages/404'));
 
 const PageLoader = () => (
@@ -43,6 +44,7 @@ function GlobalNav() {
 const AppRoutes = [
   { path: '/', Component: Landing },
   { path: '/pokedex', Component: Pokedex },
+  { path: '/pokemon/:id', Component: PokemonDetail },
   { path: '/login', Component: Login },
   { path: '/signup', Component: SignUp },
   { path: '/settings', Component: Settings },

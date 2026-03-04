@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_TYPES, computeTeamDefensive, computeTeamOffensive } from '../../../lib/typeChart';
-import { getTypeColor, translateType } from '../Pokedex/utils';
+import { translateType, getTypeSpriteUrl } from '../Pokedex/utils';
 import type { TeamMember } from '../../../lib/teams';
 
 interface Props {
@@ -58,12 +58,15 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
                 <span className="text-[11px] font-semibold text-green-600 dark:text-green-400">{t('teams_no_weaknesses')}</span>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1 items-center">
                 {weakTypes.map(type => (
-                  <span key={type} className="inline-flex items-center gap-1">
-                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}>
-                      {translateType(type, i18n.language)}
-                    </span>
+                  <span key={type} className="inline-flex items-center gap-0.5">
+                    <img
+                      src={getTypeSpriteUrl(type)}
+                      alt={translateType(type, i18n.language)}
+                      title={translateType(type, i18n.language)}
+                      className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200"
+                    />
                     {weaknesses[type] > 1 && (
                       <span className="text-[10px] font-black text-red-400 dark:text-red-300">
                         ×{weaknesses[type]}
@@ -86,12 +89,13 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
               </div>
               <div className="flex flex-wrap gap-1">
                 {immuneTypes.map(type => (
-                  <span
+                  <img
                     key={type}
-                    className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
-                  >
-                    {translateType(type, i18n.language)}
-                  </span>
+                    src={getTypeSpriteUrl(type)}
+                    alt={translateType(type, i18n.language)}
+                    title={translateType(type, i18n.language)}
+                    className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200"
+                  />
                 ))}
               </div>
             </div>
@@ -108,12 +112,13 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
               </div>
               <div className="flex flex-wrap gap-1">
                 {resistTypes.map(type => (
-                  <span
+                  <img
                     key={type}
-                    className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 opacity-70 hover:opacity-100 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
-                  >
-                    {translateType(type, i18n.language)}
-                  </span>
+                    src={getTypeSpriteUrl(type)}
+                    alt={translateType(type, i18n.language)}
+                    title={translateType(type, i18n.language)}
+                    className="w-20 h-20 object-contain drop-shadow-lg opacity-70 hover:opacity-100 hover:scale-110 transition-all duration-200"
+                  />
                 ))}
               </div>
             </div>
@@ -153,12 +158,13 @@ const TypeCoveragePanel: React.FC<Props> = ({ members }) => {
           ) : (
             <div className="flex flex-wrap gap-1">
               {coveredTypes.map(type => (
-                <span
+                <img
                   key={type}
-                  className={`inline-flex items-center justify-center px-3 py-1 rounded-md text-white text-xs font-bold capitalize shadow-sm border border-white/20 hover:scale-105 transition-all duration-200 ${getTypeColor(type)}`}
-                >
-                  {translateType(type, i18n.language)}
-                </span>
+                  src={getTypeSpriteUrl(type)}
+                  alt={translateType(type, i18n.language)}
+                  title={translateType(type, i18n.language)}
+                  className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200"
+                />
               ))}
             </div>
           )}

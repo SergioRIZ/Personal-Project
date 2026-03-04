@@ -29,7 +29,15 @@ export function Router({
     };
   }, []);
 
-  const Page = routes.find(({ path }) => path === currentPath)?.Component;
+  const Page = routes.find(({ path }) => {
+    if (path === currentPath) return true;
+    // Support dynamic segments like /pokemon/:id
+    if (path.includes(':')) {
+      const prefix = path.slice(0, path.indexOf(':'));
+      return currentPath.startsWith(prefix) && currentPath.length > prefix.length;
+    }
+    return false;
+  })?.Component;
 
   return Page ? <Page /> : <DefaultComponent />;
 }

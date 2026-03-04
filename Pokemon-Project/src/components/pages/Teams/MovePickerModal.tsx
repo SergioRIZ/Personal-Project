@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useMoveDetails } from '../../../hooks/useMoveDetails';
-import { getTypeColor, translateType } from '../Pokedex/utils';
+import { getTypeSpriteUrl, translateType } from '../Pokedex/utils';
 
 interface Props {
   pokemonId: number;
@@ -166,13 +166,16 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                     }`}
                   >
                     {/* Type badge */}
-                    <div className="shrink-0 mt-1 w-[3.75rem]">
+                    <div className="shrink-0 mt-0.5 w-8">
                       {detail ? (
-                        <span className={`inline-flex items-center justify-center w-full px-1 py-0.5 rounded-md text-white text-[10px] font-bold capitalize shadow-sm border border-white/20 ${getTypeColor(detail.type)}`}>
-                          {translateType(detail.type, i18n.language)}
-                        </span>
+                        <img
+                          src={getTypeSpriteUrl(detail.type)}
+                          alt={translateType(detail.type, i18n.language)}
+                          title={translateType(detail.type, i18n.language)}
+                          className="w-8 h-8 object-contain drop-shadow-lg"
+                        />
                       ) : (
-                        <span className="block w-full h-5 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                        <span className="block w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                       )}
                     </div>
 
