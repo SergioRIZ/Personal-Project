@@ -1,3 +1,178 @@
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
+
+/* ── Design Token System ── */
+:root {
+  /* Primary: Pokeball crimson */
+  --color-primary: #DC2626;
+  --color-primary-hover: #B91C1C;
+  --color-primary-light: #FEE2E2;
+
+  /* Accent: Amber gold */
+  --color-accent: #F59E0B;
+  --color-accent-hover: #D97706;
+  --color-accent-light: #FEF3C7;
+
+  /* Secondary: Electric cyan */
+  --color-secondary: #06B6D4;
+  --color-secondary-light: #CFFAFE;
+
+  /* Surfaces */
+  --color-surface: #FFF8F0;
+  --color-card: #FFFFFF;
+  --color-card-alt: #FFF5EB;
+  --color-border: #E2D6CA;
+
+  /* Text */
+  --text-primary: #1A1A2E;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  /* Typography */
+  --font-display: 'Chakra Petch', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Grain overlay */
+  --grain-opacity: 0.03;
+}
+
+:is(.dark) {
+  --color-primary: #EF4444;
+  --color-primary-hover: #DC2626;
+  --color-primary-light: #450A0A;
+
+  --color-accent: #FBBF24;
+  --color-accent-hover: #F59E0B;
+  --color-accent-light: #451A03;
+
+  --color-secondary: #22D3EE;
+  --color-secondary-light: #083344;
+
+  --color-surface: #0C1222;
+  --color-card: #1A2332;
+  --color-card-alt: #162032;
+  --color-border: #2A3A4E;
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --grain-opacity: 0.04;
+}
+
+/* ── Global font ── */
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* ── Global page background with grain texture ── */
+.app-bg {
+  background-color: var(--color-surface);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 24px,
+      rgba(220, 38, 38, 0.02) 24px,
+      rgba(220, 38, 38, 0.02) 25px
+    );
+}
+
+/* ── Card styling utility ── */
+.card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+/* ── Accent bar ── */
+.accent-bar {
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: 4px 4px 0 0;
+}
+
+/* ── Diagonal clip section ── */
+.diagonal-clip {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+/* ── Grain overlay pseudo-element ── */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── Gradient text utility ── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Pokeball spinner ── */
+@keyframes pokeball-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pokeball-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+/* Staggered animation delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}

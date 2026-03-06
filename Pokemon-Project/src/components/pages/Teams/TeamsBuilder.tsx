@@ -22,8 +22,11 @@ const TeamsBuilder: React.FC = () => {
 
   if (authLoading || teamsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen app-bg flex items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-[var(--color-border)]" />
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--color-primary)]" style={{ animation: 'pokeball-spin 0.8s linear infinite' }} />
+        </div>
       </div>
     );
   }
@@ -34,27 +37,30 @@ const TeamsBuilder: React.FC = () => {
 
   if (!team) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-14 w-14 text-gray-300 dark:text-gray-600 mx-auto mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-gray-700 dark:text-gray-300 font-semibold text-lg mb-1">
+      <div className="min-h-screen app-bg flex items-center justify-center">
+        <div className="text-center bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl p-10 animate-slide-up">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--color-card-alt)] flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-[var(--text-muted)]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-[var(--text-primary)] font-bold text-lg mb-1" style={{ fontFamily: 'var(--font-display)' }}>
             {t('teams_not_found', 'Team not found')}
           </p>
-          <p className="text-gray-400 dark:text-gray-500 text-sm mb-6">
+          <p className="text-[var(--text-muted)] text-sm mb-6">
             {t('teams_not_found_desc', 'This team may have been deleted.')}
           </p>
           <button
             onClick={() => navigate('/teams')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium text-sm rounded-xl shadow-sm transition-colors duration-200 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold text-sm rounded-xl shadow-md transition-colors duration-200 cursor-pointer"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -67,12 +73,13 @@ const TeamsBuilder: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
+    <div className="min-h-screen app-bg py-8 px-4">
       {/* Back link */}
       <div className="max-w-5xl mx-auto mb-4">
         <Link
           to="/teams"
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-700 dark:hover:text-green-400 transition-colors duration-200"
+          className="inline-flex items-center gap-2 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-200"
+          style={{ fontFamily: 'var(--font-display)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path

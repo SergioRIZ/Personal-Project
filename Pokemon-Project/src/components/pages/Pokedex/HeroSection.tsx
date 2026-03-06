@@ -25,43 +25,41 @@ const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 const SPRITE = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
-/* ── themed floating Pokémon ─────────────────────────────────────── */
+/* ── themed floating Pokemon ─────────────────────────────────────── */
 interface Sprite { id: number; left: string; top: string; size: number; delay: number; duration: number; flip: boolean }
 
 const LIGHT_POKEMON: Sprite[] = [
-  { id: 488, left: '3%',  top: '4%',   size: 120, delay: 0,   duration: 14, flip: false },  // Cresselia — top-left
-  { id: 196, left: '18%', top: '14%',  size: 85,  delay: 1.5, duration: 16, flip: false },  // Espeon — upper-left inset
-  { id: 150, left: '2%',  top: '46%',  size: 110, delay: 0.8, duration: 13, flip: false },  // Mewtwo — mid-left edge
-  { id: 791, left: '12%', top: '82%',  size: 125, delay: 2.2, duration: 15, flip: false },  // Solgaleo — bottom-left
-  { id: 716, left: '82%', top: '2%',   size: 120, delay: 1,   duration: 15, flip: true  },  // Xerneas — top-right
-  { id: 468, left: '70%', top: '13%',  size: 90,  delay: 2.5, duration: 12, flip: true  },  // Togekiss — upper-right inset
-  { id: 695, left: '88%', top: '50%',  size: 100, delay: 0.5, duration: 17, flip: true  },  // Heliolisk — mid-right edge
-  { id: 171, left: '76%', top: '84%',  size: 105, delay: 3,   duration: 14, flip: true  },  // Lanturn — bottom-right
-  { id: 250, left: '44%', top: '2%',   size: 115, delay: 1.8, duration: 15, flip: false },  // Ho-Oh — center-top
-  { id: 282, left: '5%',  top: '66%',  size: 95,  delay: 3.5, duration: 13, flip: false },  // Gardevoir — lower-left
-  { id: 181, left: '85%', top: '70%',  size: 90,  delay: 2.8, duration: 16, flip: true  },  // Ampharos (the Light Pokémon) — lower-right
-  { id: 643, left: '48%', top: '88%',  size: 120, delay: 0.3, duration: 14, flip: true  },  // Reshiram — center-bottom
-  { id: 385, left: '20%', top: '42%',  size: 90,  delay: 2,   duration: 15, flip: false },  // Jirachi — mid-left inset
-  { id: 338, left: '76%', top: '40%',  size: 95,  delay: 1.2, duration: 14, flip: true  },  // Solrock — mid-right inset
-  { id: 493, left: '32%', top: '86%',  size: 110, delay: 3.2, duration: 16, flip: false },  // Arceus — lower-center-left
+  { id: 6,   left: '3%',  top: '4%',   size: 130, delay: 0,   duration: 14, flip: false },  // Charizard
+  { id: 25,  left: '18%', top: '14%',  size: 85,  delay: 1.5, duration: 16, flip: false },  // Pikachu
+  { id: 150, left: '2%',  top: '46%',  size: 110, delay: 0.8, duration: 13, flip: false },  // Mewtwo
+  { id: 249, left: '12%', top: '82%',  size: 125, delay: 2.2, duration: 15, flip: false },  // Lugia
+  { id: 384, left: '82%', top: '2%',   size: 130, delay: 1,   duration: 15, flip: true  },  // Rayquaza
+  { id: 448, left: '70%', top: '13%',  size: 90,  delay: 2.5, duration: 12, flip: true  },  // Lucario
+  { id: 130, left: '88%', top: '50%',  size: 120, delay: 0.5, duration: 17, flip: true  },  // Gyarados
+  { id: 149, left: '76%', top: '84%',  size: 105, delay: 3,   duration: 14, flip: true  },  // Dragonite
+  { id: 250, left: '44%', top: '2%',   size: 115, delay: 1.8, duration: 15, flip: false },  // Ho-Oh
+  { id: 282, left: '5%',  top: '66%',  size: 95,  delay: 3.5, duration: 13, flip: false },  // Gardevoir
+  { id: 445, left: '85%', top: '70%',  size: 100, delay: 2.8, duration: 16, flip: true  },  // Garchomp
+  { id: 643, left: '48%', top: '88%',  size: 120, delay: 0.3, duration: 14, flip: true  },  // Reshiram
+  { id: 385, left: '20%', top: '42%',  size: 90,  delay: 2,   duration: 15, flip: false },  // Jirachi
+  { id: 493, left: '32%', top: '86%',  size: 110, delay: 3.2, duration: 16, flip: false },  // Arceus
 ];
 
 const DARK_POKEMON: Sprite[] = [
-  { id: 491, left: '4%',  top: '3%',   size: 115, delay: 0,   duration: 14, flip: false },  // Darkrai — top-left
-  { id: 197, left: '20%', top: '16%',  size: 80,  delay: 1.5, duration: 16, flip: false },  // Umbreon — upper-left inset
-  { id: 792, left: '1%',  top: '44%',  size: 120, delay: 0.8, duration: 13, flip: false },  // Lunala — mid-left edge
-  { id: 359, left: '14%', top: '80%',  size: 105, delay: 2.2, duration: 15, flip: false },  // Absol — bottom-left
-  { id: 430, left: '80%', top: '4%',   size: 100, delay: 1,   duration: 15, flip: true  },  // Honchkrow — top-right
-  { id: 442, left: '68%', top: '15%',  size: 90,  delay: 2.5, duration: 12, flip: true  },  // Spiritomb — upper-right inset
-  { id: 571, left: '86%', top: '48%',  size: 110, delay: 0.5, duration: 17, flip: true  },  // Zoroark — mid-right edge
-  { id: 229, left: '74%', top: '83%',  size: 105, delay: 3,   duration: 14, flip: true  },  // Houndoom — bottom-right
-  { id: 94,  left: '46%', top: '1%',   size: 110, delay: 1.8, duration: 15, flip: false },  // Gengar — center-top
-  { id: 461, left: '6%',  top: '65%',  size: 90,  delay: 3.5, duration: 13, flip: false },  // Weavile — lower-left
-  { id: 609, left: '84%', top: '68%',  size: 95,  delay: 2.8, duration: 16, flip: true  },  // Chandelure — lower-right
-  { id: 861, left: '50%', top: '87%',  size: 110, delay: 0.3, duration: 14, flip: true  },  // Grimmsnarl — center-bottom
-  { id: 302, left: '21%', top: '43%',  size: 85,  delay: 2,   duration: 15, flip: false },  // Sableye — mid-left inset
-  { id: 635, left: '75%', top: '41%',  size: 100, delay: 1.2, duration: 14, flip: true  },  // Hydreigon — mid-right inset
-  { id: 625, left: '33%', top: '85%',  size: 95,  delay: 3.2, duration: 16, flip: false },  // Bisharp — lower-center-left
+  { id: 491, left: '4%',  top: '3%',   size: 115, delay: 0,   duration: 14, flip: false },  // Darkrai
+  { id: 197, left: '20%', top: '16%',  size: 80,  delay: 1.5, duration: 16, flip: false },  // Umbreon
+  { id: 792, left: '1%',  top: '44%',  size: 120, delay: 0.8, duration: 13, flip: false },  // Lunala
+  { id: 359, left: '14%', top: '80%',  size: 105, delay: 2.2, duration: 15, flip: false },  // Absol
+  { id: 430, left: '80%', top: '4%',   size: 100, delay: 1,   duration: 15, flip: true  },  // Honchkrow
+  { id: 94,  left: '68%', top: '15%',  size: 100, delay: 2.5, duration: 12, flip: true  },  // Gengar
+  { id: 571, left: '86%', top: '48%',  size: 110, delay: 0.5, duration: 17, flip: true  },  // Zoroark
+  { id: 229, left: '74%', top: '83%',  size: 105, delay: 3,   duration: 14, flip: true  },  // Houndoom
+  { id: 248, left: '46%', top: '1%',   size: 120, delay: 1.8, duration: 15, flip: false },  // Tyranitar
+  { id: 461, left: '6%',  top: '65%',  size: 90,  delay: 3.5, duration: 13, flip: false },  // Weavile
+  { id: 609, left: '84%', top: '68%',  size: 95,  delay: 2.8, duration: 16, flip: true  },  // Chandelure
+  { id: 861, left: '50%', top: '87%',  size: 110, delay: 0.3, duration: 14, flip: true  },  // Grimmsnarl
+  { id: 635, left: '75%', top: '41%',  size: 100, delay: 1.2, duration: 14, flip: true  },  // Hydreigon
+  { id: 625, left: '33%', top: '85%',  size: 95,  delay: 3.2, duration: 16, flip: false },  // Bisharp
 ];
 
 /* ── count-up hook ───────────────────────────────────────────────── */
@@ -152,12 +150,12 @@ const HERO_STYLES = `
     100% { background-position:  200% center; }
   }
   @keyframes hero-glow {
-    0%, 100% { box-shadow: 0 4px 15px rgba(16,185,129,.30), 0 0 30px rgba(16,185,129,.10); }
-    50%      { box-shadow: 0 4px 30px rgba(16,185,129,.55), 0 0 60px rgba(16,185,129,.20); }
+    0%, 100% { box-shadow: 0 4px 15px rgba(220,38,38,.25), 0 0 30px rgba(245,158,11,.10); }
+    50%      { box-shadow: 0 4px 30px rgba(220,38,38,.45), 0 0 60px rgba(245,158,11,.20); }
   }
   @keyframes hero-card-glow {
-    0%, 100% { box-shadow: 0 0 0 rgba(16,185,129,0); }
-    50%      { box-shadow: 0 0 20px rgba(16,185,129,.08); }
+    0%, 100% { box-shadow: 0 0 0 rgba(220,38,38,0); }
+    50%      { box-shadow: 0 0 20px rgba(220,38,38,.06); }
   }
 
   .hero-s1 { animation: hero-fade-up .8s ease-out .1s both; }
@@ -167,7 +165,7 @@ const HERO_STYLES = `
   .hero-s5 { animation: hero-fade-up .8s ease-out .9s both; }
 
   .hero-title-shimmer {
-    background: linear-gradient(90deg, #16a34a, #0d9488, #2563eb, #16a34a);
+    background: linear-gradient(90deg, #DC2626, #F59E0B, #06B6D4, #DC2626);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -175,7 +173,7 @@ const HERO_STYLES = `
     animation: hero-shimmer 4s linear infinite;
   }
   :is(.dark) .hero-title-shimmer {
-    background: linear-gradient(90deg, #4ade80, #2dd4bf, #60a5fa, #4ade80);
+    background: linear-gradient(90deg, #EF4444, #FBBF24, #22D3EE, #EF4444);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -219,12 +217,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
         className="relative overflow-hidden min-h-screen flex flex-col justify-center"
         style={{
           background: settings.darkMode
-            ? 'linear-gradient(135deg, #111827, #1f2937, #111827)'
-            : 'linear-gradient(-45deg, #a7f3d0, #99f6e4, #bae6fd, #c7d2fe, #a7f3d0)',
+            ? 'linear-gradient(135deg, #0C1222, #1A2332, #0C1222)'
+            : 'linear-gradient(-45deg, #FEE2E2, #FEF3C7, #CFFAFE, #FFF8F0, #FEE2E2)',
           backgroundSize: settings.darkMode ? '100% 100%' : '400% 400%',
           animation: settings.darkMode ? 'none' : 'hero-bg-shift 15s ease infinite',
         }}
       >
+        {/* ── geometric grid overlay ───────────────────────── */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="hero-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="0.5" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hero-grid)" />
+          </svg>
+        </div>
+
         {/* ── floating particles (sm+) ──────────────────────── */}
         {PARTICLES.map((p, i) => (
           <div
@@ -242,7 +250,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
           />
         ))}
 
-        {/* ── themed Pokémon sprites (lg+) ─────────────────── */}
+        {/* ── themed Pokemon sprites (lg+) ─────────────────── */}
         {sprites.map((poke) => (
           <img
             key={poke.id}
@@ -266,26 +274,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
           />
         ))}
 
-        {/* ── floating Pokéballs ────────────────────────────── */}
+        {/* ── floating Pokeballs ────────────────────────────── */}
         <PokeBall
-          className="absolute -right-[8%] -top-[12%] w-[30%] max-w-[480px] text-slate-700 dark:text-white opacity-[0.09] dark:opacity-[0.05] pointer-events-none select-none"
-          style={{ animation: 'hero-float 8s ease-in-out infinite' }}
+          className="absolute -right-[8%] -top-[12%] w-[30%] max-w-[480px] opacity-[0.06] pointer-events-none select-none"
+          style={{ color: 'var(--color-primary)', animation: 'hero-float 8s ease-in-out infinite' }}
         />
         <PokeBall
-          className="absolute -left-[10%] -bottom-[18%] w-[40%] max-w-[340px] text-slate-700 dark:text-white opacity-[0.07] dark:opacity-[0.04] pointer-events-none select-none"
-          style={{ animation: 'hero-float-rev 10s ease-in-out 1s infinite' }}
+          className="absolute -left-[10%] -bottom-[18%] w-[40%] max-w-[340px] opacity-[0.05] pointer-events-none select-none"
+          style={{ color: 'var(--color-accent)', animation: 'hero-float-rev 10s ease-in-out 1s infinite' }}
         />
 
         {/* ── content (vertically centred) ─────────────────── */}
         <div className="relative z-10 container mx-auto px-6 flex flex-col items-center text-center gap-5 sm:gap-7 py-20 sm:py-0">
 
           {/* Title */}
-          <h1 className="hero-s1 hero-title-shimmer text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight tracking-tight">
+          <h1
+            className="hero-s1 hero-title-shimmer text-4xl sm:text-6xl md:text-8xl font-extrabold leading-tight tracking-tighter"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             {t('hero_title')}
           </h1>
 
           {/* Tagline */}
-          <p className="hero-s2 text-base sm:text-xl text-gray-600 dark:text-gray-300 font-medium max-w-sm sm:max-w-md">
+          <p className="hero-s2 text-base sm:text-xl text-[var(--text-secondary)] font-medium max-w-sm sm:max-w-md">
             {t('hero_tagline')}
           </p>
 
@@ -294,12 +305,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
             {stats.map(({ value, label }) => (
               <div
                 key={label}
-                className="flex items-center gap-1.5 bg-white/70 dark:bg-gray-700/60 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/60 dark:border-gray-600/60"
+                className="flex items-center gap-2 bg-[var(--color-card)]/70 backdrop-blur-sm rounded-xl px-4 py-2 shadow-md border border-[var(--color-border)]"
               >
-                <span className="text-base sm:text-lg font-extrabold text-green-600 dark:text-green-400 tabular-nums">
+                <span
+                  className="text-base sm:text-lg font-extrabold text-[var(--color-primary)] tabular-nums"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
                   {value}
                 </span>
-                <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
+                <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
                   {label}
                 </span>
               </div>
@@ -310,8 +324,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
           <div className="hero-s4 flex flex-wrap items-center justify-center gap-3 mt-1">
             <button
               onClick={onExplore}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 active:scale-95 text-white text-sm font-semibold rounded-full transition-all duration-200 cursor-pointer"
-              style={{ animation: 'hero-glow 3s ease-in-out 1.5s infinite' }}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] active:scale-95 text-white text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer shadow-lg"
+              style={{ fontFamily: 'var(--font-display)', animation: 'hero-glow 3s ease-in-out 1.5s infinite' }}
             >
               <SearchIcon />
               {t('hero_cta_explore')}
@@ -324,16 +338,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
               <Link
                 key={to}
                 to={to}
-                className="group flex flex-col items-center gap-2 p-5 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-white/60 dark:border-gray-700/60 shadow-sm hover:shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-[var(--color-card)]/60 backdrop-blur-md border border-[var(--color-border)] shadow-md hover:shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer"
                 style={{ animation: 'hero-card-glow 4s ease-in-out infinite' }}
               >
-                <div className="text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform duration-200">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-primary-light)] flex items-center justify-center text-[var(--color-primary)] group-hover:scale-110 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all duration-200">
                   {icon}
                 </div>
-                <span className="text-sm font-bold text-gray-800 dark:text-white">
+                <span className="text-sm font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                   {title}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                <span className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   {desc}
                 </span>
               </Link>

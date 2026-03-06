@@ -27,18 +27,24 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 flex justify-center items-start py-12 transition-colors duration-300">
+    <div className="min-h-screen app-bg flex justify-center items-start py-12">
       <div className="container max-w-2xl mx-auto px-6">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
+        <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
 
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
+          {/* Header with diagonal accent */}
+          <div className="relative overflow-hidden p-6 border-b border-[var(--color-border)]" style={{ background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-card))' }}>
+            {/* Geometric decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.05]">
+              <svg viewBox="0 0 100 100">
+                <circle cx="80" cy="20" r="60" fill="var(--color-primary)" />
+              </svg>
+            </div>
+            <div className="flex items-center justify-between relative">
               <div>
-                <h1 className=" md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-400">
+                <h1 className="text-2xl md:text-4xl font-extrabold gradient-text" style={{ fontFamily: 'var(--font-display)' }}>
                   {t('settings')}
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   {t('settings_subtitle')}
                 </p>
               </div>
@@ -66,11 +72,12 @@ const Settings = () => {
           <div className="px-6 pb-6 flex justify-end">
             <button
               onClick={handleReset}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 cursor-pointer ${
                 resetConfirm
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
+                  : 'bg-[var(--color-card-alt)] border border-[var(--color-border)] text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]'
               }`}
+              style={{ fontFamily: 'var(--font-display)' }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"

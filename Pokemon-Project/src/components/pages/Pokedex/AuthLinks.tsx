@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '../../../Link';
 import { useAuth } from '../../../context/AuthContext';
+import PokemonAvatar from '../../shared/PokemonAvatar';
 
 const AuthLinks = () => {
   const { t } = useTranslation();
@@ -24,37 +25,30 @@ const AuthLinks = () => {
   ];
 
   return (
-    <div className="absolute right-4 top-4 flex items-center gap-2">
+    <div className="absolute right-4 top-4 flex items-center gap-2 z-20">
 
-      {user ? (
-        /* Logged in: avatar links to profile */
-        <Link to="/profile">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm select-none shadow cursor-pointer hover:opacity-90 transition-opacity duration-200">
-            {user.email?.[0]?.toUpperCase() ?? '?'}
-          </div>
-        </Link>
-      ) : (
+      {user ? null : (
         /* Guest: login + signup links */
-        <div className="flex items-center bg-white/10 dark:bg-gray-800/20 rounded-t-lg">
+        <div className="flex items-center gap-1 bg-[var(--color-card)]/80 backdrop-blur-md rounded-xl border border-[var(--color-border)] p-1">
           {guestLinks.map(({ key, to, label, icon }) => (
             <Link
               key={key}
               to={to}
-              className={`relative px-2 sm:px-5 py-2 text-sm font-medium transition-all duration-300 ${
+              className={`relative px-3 sm:px-4 py-2 text-sm font-bold rounded-lg transition-all duration-300 ${
                 hovered === key
-                  ? 'bg-white/20 dark:bg-gray-700/50 text-green-700 dark:text-green-400'
-                  : 'text-gray-700 dark:text-gray-300'
-              } hover:text-green-700 dark:hover:text-green-400`}
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'text-[var(--text-primary)] hover:text-[var(--color-primary)]'
+              }`}
+              style={{ fontFamily: 'var(--font-display)' }}
               onMouseEnter={() => setHovered(key)}
               onMouseLeave={() => setHovered(null)}
             >
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   {icon}
                 </svg>
                 <span className="hidden sm:inline">{label}</span>
               </div>
-              <span className={`absolute bottom-0 left-0 w-full h-0.5 ${hovered === key ? 'bg-green-500' : 'bg-transparent'} transition-colors duration-300`} />
             </Link>
           ))}
         </div>

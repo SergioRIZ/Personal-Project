@@ -28,3 +28,9 @@ export async function signUp(
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }
+
+export async function updateAvatar(avatarId: string | null): Promise<void> {
+  await supabase.auth.updateUser({
+    data: { avatar_id: avatarId },
+  });
+}

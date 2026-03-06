@@ -25,7 +25,7 @@ interface PokemonData {
   weight: number;
 }
 
-/* ── Stat bar colors (matching PokemonStats.tsx) ────────────────────── */
+/* ── Stat bar colors ─────────────────────────────────────────────────── */
 
 const BAR_COLORS: Record<string, string> = {
   hp: 'bg-gradient-to-r from-rose-500 to-red-500',
@@ -54,7 +54,7 @@ const PokemonDetailPage = () => {
   const { collectedIds, addPokemon, removePokemon } = useCollection();
   const currentLanguage = settings.language;
 
-  // Extract ID from URL: /pokemon/25 → 25
+  // Extract ID from URL: /pokemon/25 -> 25
   const pokemonId = Number(window.location.pathname.split('/').pop());
 
   const [pokemon, setPokemon] = useState<PokemonData | null>(null);
@@ -142,14 +142,17 @@ const PokemonDetailPage = () => {
   // Loading state
   if (loading || !pokemon) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center transition-colors duration-300">
-        <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen app-bg flex items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-[var(--color-border)]" />
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--color-primary)]" style={{ animation: 'pokeball-spin 0.8s linear infinite' }} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 py-6 transition-colors duration-300">
+    <div className="min-h-screen app-bg py-6">
       <div className="container mx-auto px-4 pt-16 sm:pt-10 max-w-4xl">
 
         {/* ── Navigation bar ────────────────────────────────── */}
@@ -158,11 +161,12 @@ const PokemonDetailPage = () => {
           <button
             onClick={() => pokemonId > 1 && navigate(`/pokemon/${pokemonId - 1}`)}
             disabled={pokemonId <= 1}
-            className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 text-sm font-bold transition-colors cursor-pointer ${
               pokemonId > 1
-                ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                : 'text-gray-300 dark:text-gray-600 cursor-default'
+                ? 'text-[var(--text-secondary)] hover:text-[var(--color-primary)]'
+                : 'text-[var(--text-muted)] cursor-default'
             }`}
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -175,7 +179,8 @@ const PokemonDetailPage = () => {
           {/* Back to Pokedex */}
           <button
             onClick={() => navigate('/pokedex')}
-            className="text-sm font-bold text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors cursor-pointer"
+            className="text-sm font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors cursor-pointer"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             {t('profile_back')}
           </button>
@@ -183,7 +188,8 @@ const PokemonDetailPage = () => {
           {/* Next */}
           <button
             onClick={() => navigate(`/pokemon/${pokemonId + 1}`)}
-            className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             <span className="hidden sm:inline">
               N.° {(pokemonId + 1).toString().padStart(4, '0')}
@@ -195,15 +201,20 @@ const PokemonDetailPage = () => {
         </div>
 
         {/* ── Main card ─────────────────────────────────────── */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div className="bg-[var(--color-card)] rounded-2xl shadow-xl overflow-hidden border border-[var(--color-border)] animate-slide-up">
+          {/* Accent bar */}
+          <div className="accent-bar" />
 
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold capitalize text-gray-900 dark:text-white leading-tight">
+              <h1
+                className="text-2xl sm:text-3xl font-extrabold capitalize text-[var(--text-primary)] leading-tight"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
                 {pokemonName}
               </h1>
-              <span className="text-sm font-bold text-gray-400 dark:text-gray-500">
+              <span className="text-sm font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                 N.° {pokemon.id.toString().padStart(4, '0')}
               </span>
             </div>
@@ -218,9 +229,10 @@ const PokemonDetailPage = () => {
                 }
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                   isCollected
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'
+                    ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white'
+                    : 'bg-[var(--color-card-alt)] border border-[var(--color-border)] hover:border-[var(--color-primary)] text-[var(--text-secondary)] hover:text-[var(--color-primary)]'
                 }`}
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill={isCollected ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -234,9 +246,24 @@ const PokemonDetailPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2">
 
             {/* LEFT: Image */}
-            <div className="relative flex flex-col items-center justify-center p-8 bg-slate-100/80 dark:bg-slate-800/40">
-              <div className="absolute inset-0 opacity-5 flex items-center justify-center">
-                <div className="w-48 h-48 border-8 border-slate-400 rounded-full" />
+            <div className="relative flex flex-col items-center justify-center p-8" style={{ background: 'linear-gradient(135deg, var(--color-card-alt), var(--color-surface))' }}>
+              {/* Geometric pattern background */}
+              <div className="absolute inset-0 opacity-[0.03]">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <pattern id="detail-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--color-primary)" strokeWidth="0.5" />
+                  </pattern>
+                  <rect width="100" height="100" fill="url(#detail-grid)" />
+                </svg>
+              </div>
+
+              {/* Pokeball outline */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-[0.04]">
+                <svg viewBox="0 0 200 200" className="w-48 h-48">
+                  <circle cx="100" cy="100" r="93" stroke="var(--color-primary)" strokeWidth="4" fill="none" />
+                  <line x1="7" y1="100" x2="193" y2="100" stroke="var(--color-primary)" strokeWidth="4" />
+                  <circle cx="100" cy="100" r="24" stroke="var(--color-primary)" strokeWidth="4" fill="none" />
+                </svg>
               </div>
 
               <img
@@ -265,11 +292,11 @@ const PokemonDetailPage = () => {
               <div className="min-h-[3rem]">
                 {speciesLoading ? (
                   <div className="space-y-2">
-                    <div className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                    <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <div className="h-3 w-full bg-[var(--color-card-alt)] rounded animate-pulse" />
+                    <div className="h-3 w-3/4 bg-[var(--color-card-alt)] rounded animate-pulse" />
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                     {species?.description || t('detail_no_description')}
                   </p>
                 )}
@@ -277,54 +304,54 @@ const PokemonDetailPage = () => {
 
               {/* Info table */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl px-3.5 py-2.5">
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+                <div className="bg-[var(--color-card-alt)] rounded-xl px-3.5 py-2.5 border border-[var(--color-border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('height')}
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-bold text-[var(--text-primary)]">
                     {(pokemon.height / 10).toFixed(1)} {t('m')}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl px-3.5 py-2.5">
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+                <div className="bg-[var(--color-card-alt)] rounded-xl px-3.5 py-2.5 border border-[var(--color-border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('detail_category')}
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-bold text-[var(--text-primary)]">
                     {speciesLoading ? (
-                      <span className="inline-block w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <span className="inline-block w-20 h-4 bg-[var(--color-card-alt)] rounded animate-pulse" />
                     ) : (
                       species?.genus || '—'
                     )}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl px-3.5 py-2.5">
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+                <div className="bg-[var(--color-card-alt)] rounded-xl px-3.5 py-2.5 border border-[var(--color-border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('weight')}
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-bold text-[var(--text-primary)]">
                     {(pokemon.weight / 10).toFixed(1)} {t('kg')}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl px-3.5 py-2.5">
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+                <div className="bg-[var(--color-card-alt)] rounded-xl px-3.5 py-2.5 border border-[var(--color-border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('detail_ability')}
                   </p>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">
+                  <p className="text-sm font-bold text-[var(--text-primary)] capitalize">
                     {abilityName}
                   </p>
                 </div>
 
-                <div className="col-span-2 bg-gray-50 dark:bg-gray-800/60 rounded-xl px-3.5 py-2.5">
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
+                <div className="col-span-2 bg-[var(--color-card-alt)] rounded-xl px-3.5 py-2.5 border border-[var(--color-border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('detail_gender')}
                   </p>
                   {speciesLoading ? (
-                    <span className="inline-block w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    <span className="inline-block w-24 h-4 bg-[var(--color-card-alt)] rounded animate-pulse" />
                   ) : genderDisplay?.genderless ? (
-                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+                    <p className="text-sm font-bold text-[var(--text-muted)]">
                       {t('detail_genderless')}
                     </p>
                   ) : genderDisplay ? (
@@ -338,11 +365,11 @@ const PokemonDetailPage = () => {
 
               {/* Weaknesses */}
               <div>
-                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-display)' }}>
                   {t('detail_weaknesses')}
                 </h3>
                 {weaknesses.length === 0 ? (
-                  <p className="text-sm text-gray-400 dark:text-gray-500 italic">—</p>
+                  <p className="text-sm text-[var(--text-muted)] italic">—</p>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
                     {weaknesses.map(({ type, multiplier }) => (
@@ -354,7 +381,7 @@ const PokemonDetailPage = () => {
                           className="w-20 h-20 object-contain drop-shadow-lg"
                         />
                         {multiplier > 2 && (
-                          <span className="absolute -bottom-1 -right-1 text-[9px] font-black text-red-500 bg-white dark:bg-gray-900 rounded-full px-1">
+                          <span className="absolute -bottom-1 -right-1 text-[9px] font-black text-[var(--color-primary)] bg-[var(--color-card)] rounded-full px-1 border border-[var(--color-border)]">
                             ×{multiplier}
                           </span>
                         )}
@@ -367,10 +394,10 @@ const PokemonDetailPage = () => {
               {/* Base Stats */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('baseStats')}
                   </h3>
-                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
+                  <span className="text-xs font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                     Total: {totalStats}
                   </span>
                 </div>
@@ -378,20 +405,20 @@ const PokemonDetailPage = () => {
                   {pokemon.stats.map(stat => {
                     const pct = Math.min(100, (stat.base_stat / 255) * 100);
                     const barColor = BAR_COLORS[stat.stat.name] ?? 'bg-gray-400';
-                    const textColor = TEXT_COLORS[stat.stat.name] ?? 'text-gray-500';
+                    const textColor = TEXT_COLORS[stat.stat.name] ?? 'text-[var(--text-muted)]';
 
                     return (
                       <div key={stat.stat.name} className="flex items-center gap-2">
-                        <span className={`text-[11px] font-bold w-16 shrink-0 ${textColor}`}>
+                        <span className={`text-[11px] font-bold w-16 shrink-0 ${textColor}`} style={{ fontFamily: 'var(--font-display)' }}>
                           {translateStatName(stat.stat.name, currentLanguage)}
                         </span>
-                        <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-[var(--color-card-alt)] rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 w-8 text-right tabular-nums shrink-0">
+                        <span className="text-xs font-bold text-[var(--text-primary)] w-8 text-right tabular-nums shrink-0" style={{ fontFamily: 'var(--font-display)' }}>
                           {stat.base_stat}
                         </span>
                       </div>

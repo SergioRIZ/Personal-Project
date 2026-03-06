@@ -6,6 +6,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { signOut } from '../../../lib/auth';
 import { useSettings } from '../../../context/SettingsContext';
 import { MoonIcon, SunIcon } from 'lucide-react';
+import PokemonAvatar from '../../shared/PokemonAvatar';
 
 interface MenuItem {
   label: string;
@@ -17,7 +18,7 @@ interface MenuItem {
 const HomeICON = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="ml-1">
     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg> 
+    </svg>
 )
 
 const SettingsIcon = () => (
@@ -91,40 +92,50 @@ const DropdownMenu = () => {
 
   return (
     <div className="z-50">
-      {/* Hamburger button */}
+      {/* Menu trigger: avatar when logged in, hamburger when guest */}
       <button
         ref={buttonRef}
-        className={`fixed top-4 left-4 w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 z-50 border border-gray-200 dark:border-gray-700 transition-colors duration-300 ${showButton ? 'block' : 'hidden'}`}
+        className={`fixed top-4 left-4 z-50 cursor-pointer transform hover:scale-105 active:scale-95 transition-all duration-300 ${showButton ? 'block' : 'hidden'} ${user ? '' : 'w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl border border-[var(--color-border)]'}`}
         onClick={openMenu}
         aria-expanded={isOpen}
         aria-label={t('menu', 'Menu')}
       >
-        <span className="text-gray-800 dark:text-white text-xl">☰</span>
+        {user ? (
+          <PokemonAvatar user={user} size="sm" />
+        ) : (
+          <svg className="w-5 h-5 text-[var(--color-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
       </button>
 
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black transition-opacity duration-500 z-40 ${isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 z-40 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={closeMenu}
       />
 
-      {/* Sidebar — light: white, dark: dark */}
+      {/* Sidebar */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 shadow-2xl transform transition-transform duration-500 ease-in-out z-45 flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full w-72 bg-[var(--color-card)] shadow-2xl transform transition-transform duration-500 ease-in-out z-45 flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         onTransitionEnd={() => {
           if (!isOpen) setTimeout(() => setShowButton(true), 50);
         }}
       >
         {/* Sidebar header */}
-        <div className="p-5 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <span className="text-lg font-bold text-gray-800 dark:text-white">{t('menu', 'Menu')}</span>
+        <div className="p-5 border-b border-[var(--color-border)] flex items-center justify-between">
+          <span className="text-lg font-bold gradient-text" style={{ fontFamily: 'var(--font-display)' }}>
+            PokeLab
+          </span>
           <button
-            className="w-8 h-8 p-0 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer relative"
+            className="w-8 h-8 rounded-lg bg-[var(--color-primary-light)] hover:bg-[var(--color-primary)] hover:text-white text-[var(--color-primary)] transition-colors duration-200 cursor-pointer flex items-center justify-center"
             onClick={closeMenu}
             aria-label={t('closeMenu', 'Close menu')}
           >
-            <span className="absolute inset-0 flex items-center justify-center text-gray-700 dark:text-white text-xl" style={{ lineHeight: 0, marginTop: '-4px' }}>&times;</span>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -132,29 +143,28 @@ const DropdownMenu = () => {
         {user && (
           <Link
             to="/profile"
-            className="flex items-center gap-3 px-5 py-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors duration-200"
+            className="flex items-center gap-3 px-5 py-4 border-b border-[var(--color-border)] hover:bg-[var(--color-card-alt)] transition-colors duration-200"
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               closeMenu();
               setTimeout(() => navigate('/profile'), 50);
             }}
           >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow">
-              {user.email?.[0]?.toUpperCase() ?? '?'}
-            </div>
+            <PokemonAvatar user={user} size="sm" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{user.email}</p>
-              <p className="text-[10px] text-gray-400 dark:text-gray-500">View profile →</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{user.email}</p>
+              <p className="text-xs text-[var(--text-muted)]">View profile</p>
             </div>
           </Link>
         )}
+
         {/* Nav items */}
         <div className="py-3 flex-1">
           {menuItems.map((item, index) => (
             <Link
               key={index}
               to={item.to}
-              className="flex items-center px-5 py-3.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group"
+              className="flex items-center px-5 py-3.5 text-[var(--text-primary)] hover:bg-[var(--color-primary-light)] hover:text-[var(--color-primary)] transition-all duration-200 group"
               onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
                 closeMenu();
@@ -165,30 +175,30 @@ const DropdownMenu = () => {
                 }
               }}
             >
-              <div className="flex items-center w-8">{item.icon}</div>
-              <span className="font-medium ml-3">{item.label}</span>
+              <div className="flex items-center w-8 text-[var(--text-muted)] group-hover:text-[var(--color-primary)] transition-colors">{item.icon}</div>
+              <span className="font-semibold ml-3" style={{ fontFamily: 'var(--font-display)' }}>{item.label}</span>
             </Link>
           ))}
         </div>
-        
+
         {/* Dark mode toggle */}
-        <div className="border-t border-gray-100 dark:border-gray-700 px-5 py-3">
+        <div className="border-t border-[var(--color-border)] px-5 py-3">
           <button
             onClick={() => updateSetting('darkMode', !settings.darkMode)}
             aria-label={settings.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="flex items-center gap-3 w-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg px-1 py-2 transition-colors duration-200 cursor-pointer"
+            className="flex items-center gap-3 w-full text-[var(--text-primary)] hover:bg-[var(--color-card-alt)] rounded-xl px-2 py-2.5 transition-colors duration-200 cursor-pointer"
           >
             <div className="flex items-center w-8 justify-center">
-              {settings.darkMode ? <SunIcon size={20} className="text-yellow-400" /> : <MoonIcon size={20} className="text-slate-500" />}
+              {settings.darkMode ? <SunIcon size={20} className="text-[var(--color-accent)]" /> : <MoonIcon size={20} className="text-[var(--text-muted)]" />}
             </div>
-            <span className="font-medium">
+            <span className="font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
               {settings.darkMode ? t('lightMode', 'Light mode') : t('darkMode', 'Dark mode')}
             </span>
           </button>
         </div>
 
         {/* Logout (logged in) / Login+SignUp (guest) */}
-        <div className="border-t border-gray-100 dark:border-gray-700 p-4">
+        <div className="border-t border-[var(--color-border)] p-4">
           {user ? (
             <button
               onClick={async () => {
@@ -196,7 +206,8 @@ const DropdownMenu = () => {
                 await signOut();
                 navigate('/login');
               }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors duration-200 text-sm font-medium cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary-light)] text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-200 text-sm font-bold cursor-pointer"
+              style={{ fontFamily: 'var(--font-display)' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
@@ -209,13 +220,15 @@ const DropdownMenu = () => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => { closeMenu(); setTimeout(() => navigate('/login'), 50); }}
-                className="w-full px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition-colors duration-200 cursor-pointer"
+                className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold transition-colors duration-200 cursor-pointer"
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 {t('login', 'Login')}
               </button>
               <button
                 onClick={() => { closeMenu(); setTimeout(() => navigate('/signup'), 50); }}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium transition-colors duration-200 cursor-pointer"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-[var(--color-border)] text-[var(--text-primary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] text-sm font-bold transition-colors duration-200 cursor-pointer"
+                style={{ fontFamily: 'var(--font-display)' }}
               >
                 {t('signup', 'Sign up')}
               </button>

@@ -107,16 +107,22 @@ const Pokedex = () => {
   if (error) return <ErrorMessage error={error} />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-800 dark:to-gray-900 py-6 transition-colors duration-300">
+    <div className="min-h-screen app-bg py-6">
       <AuthLinks />
 
       <div className="container mx-auto px-4 pt-16 sm:pt-10">
         <header className="text-center mb-6 sm:mb-8 px-10 sm:px-0">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-blue-500 mb-2 drop-shadow-md">
+          <h1
+            className="text-2xl sm:text-4xl md:text-5xl font-extrabold gradient-text mb-2 drop-shadow-md"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             {t('title')}
           </h1>
           {settings.generations.length > 0 && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p
+              className="text-sm text-[var(--text-secondary)] mt-1 font-medium"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               Gen {settings.generations.join(', ')} · {filteredByGeneration.length} Pokémon
             </p>
           )}

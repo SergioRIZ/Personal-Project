@@ -40,47 +40,67 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
     pokemon.sprites.front_default;
 
   return (
-    <div className="bg-white dark:bg-gray-900/95 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700 w-full">
+    <div className="group bg-[var(--color-card)] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-[var(--color-border)] w-full relative">
+      {/* Accent bar */}
+      <div className="accent-bar" />
+
       <div className="p-4">
+        {/* Header: Name + ID */}
         <div className="flex items-center justify-between mb-3">
-          <div className="relative">
+          <div className="relative min-w-0 flex-1">
             <h2
-              className="text-base font-bold capitalize text-gray-900 dark:text-white truncate max-w-full"
+              className="text-base font-bold capitalize text-[var(--text-primary)] truncate"
+              style={{ fontFamily: 'var(--font-display)' }}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
               {pokemonName}
             </h2>
             {showTooltip && (
-              <div className="absolute left-0 top-full mt-1 px-3 py-1 bg-white dark:bg-slate-800 text-gray-800 dark:text-white text-sm rounded shadow-lg border border-slate-200 dark:border-transparent z-50">
+              <div className="absolute left-0 top-full mt-1 px-3 py-1 bg-[var(--color-card)] text-[var(--text-primary)] text-sm rounded-lg shadow-lg border border-[var(--color-border)] z-50">
                 {pokemonName}
               </div>
             )}
           </div>
-          <div className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-200 font-bold px-3 py-1 rounded-lg text-sm shadow-sm shrink-0">
+          <div
+            className="bg-[var(--color-primary-light)] text-[var(--color-primary)] font-bold px-3 py-1 rounded-lg text-sm shrink-0"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             #{pokemon.id.toString().padStart(4, '0')}
           </div>
         </div>
 
-        <div className="relative h-40 sm:h-52 w-full flex items-center justify-center bg-slate-100/80 dark:bg-slate-800/50 rounded-lg mb-3 overflow-hidden">
-          <div className="absolute inset-0 opacity-10 flex items-center justify-center">
-            <div className="w-28 h-28 border-4 border-slate-300 dark:border-slate-600 rounded-full" />
+        {/* Image container with diagonal background */}
+        <div className="relative h-40 sm:h-52 w-full flex items-center justify-center rounded-xl mb-3 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, var(--color-card-alt), var(--color-surface))' }}
+        >
+          {/* Geometric pattern */}
+          <div className="absolute inset-0 opacity-[0.04]">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <pattern id={`grid-${pokemon.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--color-primary)" strokeWidth="0.5" />
+              </pattern>
+              <rect width="100" height="100" fill={`url(#grid-${pokemon.id})`} />
+            </svg>
           </div>
+
           <img
             src={sprite}
             alt={pokemonName}
             style={{ height: 'auto', width: 'auto', maxHeight: '80%', maxWidth: '80%' }}
-            className="z-10 transform hover:scale-110 transition-transform duration-300 drop-shadow-md animate-float"
+            className="z-10 transform group-hover:scale-110 transition-transform duration-500 drop-shadow-lg"
           />
+
+          {/* Collection button */}
           {user && (
             <button
               onClick={(e) => { e.stopPropagation(); isCollected ? removePokemon(pokemon.id) : addPokemon(pokemon.id, pokemon.name); }}
               aria-label={isCollected ? t('collection_remove') : t('collection_add')}
               title={isCollected ? t('collection_remove') : t('collection_add')}
-              className={`absolute top-2 right-2 z-30 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition-all duration-200 cursor-pointer ${
+              className={`absolute top-2 right-2 z-30 w-9 h-9 flex items-center justify-center rounded-xl shadow-md transition-all duration-200 cursor-pointer ${
                 isCollected
-                  ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 text-slate-400 dark:text-slate-300 hover:text-red-400'
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'bg-[var(--color-card)]/80 hover:bg-[var(--color-card)] text-[var(--text-muted)] hover:text-[var(--color-primary)] border border-[var(--color-border)]'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill={isCollected ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
@@ -88,7 +108,9 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
               </svg>
             </button>
           )}
-          <div className="absolute bottom-1.5 inset-x-0 z-20 flex justify-center gap-2">
+
+          {/* Type badges */}
+          <div className="absolute bottom-2 inset-x-0 z-20 flex justify-center gap-2">
             <PokemonTypes types={pokemon.types} currentLanguage={currentLanguage} />
           </div>
         </div>

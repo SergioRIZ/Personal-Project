@@ -11,7 +11,10 @@
       "WebFetch(domain:pokeapi.co)",
       "Bash(pnpm dev:*)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:localhost)",
+      "WebSearch"
     ]
   }
 }

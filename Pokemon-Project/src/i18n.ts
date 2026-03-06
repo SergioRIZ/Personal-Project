@@ -144,6 +144,21 @@ i18next
           hero_feat_pokedex: "Browse stats, abilities & moves for every Pokémon",
           hero_feat_teams: "Build competitive teams & export to Showdown",
           hero_feat_collection: "Track and organize your favorite Pokémon",
+          // Avatar section
+          avatar_title: "Choose Avatar",
+          avatar_remove: "Remove avatar",
+          avatar_section_title: "Profile Avatar",
+          avatar_section_desc: "Choose your avatar from iconic Pokémon characters: protagonists, rivals, gym leaders, champions, villains, professors, and more.",
+          avatar_click_to_change: "Click to change",
+          avatar_choose_button: "Choose Avatar",
+          avatar_category_protagonist: "Protagonists",
+          avatar_category_rival: "Rivals",
+          avatar_category_gym: "Gym Leaders",
+          avatar_category_elite: "Elite & Champions",
+          avatar_category_villain: "Villains",
+          avatar_category_professor: "Professors",
+          avatar_category_frontier: "Battle Frontier",
+          avatar_category_notable: "Notable Characters",
         }
       },
       es: {
@@ -285,6 +300,21 @@ i18next
           hero_feat_pokedex: "Consulta estadísticas, habilidades y movimientos de cada Pokémon",
           hero_feat_teams: "Crea equipos competitivos y expórtalos a Showdown",
           hero_feat_collection: "Registra y organiza tus Pokémon favoritos",
+          // Avatar section
+          avatar_title: "Elegir Avatar",
+          avatar_remove: "Quitar avatar",
+          avatar_section_title: "Avatar de Perfil",
+          avatar_section_desc: "Elige tu avatar entre los personajes icónicos de Pokémon: protagonistas, rivales, líderes de gimnasio, campeones, villanos, profesores y más.",
+          avatar_click_to_change: "Clic para cambiar",
+          avatar_choose_button: "Elegir Avatar",
+          avatar_category_protagonist: "Protagonistas",
+          avatar_category_rival: "Rivales",
+          avatar_category_gym: "Líderes de Gimnasio",
+          avatar_category_elite: "Élite y Campeones",
+          avatar_category_villain: "Villanos",
+          avatar_category_professor: "Profesores",
+          avatar_category_frontier: "Frente de Batalla",
+          avatar_category_notable: "Personajes Destacados",
         }
       }
     },

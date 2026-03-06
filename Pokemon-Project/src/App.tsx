@@ -19,8 +19,17 @@ const PokemonDetail = lazy(() => import('./components/pages/Pokedex/Pokemon/Poke
 const Page404 = lazy(() => import('./components/pages/404'));
 
 const PageLoader = () => (
-  <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 flex items-center justify-center">
-    <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
+  <div className="min-h-screen app-bg flex items-center justify-center">
+    <div className="relative w-16 h-16">
+      <div className="absolute inset-0 rounded-full border-4 border-[var(--color-border)]" />
+      <div
+        className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--color-primary)]"
+        style={{ animation: 'pokeball-spin 0.8s linear infinite' }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-3 h-3 rounded-full bg-[var(--color-primary)]" />
+      </div>
+    </div>
   </div>
 );
 
@@ -60,7 +69,7 @@ function App() {
     <TeamsProvider>
       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
-          <main>
+          <main className="grain">
             <GlobalNav />
             <Router routes={AppRoutes} defaultComponent={Page404} />
           </main>

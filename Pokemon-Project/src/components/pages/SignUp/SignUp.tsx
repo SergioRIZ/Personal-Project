@@ -37,12 +37,12 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-100 to-slate-400 dark:from-gray-900 dark:to-gray-800 py-6 flex flex-col items-center justify-center p-4 relative">
+    <div className="min-h-screen app-bg py-6 flex flex-col items-center justify-center p-4 relative">
       <SignUpHeader isSubmitting={isSubmitting} />
 
       <div className="max-w-md w-full mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105">
-          <div className="h-3 bg-gradient-to-r from-green-600 to-slate-700"></div>
+        <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-[0_20px_60px_rgba(220,38,38,0.15)]">
+          <div className="accent-bar" />
 
           <div className="p-5 sm:p-8">
             {formSuccess && (

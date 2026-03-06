@@ -11,10 +11,13 @@ const ResultsCount = ({ filteredCount, totalCount }: Props) => {
 
   return (
     <div className="max-w-6xl mx-auto mb-6 px-4">
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-md p-4 flex items-center border-l-4 border-slate-500 dark:border-slate-400">
-        <p className="text-slate-700 dark:text-slate-200 font-medium">
-          {t('showing')} <span className="font-bold text-green-600 dark:text-green-400">{filteredCount}</span>{' '}
-          {t('of')} <span className="font-bold text-slate-600 dark:text-slate-300">{totalCount}</span>{' '}
+      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-md p-4 flex items-center gap-3">
+        <div className="w-1 h-8 rounded-full bg-gradient-to-b from-[var(--color-primary)] to-[var(--color-accent)]" />
+        <p className="text-[var(--text-primary)] font-medium" style={{ fontFamily: 'var(--font-display)' }}>
+          {t('showing')}{' '}
+          <span className="font-bold text-[var(--color-primary)] text-lg">{filteredCount}</span>{' '}
+          {t('of')}{' '}
+          <span className="font-bold text-[var(--text-primary)]">{totalCount}</span>{' '}
           {t('pokemon')}
         </p>
       </div>
