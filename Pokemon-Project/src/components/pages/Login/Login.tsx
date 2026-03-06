@@ -1,6 +1,4 @@
-import React from 'react';
 import '../css/register.css';
-import { Link } from '../../../Link';
 import { LoginHeader, LoginForm, LoginFooter, Alert } from './components';
 import useLoginForm from './hooks/useLoginForm';
 

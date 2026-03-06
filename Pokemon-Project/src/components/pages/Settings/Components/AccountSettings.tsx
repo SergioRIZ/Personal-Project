@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, LogOut } from 'lucide-react';
 import SettingsSection from './ui/SettingSection';

@@ -12,20 +12,15 @@ const Profile = () => {
   const { user, loading: authLoading } = useAuth();
   const { collectionItems, loading: collectionLoading, removePokemon } = useCollection();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [avatarId, setAvatarId] = useState<string | null>(null);
+  const [avatarId, setAvatarId] = useState<string | null>(
+    () => (user?.user_metadata?.avatar_id as string) ?? null
+  );
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/login');
     }
   }, [user, authLoading]);
-
-  // Sync avatar from user metadata
-  useEffect(() => {
-    if (user) {
-      setAvatarId((user.user_metadata?.avatar_id as string) ?? null);
-    }
-  }, [user]);
 
   if (authLoading) {
     return (

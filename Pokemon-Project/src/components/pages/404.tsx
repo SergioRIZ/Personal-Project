@@ -1,4 +1,3 @@
-import React from 'react';
 import { navigate } from '../../navigation';
 
 export default function Page404() {

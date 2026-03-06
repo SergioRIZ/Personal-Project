@@ -87,6 +87,11 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
       id: `optimistic-${Date.now()}`,
       team_id: teamId,
       moves: [],
+      ability: null,
+      item: null,
+      nature: null,
+      evs: null,
+      ivs: null,
       ...member,
     };
     // Optimistic update

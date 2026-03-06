@@ -4,7 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useTeams } from '../../../context/TeamsContext';
 import { navigate } from '../../../navigation';
 import { Link } from '../../../Link';
-import TeamCard from './TeamCard';
+import TeamSummaryCard from './TeamSummaryCard';
 
 const Teams: React.FC = () => {
   const { t } = useTranslation();
@@ -130,7 +130,7 @@ const Teams: React.FC = () => {
         ) : (
           <div className="space-y-6">
             {teams.map(team => (
-              <TeamCard key={team.id} team={team} />
+              <TeamSummaryCard key={team.id} team={team} />
             ))}
           </div>
         )}

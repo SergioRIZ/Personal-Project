@@ -162,6 +162,10 @@ h1, h2, h3, h4, h5, h6 {
 .delay-4 { animation-delay: 0.4s; }
 .delay-5 { animation-delay: 0.5s; }
 
+@keyframes stat-fill {
+  from { width: 0; }
+}
+
 /* ── Scrollbar styling ── */
 ::-webkit-scrollbar {
   width: 8px;

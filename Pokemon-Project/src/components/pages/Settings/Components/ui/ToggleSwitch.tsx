@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface Props {
   isEnabled: boolean;
   onToggle: () => void;

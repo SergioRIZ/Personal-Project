@@ -15,6 +15,7 @@ const Settings = lazy(() => import('./components/pages/Settings/Settings'));
 const SignUp = lazy(() => import('./components/pages/SignUp/SignUp'));
 const Profile = lazy(() => import('./components/pages/Profile/Profile'));
 const Teams = lazy(() => import('./components/pages/Teams/Teams'));
+const TeamsBuilder = lazy(() => import('./components/pages/Teams/TeamsBuilder'));
 const PokemonDetail = lazy(() => import('./components/pages/Pokedex/Pokemon/PokemonDetail'));
 const Page404 = lazy(() => import('./components/pages/404'));
 
@@ -59,6 +60,7 @@ const AppRoutes = [
   { path: '/settings', Component: Settings },
   { path: '/profile', Component: Profile },
   { path: '/teams', Component: Teams },
+  { path: '/teamsbuilder/:id', Component: TeamsBuilder },
 ];
 
 function App() {

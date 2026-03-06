@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '../../../Link';
 import { useAuth } from '../../../context/AuthContext';
-import PokemonAvatar from '../../shared/PokemonAvatar';
 
 const AuthLinks = () => {
   const { t } = useTranslation();

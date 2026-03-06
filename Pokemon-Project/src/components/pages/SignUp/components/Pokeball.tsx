@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 
 const Amigoball = ({ size = "w-24 h-24" }) => {
   const [isHovered, setIsHovered] = useState(false);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const EmptyState = () => {
@@ -13,9 +12,9 @@ const EmptyState = () => {
           <circle cx="50" cy="50" r="45" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeDasharray="8 4" opacity="0.2" />
           <line x1="5" y1="50" x2="95" y2="50" stroke="var(--color-primary)" strokeWidth="2" strokeDasharray="8 4" opacity="0.2" />
           <circle cx="50" cy="50" r="12" fill="none" stroke="var(--color-primary)" strokeWidth="2" opacity="0.2" />
-          {/* Search icon centered at 50,50 */}
-          <circle cx="47" cy="47" r="11" fill="none" stroke="var(--color-primary)" strokeWidth="3" opacity="0.6" />
-          <line x1="55" y1="55" x2="63" y2="63" stroke="var(--color-primary)" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
+          {/* Search icon — glass centered on pokeball center */}
+          <circle cx="50" cy="50" r="12" fill="none" stroke="var(--color-primary)" strokeWidth="3" opacity="0.6" />
+          <line x1="58.5" y1="58.5" x2="66" y2="66" stroke="var(--color-primary)" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
         </svg>
       </div>
       <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-display)' }}>

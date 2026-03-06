@@ -10,16 +10,15 @@ import AnimationsStyle from './AnimationStyle';
 import EmptyState from './EmptyState';
 import AuthLinks from './AuthLinks';
 
-import { fetchAbilityDescriptions, type AbilityMap } from './ApiService';
+import { fetchAbilityDescriptions, type AbilityMap, type PokemonData, type PokemonBasic } from './ApiService';
 import { fetchPokemonBasicData, searchPokemonByTerm } from './SearchService';
-import type { PokemonBasic } from './ApiService';
 import { useSettings, GENERATION_RANGES } from '../../../context/SettingsContext';
 
 const Pokedex = () => {
   const { t } = useTranslation();
   const { settings } = useSettings();
   const [allPokemonBasic, setAllPokemonBasic] = useState<PokemonBasic[]>([]);
-  const [displayedPokemon, setDisplayedPokemon] = useState<unknown[]>([]);
+  const [displayedPokemon, setDisplayedPokemon] = useState<PokemonData[]>([]);
   const [initialLoad, setInitialLoad] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,16 +66,12 @@ const Pokedex = () => {
           }
 
           setDisplayedPokemon(results);
+          setLoading(false);
 
           if (results.length > 0) {
-            const abilities = await fetchAbilityDescriptions(
-              results as Parameters<typeof fetchAbilityDescriptions>[0],
-              settings.language
-            );
-            setAbilityDescriptions(abilities);
+            fetchAbilityDescriptions(results, settings.language)
+              .then(setAbilityDescriptions);
           }
-
-          setLoading(false);
         } catch (err) {
           setError(t('errorTitle') + ': ' + (err instanceof Error ? err.message : 'Unknown error'));
           setLoading(false);
@@ -92,10 +87,8 @@ const Pokedex = () => {
   // Re-fetch ability descriptions when language changes
   useEffect(() => {
     if (displayedPokemon.length > 0) {
-      fetchAbilityDescriptions(
-        displayedPokemon as Parameters<typeof fetchAbilityDescriptions>[0],
-        settings.language
-      ).then(setAbilityDescriptions);
+      fetchAbilityDescriptions(displayedPokemon, settings.language)
+        .then(setAbilityDescriptions);
     }
   }, [settings.language, displayedPokemon]);
 

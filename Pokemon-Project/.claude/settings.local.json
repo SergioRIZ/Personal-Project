@@ -14,7 +14,14 @@
       "Bash(npx vite build)",
       "Bash(npm run:*)",
       "WebFetch(domain:localhost)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx skills:*)",
+      "Bash(code C:\\\\Users\\\\Usuario\\\\Desktop\\\\PROYECTOS\\\\Personal-Project\\\\Pokemon-Project:*)",
+      "Bash(npx tsc:*)",
+      "Bash(do sed:*)",
+      "Bash(awk:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)"
     ]
   }
 }

@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "../../../../Link";
 
 const AlertTypes = { SUCCESS: "success", ERROR: "error" } as const;

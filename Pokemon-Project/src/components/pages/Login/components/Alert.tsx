@@ -1,4 +1,3 @@
-import React from "react";
 
 type AlertType = 'success' | 'error' | 'warning' | 'info';
 interface Props { type: AlertType; message: string }

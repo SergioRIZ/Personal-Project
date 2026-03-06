@@ -1,4 +1,4 @@
-import type { PokemonBasic } from './ApiService';
+import type { PokemonBasic, PokemonData } from './ApiService';
 
 export const fetchPokemonBasicData = async (): Promise<PokemonBasic[]> => {
   const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1267');
@@ -17,7 +17,7 @@ export const searchPokemonByTerm = async (
   allPokemon: PokemonBasic[],
   searchTerm: string,
   setLoadingProgress: (progress: number) => void
-): Promise<unknown[]> => {
+): Promise<PokemonData[]> => {
   if (!searchTerm || searchTerm.length < 1) return [];
 
   const normalizedTerm = searchTerm.toLowerCase();
@@ -29,18 +29,19 @@ export const searchPokemonByTerm = async (
   );
 
   const limitedResults = matchingPokemon.slice(0, 24);
-  const pokemonDetails: unknown[] = [];
+  let completed = 0;
 
-  for (let i = 0; i < limitedResults.length; i++) {
-    try {
-      const response = await fetch(limitedResults[i].url);
-      const data = await response.json();
-      pokemonDetails.push(data);
-      setLoadingProgress(Math.floor(((i + 1) / limitedResults.length) * 100));
-    } catch {
-      // Skip Pokemon that fail to load
-    }
-  }
+  const promises = limitedResults.map(pokemon =>
+    fetch(pokemon.url)
+      .then(r => r.json())
+      .finally(() => {
+        completed++;
+        setLoadingProgress(Math.floor((completed / limitedResults.length) * 100));
+      })
+  );
 
-  return pokemonDetails;
+  const results = await Promise.allSettled(promises);
+  return results
+    .filter((r): r is PromiseFulfilledResult<PokemonData> => r.status === 'fulfilled')
+    .map(r => r.value);
 };

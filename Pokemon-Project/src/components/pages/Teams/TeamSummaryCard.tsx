@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeams } from '../../../context/TeamsContext';
 import { navigate } from '../../../navigation';
@@ -78,12 +78,12 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
   const slotMap = Object.fromEntries(team.members.map(m => [m.slot, m]));
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div className="bg-[var(--color-card)] rounded-2xl shadow-lg overflow-hidden border border-[var(--color-border)] animate-slide-up">
       {/* Accent bar */}
-      <div className="h-1.5 bg-gradient-to-r from-green-500 to-teal-500" />
+      <div className="accent-bar" />
 
       {/* Header: name + count + export + delete */}
-      <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700">
+      <div className="px-4 pt-4 pb-3 flex items-center gap-3 border-b border-[var(--color-border)]">
         {editing ? (
           <input
             type="text"
@@ -94,31 +94,33 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
               if (e.key === 'Enter') handleRename();
               if (e.key === 'Escape') { setNameValue(team.name); setEditing(false); }
             }}
-            className="flex-1 px-2 py-1 rounded border border-green-400 dark:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="flex-1 px-2 py-1 rounded border border-[var(--color-primary)] bg-[var(--color-card)] text-[var(--text-primary)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             autoFocus
           />
         ) : (
           <button
             onClick={() => setEditing(true)}
             title={t('teams_rename_team')}
-            className="flex-1 text-left font-bold text-gray-800 dark:text-white hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200 text-sm cursor-pointer"
+            className="flex-1 text-left font-bold text-[var(--text-primary)] hover:text-[var(--color-primary)] transition-colors duration-200 text-sm cursor-pointer"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             {team.name}
           </button>
         )}
 
-        <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+        <span className="text-xs text-[var(--text-muted)] shrink-0">
           {team.members.length}/6
         </span>
 
         {team.members.length > 0 && (
           <button
             onClick={handleExport}
-            className={`shrink-0 px-2 py-1 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
+            className={`shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
               copied
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400'
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'bg-[var(--color-card-alt)] text-[var(--text-secondary)] hover:text-[var(--color-primary)] border border-[var(--color-border)]'
             }`}
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             {copied ? t('teams_copied') : t('teams_export_showdown')}
           </button>
@@ -126,11 +128,12 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
 
         <button
           onClick={handleDelete}
-          className={`shrink-0 px-2 py-1 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
             confirmDelete
               ? 'bg-red-500 text-white hover:bg-red-600'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40'
+              : 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
           }`}
+          style={{ fontFamily: 'var(--font-display)' }}
         >
           {confirmDelete ? t('teams_confirm_delete') : t('teams_delete_team')}
         </button>
@@ -146,7 +149,7 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
               <div
                 key={slot}
                 title={member.pokemon_name.replace(/-/g, ' ')}
-                className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0 overflow-hidden"
+                className="w-12 h-12 rounded-full bg-[var(--color-card-alt)] flex items-center justify-center shrink-0 overflow-hidden border border-[var(--color-border)]"
               >
                 <img
                   src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.pokemon_id}.png`}
@@ -158,10 +161,10 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
             ) : (
               <div
                 key={slot}
-                className="w-12 h-12 rounded-full border-2 border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center shrink-0"
+                className="w-12 h-12 rounded-full border-2 border-dashed border-[var(--color-border)] flex items-center justify-center shrink-0"
                 aria-label={`Empty slot ${slot}`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-300 dark:text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[var(--text-muted)]" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -172,12 +175,13 @@ const TeamSummaryCard: React.FC<Props> = ({ team }) => {
         {/* Edit Team button */}
         <button
           onClick={() => navigate(`/teamsbuilder/${team.id}`)}
-          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-medium text-sm shadow-sm transition-all duration-200 cursor-pointer"
+          className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold text-sm shadow-md transition-all duration-200 cursor-pointer"
+          style={{ fontFamily: 'var(--font-display)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
-          {t('teams_edit', 'Edit Team')}
+          {t('teams_edit')}
         </button>
       </div>
     </div>

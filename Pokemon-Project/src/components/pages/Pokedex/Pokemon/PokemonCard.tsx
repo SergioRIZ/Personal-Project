@@ -4,23 +4,9 @@ import PokemonTypes from './PokemonTypes';
 import PokemonStats from './PokemonStats';
 import PokemonDimensions from './PokemonDimensions';
 import PokemonAbilities from './PokemonAbilities';
-import type { AbilityMap } from '../ApiService';
+import type { AbilityMap, PokemonData } from '../ApiService';
 import { useAuth } from '../../../../context/AuthContext';
 import { useCollection } from '../../../../context/CollectionContext';
-
-interface PokemonData {
-  id: number;
-  name: string;
-  sprites: {
-    front_default: string;
-    other: { 'official-artwork': { front_default: string } };
-  };
-  types: Array<{ type: { name: string } }>;
-  stats: Array<{ stat: { name: string }; base_stat: number }>;
-  abilities: Array<{ ability: { name: string; url: string }; is_hidden: boolean }>;
-  height: number;
-  weight: number;
-}
 
 interface Props {
   pokemon: PokemonData;
@@ -33,11 +19,25 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
   const { user } = useAuth();
   const { collectedIds, addPokemon, removePokemon } = useCollection();
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isShiny, setIsShiny] = useState(false);
+  const [spriteOpacity, setSpriteOpacity] = useState(1);
+
+  const handleShinyToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSpriteOpacity(0);
+    setTimeout(() => {
+      setIsShiny(s => !s);
+      setSpriteOpacity(1);
+    }, 150);
+  };
   const pokemonName = pokemon.name.replace('-', ' ');
   const isCollected = collectedIds.has(pokemon.id);
-  const sprite =
+  const normalSprite =
     pokemon.sprites.other['official-artwork'].front_default ||
     pokemon.sprites.front_default;
+  const hasOfficialShiny = !!pokemon.sprites.other['official-artwork'].front_shiny;
+  const shinySprite = pokemon.sprites.other['official-artwork'].front_shiny || normalSprite;
+  const sprite = isShiny ? shinySprite : normalSprite;
 
   return (
     <div className="group bg-[var(--color-card)] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-[var(--color-border)] w-full relative">
@@ -71,7 +71,7 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
         </div>
 
         {/* Image container with diagonal background */}
-        <div className="relative h-40 sm:h-52 w-full flex items-center justify-center rounded-xl mb-3 overflow-hidden"
+        <div className="relative h-40 sm:h-52 w-full flex items-center justify-center rounded-xl overflow-hidden"
           style={{ background: 'linear-gradient(135deg, var(--color-card-alt), var(--color-surface))' }}
         >
           {/* Geometric pattern */}
@@ -87,9 +87,27 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
           <img
             src={sprite}
             alt={pokemonName}
-            style={{ height: 'auto', width: 'auto', maxHeight: '80%', maxWidth: '80%' }}
-            className="z-10 transform group-hover:scale-110 transition-transform duration-500 drop-shadow-lg"
+            className="z-10 w-28 h-28 sm:w-36 sm:h-36 object-contain transform group-hover:scale-110 drop-shadow-lg"
+            style={{ opacity: spriteOpacity, transition: 'opacity 0.15s ease, transform 0.5s ease' }}
           />
+
+          {/* Shiny toggle button */}
+          {hasOfficialShiny && (
+            <button
+              onClick={handleShinyToggle}
+              aria-label={isShiny ? 'Ver forma normal' : 'Ver forma shiny'}
+              title={isShiny ? 'Ver forma normal' : 'Ver forma shiny'}
+              className={`absolute top-2 left-2 z-30 w-9 h-9 flex items-center justify-center rounded-xl shadow-md transition-all duration-200 cursor-pointer ${
+                isShiny
+                  ? 'bg-yellow-400 text-white'
+                  : 'bg-[var(--color-card)]/80 hover:bg-[var(--color-card)] text-[var(--text-muted)] hover:text-yellow-400 border border-[var(--color-border)]'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill={isShiny ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
+          )}
 
           {/* Collection button */}
           {user && (
@@ -109,10 +127,11 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
             </button>
           )}
 
-          {/* Type badges */}
-          <div className="absolute bottom-2 inset-x-0 z-20 flex justify-center gap-2">
-            <PokemonTypes types={pokemon.types} currentLanguage={currentLanguage} />
-          </div>
+        </div>
+
+        {/* Type badges */}
+        <div className="flex justify-center gap-2 mb-3">
+          <PokemonTypes types={pokemon.types} currentLanguage={currentLanguage} />
         </div>
 
         <PokemonStats stats={pokemon.stats} currentLanguage={currentLanguage} />

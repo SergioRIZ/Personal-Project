@@ -38,7 +38,7 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen app-bg py-6 flex flex-col items-center justify-center p-4 relative">
-      <SignUpHeader isSubmitting={isSubmitting} />
+      <SignUpHeader />
 
       <div className="max-w-md w-full mx-auto">
         <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-[0_20px_60px_rgba(220,38,38,0.15)]">

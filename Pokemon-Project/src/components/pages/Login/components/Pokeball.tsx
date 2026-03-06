@@ -1,4 +1,3 @@
-import React from "react";
 import { useState } from "react";
 
 const PokeBall = ({ size = "w-24 h-24" }) => {
