@@ -28,7 +28,7 @@ const PasswordInput = ({ id, name, label, value, onChange, error, showPassword, 
           className={`py-3 pl-10 pr-10 w-full border ${
             error
               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500 dark:bg-red-900/20 dark:border-red-500 dark:text-red-300 dark:placeholder-red-500'
-              : 'border-gray-300 bg-white focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-green-400 dark:focus:border-green-400'
+              : 'border-gray-300 bg-white focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-red-400 dark:focus:border-red-400'
           } rounded-xl shadow-sm transition-colors duration-200`}
           placeholder={placeholder}
           aria-invalid={error ? "true" : "false"}

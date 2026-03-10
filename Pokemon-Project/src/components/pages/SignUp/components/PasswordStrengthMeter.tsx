@@ -34,9 +34,9 @@ const PasswordStrengthMeter = ({ password }: Props) => {
   };
   
   const getStrengthLabel = () => {
-    if (passwordStrength <= 1) return 'Weak';
-    if (passwordStrength <= 3) return 'Medium';
-    return 'Strong';
+    if (passwordStrength <= 1) return 'Débil';
+    if (passwordStrength <= 3) return 'Media';
+    return 'Fuerte';
   };
 
   if (!password) {
@@ -46,7 +46,7 @@ const PasswordStrengthMeter = ({ password }: Props) => {
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Password security</span>
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Seguridad de la contraseña</span>
         <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{getStrengthLabel()}</span>
       </div>
       <div className="h-1 w-full bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">

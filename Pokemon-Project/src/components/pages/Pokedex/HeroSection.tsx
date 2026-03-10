@@ -218,9 +218,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
         style={{
           background: settings.darkMode
             ? 'linear-gradient(135deg, #0C1222, #1A2332, #0C1222)'
-            : 'linear-gradient(-45deg, #FEE2E2, #FEF3C7, #CFFAFE, #FFF8F0, #FEE2E2)',
-          backgroundSize: settings.darkMode ? '100% 100%' : '400% 400%',
-          animation: settings.darkMode ? 'none' : 'hero-bg-shift 15s ease infinite',
+            : '#FFF8F0',
         }}
       >
         {/* ── geometric grid overlay ───────────────────────── */}

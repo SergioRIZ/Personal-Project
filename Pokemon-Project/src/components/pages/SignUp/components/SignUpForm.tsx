@@ -82,8 +82,8 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
   
     return (
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-slate-700 dark:from-green-400 dark:to-slate-300">Trainer Account</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Create your account and start your adventure!</p>
+        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300">Cuenta de Entrenador</h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">Crea tu cuenta y empieza tu aventura</p>
         
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           {/* Username field */}
@@ -93,7 +93,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
             type="text"
             value={formData.username}
             onChange={handleChange}
-            label="Trainer Name"
+            label="Nombre de Entrenador"
             placeholder="Ash Ketchum"
             error={errors.username}
             icon={userIcon}
@@ -120,7 +120,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              label="Secret Password"
+              label="Contraseña Secreta"
               placeholder="••••••••"
               error={errors.password}
               icon={lockIcon}
@@ -138,7 +138,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
             type={showConfirmPassword ? "text" : "password"}
             value={formData.confirmPassword}
             onChange={handleChange}
-            label="Confirm Password"
+            label="Confirmar Contraseña"
             placeholder="••••••••"
             error={errors.confirmPassword}
             icon={lockIcon}
@@ -152,7 +152,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
               disabled={isSubmitting}
               isLoading={isSubmitting}
             >
-              Start Adventure
+              Iniciar Aventura
             </Button>
           </div>
         </form>

@@ -1,9 +1,23 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useCollection } from '../../../context/CollectionContext';
 import { useTeams } from '../../../context/TeamsContext';
 import type { TeamMemberInput } from '../../../lib/teams';
+
+interface PokemonEntry {
+  id: number;
+  name: string;
+}
+
+let allPokemonCache: PokemonEntry[] | null = null;
+
+async function fetchAllPokemon(): Promise<PokemonEntry[]> {
+  if (allPokemonCache) return allPokemonCache;
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
+  const data: { results: Array<{ name: string; url: string }> } = await res.json();
+  allPokemonCache = data.results.map((p, i) => ({ id: i + 1, name: p.name }));
+  return allPokemonCache;
+}
 
 interface Props {
   teamId: string;
@@ -13,35 +27,62 @@ interface Props {
 
 const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
   const { t } = useTranslation();
-  const { collectionItems } = useCollection();
   const { addMember } = useTeams();
 
   const [search, setSearch] = useState('');
+  const [allPokemon, setAllPokemon] = useState<PokemonEntry[]>([]);
+  const [filtered, setFiltered] = useState<PokemonEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [pickingId, setPickingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(60);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
+    fetchAllPokemon()
+      .then(list => {
+        setAllPokemon(list);
+        setFiltered(list);
+      })
+      .catch(() => setError('Error loading Pokémon list'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return collectionItems;
-    return collectionItems.filter(
-      item =>
-        item.pokemon_name.toLowerCase().includes(q) ||
-        item.pokemon_id.toString().includes(q)
-    );
-  }, [collectionItems, search]);
+    if (!q) {
+      setFiltered(allPokemon);
+    } else {
+      setFiltered(
+        allPokemon.filter(
+          p => p.name.toLowerCase().includes(q) || p.id.toString().includes(q)
+        )
+      );
+    }
+    setDisplayCount(60);
+    if (listRef.current) listRef.current.scrollTop = 0;
+  }, [search, allPokemon]);
 
-  const handlePick = async (item: { pokemon_id: number; pokemon_name: string }) => {
+  const handleScroll = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+      setDisplayCount(prev => Math.min(prev + 60, filtered.length));
+    }
+  }, [filtered.length]);
+
+  const handlePick = async (entry: PokemonEntry) => {
     if (pickingId !== null) return;
-    setPickingId(item.pokemon_id);
+    setPickingId(entry.id);
     setError(null);
     try {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${item.pokemon_id}`);
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${entry.id}`);
       const data: { types: Array<{ type: { name: string } }> } = await res.json();
       const types = data.types.map(t => t.type.name);
 
       const member: TeamMemberInput = {
-        pokemon_id: item.pokemon_id,
-        pokemon_name: item.pokemon_name,
+        pokemon_id: entry.id,
+        pokemon_name: entry.name,
         pokemon_types: types,
         slot,
       };
@@ -87,7 +128,7 @@ const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t('teams_pick_search')}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             autoFocus
           />
         </div>
@@ -100,41 +141,45 @@ const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
         )}
 
         {/* List */}
-        <div className="overflow-y-auto flex-1 p-2">
-          {collectionItems.length === 0 ? (
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">
-              {t('teams_not_in_collection')}
-            </p>
+        <div
+          ref={listRef}
+          className="overflow-y-auto flex-1 p-2"
+          onScroll={handleScroll}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-3 border-red-500 border-t-transparent rounded-full animate-spin" />
+            </div>
           ) : filtered.length === 0 ? (
             <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">
               {t('noResults')}
             </p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
-              {filtered.map(item => (
+              {filtered.slice(0, displayCount).map(entry => (
                 <button
-                  key={item.pokemon_id}
-                  onClick={() => handlePick(item)}
+                  key={entry.id}
+                  onClick={() => handlePick(entry)}
                   disabled={pickingId !== null}
-                  className="flex flex-col items-center gap-1 p-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/10 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex flex-col items-center gap-1 p-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {pickingId === item.pokemon_id ? (
+                  {pickingId === entry.id ? (
                     <div className="w-10 h-10 flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                     </div>
                   ) : (
                     <img
-                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.pokemon_id}.png`}
-                      alt={item.pokemon_name}
+                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${entry.id}.png`}
+                      alt={entry.name}
                       className="w-10 h-10 object-contain"
                       loading="lazy"
                     />
                   )}
                   <span className="text-[10px] font-medium capitalize text-gray-700 dark:text-gray-200 text-center truncate w-full">
-                    {item.pokemon_name.replace('-', ' ')}
+                    {entry.name.replace(/-/g, ' ')}
                   </span>
                   <span className="text-[9px] text-gray-400 dark:text-gray-500">
-                    #{item.pokemon_id.toString().padStart(4, '0')}
+                    #{entry.id.toString().padStart(4, '0')}
                   </span>
                 </button>
               ))}

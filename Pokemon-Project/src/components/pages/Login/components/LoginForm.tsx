@@ -52,7 +52,7 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
               type="checkbox"
               checked={formData.rememberMe}
               onChange={handleChange}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
+              className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded accent-red-600"
             />
             <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Recordar sesión
@@ -60,7 +60,7 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
           </div>
           
           <div className="text-sm">
-            <a href="#" className="font-medium text-green-600 hover:text-green-800 transition-colors duration-200">
+            <a href="#" className="font-medium text-red-600 hover:text-red-800 transition-colors duration-200">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
@@ -70,7 +70,7 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full flex items-center justify-center py-3 px-4 border-0 shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-600 to-slate-700 hover:from-green-700 hover:to-slate-800 cursor-pointer'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200`}
+            className={`w-full flex items-center justify-center py-3 px-4 border-0 shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 cursor-pointer'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200`}
           >
             {isSubmitting ? (
               <>

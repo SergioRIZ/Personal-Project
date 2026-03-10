@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { getTypeSpriteUrl } from '../Pokedex/utils';
@@ -66,48 +66,19 @@ function formatMoveName(slug: string): string {
 
 /* ─── Popular competitive items ──────────────────────────────────────── */
 
-const POPULAR_ITEMS = [
-  { name: 'Leftovers', desc: 'Restores 1/16 max HP every turn' },
-  { name: 'Life Orb', desc: '1.3\u00d7 damage, costs 1/10 max HP' },
-  { name: 'Choice Band', desc: '1.5\u00d7 Attack, locks into one move' },
-  { name: 'Choice Specs', desc: '1.5\u00d7 Sp. Atk, locks into one move' },
-  { name: 'Choice Scarf', desc: '1.5\u00d7 Speed, locks into one move' },
-  { name: 'Focus Sash', desc: 'Survives a KO at 1 HP when at full HP' },
-  { name: 'Assault Vest', desc: '1.5\u00d7 Sp. Def, attacks only' },
-  { name: 'Heavy-Duty Boots', desc: 'Immune to entry hazards' },
-  { name: 'Rocky Helmet', desc: 'Contact moves deal 1/6 HP to attacker' },
-  { name: 'Eviolite', desc: '1.5\u00d7 Def & SpD if not fully evolved' },
-  { name: 'Air Balloon', desc: 'Ground immunity until hit' },
-  { name: 'Expert Belt', desc: 'Super effective moves deal 1.2\u00d7' },
-  { name: 'Sitrus Berry', desc: 'Restores 1/4 HP when HP \u2264 50%' },
-  { name: 'Lum Berry', desc: 'Cures any status condition once' },
-  { name: 'Weakness Policy', desc: '+2 Atk & SpA on super effective hit' },
-  { name: 'Booster Energy', desc: 'Activates Protosynthesis / Quark Drive' },
-];
 
-/* ─── Move category mini-icons ───────────────────────────────────────── */
+/* ─── Move category sprites ─────────────────────────────────────────── */
 
-const PhysicalIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M13.707 3.293a1 1 0 00-1.414 0l-8 8a1 1 0 000 1.414l8 8a1 1 0 001.414 0l8-8a1 1 0 000-1.414l-8-8z"/>
-  </svg>
-);
-const SpecialIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-  </svg>
-);
-const StatusIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-  </svg>
-);
-
-const DAMAGE_CLASS_STYLES: Record<string, { icon: React.ReactNode; color: string }> = {
-  physical: { icon: <PhysicalIcon />, color: 'text-orange-500 dark:text-orange-400' },
-  special:  { icon: <SpecialIcon />,  color: 'text-blue-500 dark:text-blue-400' },
-  status:   { icon: <StatusIcon />,   color: 'text-gray-400 dark:text-gray-500' },
+const DAMAGE_CLASS_SPRITE: Record<string, string> = {
+  physical: '/move-types/Physic.png',
+  special:  '/move-types/Special.png',
+  status:   '/move-types/Status.png',
 };
+
+/* ─── Type icon SVGs ────────────────────────────────────────────────── */
+
+const getTypeIconUrl = (type: string): string =>
+  `/icons-types/${type.toLowerCase()}.svg`;
 
 /* ─── Props ──────────────────────────────────────────────────────────── */
 
@@ -167,13 +138,12 @@ const TeamMemberEditor: React.FC<Props> = ({
     }
   }
 
-  const filteredItems = (() => {
+  const filteredItems = useMemo(() => {
     const q = itemInput.toLowerCase().trim();
-    if (!q) return [];
+    if (!q) return allItems;
     return allItems
-      .filter(item => item.name.toLowerCase().includes(q) || item.slug.includes(q))
-      .slice(0, 8);
-  })();
+      .filter(item => item.name.toLowerCase().includes(q) || item.slug.includes(q));
+  }, [itemInput, allItems]);
 
   /* ── Handlers ───────────────────────────────────────────────────────── */
   const handleMoveSelect = (moveSlug: string) => {
@@ -186,10 +156,6 @@ const TeamMemberEditor: React.FC<Props> = ({
   const handleMoveRemove = (idx: number) => onUpdateMoves(slot, moves.filter((_, i) => i !== idx));
 
   const handleItemBlur = () => onUpdateItem(slot, itemInput.trim() || null);
-  const handleSelectPopularItem = (name: string) => {
-    setItemInput(name);
-    onUpdateItem(slot, name);
-  };
 
   const handleEVChange = (stat: keyof EVSpread, raw: string) => {
     const val = Math.min(252, Math.max(0, parseInt(raw, 10) || 0));
@@ -330,7 +296,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                         type="text"
                         value={itemInput}
                         onChange={e => { setItemInput(e.target.value); setItemDropdownOpen(true); }}
-                        onFocus={() => { if (itemInput.trim()) setItemDropdownOpen(true); }}
+                        onFocus={() => setItemDropdownOpen(true)}
                         onBlur={() => { setTimeout(() => { setItemDropdownOpen(false); handleItemBlur(); }, 150); }}
                         placeholder={t('teams_choose_item')}
                         className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 dark:focus:border-green-600 transition-all"
@@ -338,7 +304,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                       {itemInput && (
                         <button
                           onMouseDown={e => e.preventDefault()}
-                          onClick={() => { setItemInput(''); onUpdateItem(slot, null); setItemDropdownOpen(false); }}
+                          onClick={() => { setItemInput(''); onUpdateItem(slot, null); }}
                           className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-gray-300 hover:text-gray-500 cursor-pointer"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -348,62 +314,52 @@ const TeamMemberEditor: React.FC<Props> = ({
                       )}
                       {/* Autocomplete dropdown */}
                       {itemDropdownOpen && filteredItems.length > 0 && (
-                        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-44 overflow-y-auto">
+                        <div
+                          className="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-y-auto"
+                        >
                           {filteredItems.map(item => (
                             <button
                               key={item.slug}
                               onMouseDown={e => e.preventDefault()}
                               onClick={() => { setItemInput(item.name); onUpdateItem(slot, item.name); setItemDropdownOpen(false); }}
-                              className="w-full text-left px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 cursor-pointer transition-colors first:rounded-t-xl last:rounded-b-xl"
+                              className="w-full text-left px-3 py-2 flex items-start gap-2.5 hover:bg-red-50 dark:hover:bg-red-900/10 cursor-pointer transition-colors first:rounded-t-xl last:rounded-b-xl"
                             >
-                              {item.name}
+                              <img
+                                src={item.sprite}
+                                data-fallback={item.spriteFallback}
+                                alt={item.name}
+                                className="w-8 h-8 object-contain shrink-0 mt-0.5"
+                                loading="lazy"
+                                onError={e => {
+                                  const img = e.target as HTMLImageElement;
+                                  const fallback = img.dataset.fallback;
+                                  if (fallback && img.src !== fallback) {
+                                    img.src = fallback;
+                                  } else {
+                                    img.style.display = 'none';
+                                    img.nextElementSibling?.classList.remove('hidden');
+                                  }
+                                }}
+                              />
+                              <span className="hidden w-8 h-8 shrink-0 mt-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/></svg>
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">
+                                  {item.name}
+                                </p>
+                                {item.desc && (
+                                  <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-snug mt-0.5 line-clamp-2">
+                                    {item.desc}
+                                  </p>
+                                )}
+                              </div>
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
 
-                    {/* Popular items list */}
-                    <div className="mt-3">
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
-                        Popular Items
-                      </p>
-                      <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-100 dark:border-gray-800 divide-y divide-gray-50 dark:divide-gray-800/80">
-                        {POPULAR_ITEMS.map(item => {
-                          const isSelected = itemInput.toLowerCase() === item.name.toLowerCase();
-                          return (
-                            <button
-                              key={item.name}
-                              onClick={() => handleSelectPopularItem(item.name)}
-                              className={`w-full text-left px-3 py-2 flex items-start gap-2.5 transition-colors cursor-pointer ${
-                                isSelected
-                                  ? 'bg-green-50 dark:bg-green-900/20'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
-                              }`}
-                            >
-                              {/* radio dot */}
-                              <span className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                                isSelected
-                                  ? 'border-green-500 bg-green-500'
-                                  : 'border-gray-300 dark:border-gray-600'
-                              }`}>
-                                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                              </span>
-                              <div className="min-w-0">
-                                <p className={`text-xs font-semibold leading-tight ${
-                                  isSelected ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-200'
-                                }`}>
-                                  {item.name}
-                                </p>
-                                <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-snug mt-0.5">
-                                  {item.desc}
-                                </p>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
                   </section>
 
                   {/* ▸ Ability ────────────────────────────────────────── */}
@@ -505,7 +461,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                   <div className="space-y-1.5">
                     {moves.map((slug, idx) => {
                       const detail = moveDetails[slug];
-                      const cat = detail ? DAMAGE_CLASS_STYLES[detail.damageClass] : null;
+                      const catSprite = detail ? DAMAGE_CLASS_SPRITE[detail.damageClass] : null;
                       return (
                         <div
                           key={idx}
@@ -513,13 +469,13 @@ const TeamMemberEditor: React.FC<Props> = ({
                         >
                           {detail ? (
                             <img
-                              src={getTypeSpriteUrl(detail.type)}
+                              src={getTypeIconUrl(detail.type)}
                               alt={detail.type}
                               title={detail.type}
-                              className="shrink-0 w-7 h-7 object-contain drop-shadow-lg"
+                              className="shrink-0 w-5 h-5 object-contain drop-shadow"
                             />
                           ) : (
-                            <span className="shrink-0 w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                            <span className="shrink-0 w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                           )}
 
                           <button
@@ -535,7 +491,14 @@ const TeamMemberEditor: React.FC<Props> = ({
                             </span>
                           )}
 
-                          {cat && <span className={`shrink-0 ${cat.color}`}>{cat.icon}</span>}
+                          {catSprite && (
+                            <img
+                              src={catSprite}
+                              alt={detail!.damageClass}
+                              title={detail!.damageClass}
+                              className="shrink-0 w-16 h-auto object-contain"
+                            />
+                          )}
 
                           <button
                             onClick={() => handleMoveRemove(idx)}
@@ -564,28 +527,6 @@ const TeamMemberEditor: React.FC<Props> = ({
                     ))}
                   </div>
 
-                  {/* Move info (if any detail loaded) */}
-                  {moves.length > 0 && (() => {
-                    const loadedMoves = moves.filter(m => moveDetails[m]?.shortEffect);
-                    if (loadedMoves.length === 0) return null;
-                    return (
-                      <div className="mt-4 space-y-1.5">
-                        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                          Move Details
-                        </p>
-                        {loadedMoves.map(slug => {
-                          const d = moveDetails[slug];
-                          if (!d) return null;
-                          return (
-                            <div key={slug} className="px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800/40">
-                              <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-300">{formatMoveName(slug)}</p>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-relaxed mt-0.5">{d.shortEffect}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
                 </div>
 
                 {/* ─── COLUMN 3 : Stats ────────────────────────────────── */}
