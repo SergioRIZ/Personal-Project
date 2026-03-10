@@ -13,10 +13,10 @@ const SettingsSection = ({ title, icon: Icon, isExpanded, onToggle, children }: 
   <div className="transition-all duration-300">
     <button
       onClick={onToggle}
-      className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 rounded-lg focus:outline-none hover:shadow-md transition-all duration-300"
+      className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 rounded-lg focus:outline-none hover:shadow-md transition-all duration-300"
     >
       <div className="flex items-center">
-        {Icon && <Icon className="mr-2 text-green-600 dark:text-green-400" size={20} />}
+        {Icon && <Icon className="mr-2 text-red-600 dark:text-red-400" size={20} />}
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{title}</h2>
       </div>
       {isExpanded

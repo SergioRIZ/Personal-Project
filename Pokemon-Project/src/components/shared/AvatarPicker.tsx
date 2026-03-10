@@ -103,7 +103,7 @@ const AvatarPicker = ({ currentAvatarId, onSelect, onClose }: Props) => {
                         title={char.name}
                         className={`relative flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-slate-100 dark:bg-slate-800 ring-2 ring-slate-500 dark:ring-green-400'
+                            ? 'bg-slate-100 dark:bg-slate-800 ring-2 ring-slate-500 dark:ring-red-400'
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                         }`}
                       >

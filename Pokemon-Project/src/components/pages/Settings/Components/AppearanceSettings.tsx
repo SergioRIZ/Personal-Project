@@ -51,7 +51,7 @@ const AppearanceSettings = ({ isExpanded, onToggle }: Props) => {
       {/* Language */}
       <div className="flex items-center justify-between py-3">
         <div className="flex items-center gap-3">
-          <Globe size={18} className="text-green-600 dark:text-green-400" />
+          <Globe size={18} className="text-red-600 dark:text-red-400" />
           <div>
             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t('appearance_language')}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -68,7 +68,7 @@ const AppearanceSettings = ({ isExpanded, onToggle }: Props) => {
                 idx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : ''
               } ${
                 settings.language === lang
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-red-600 text-white'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >

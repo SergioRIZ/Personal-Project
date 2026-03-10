@@ -96,7 +96,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
     <>
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         {/* Accent bar */}
-        <div className="h-1.5 bg-gradient-to-r from-green-500 to-teal-500" />
+        <div className="h-1.5 bg-gradient-to-r from-red-500 to-red-400" />
 
         {/* Team header */}
         <div className="p-4 flex items-center gap-3 border-b border-gray-100 dark:border-gray-700">
@@ -113,13 +113,13 @@ const TeamCard: React.FC<Props> = ({ team }) => {
                   setEditing(false);
                 }
               }}
-              className="flex-1 px-2 py-1 rounded border border-green-400 dark:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="flex-1 px-2 py-1 rounded border border-red-400 dark:border-red-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-500"
               autoFocus
             />
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="flex-1 text-left font-bold text-gray-800 dark:text-white hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200 text-sm cursor-pointer"
+              className="flex-1 text-left font-bold text-gray-800 dark:text-white hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 text-sm cursor-pointer"
               title={t('teams_rename_team')}
             >
               {team.name}
@@ -135,8 +135,8 @@ const TeamCard: React.FC<Props> = ({ team }) => {
               onClick={handleExport}
               className={`shrink-0 px-2 py-1 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
                 copied
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400'
+                  ? 'bg-red-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400'
               }`}
             >
               {copied ? t('teams_copied') : t('teams_export_showdown')}

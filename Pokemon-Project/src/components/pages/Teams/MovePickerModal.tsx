@@ -110,7 +110,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t('teams_move_search')}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
               autoFocus
             />
           </div>
@@ -130,7 +130,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
         <div className="overflow-y-auto flex-1">
           {loadingList ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
-              <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm text-gray-400 dark:text-gray-500">{t('teams_loading_moves')}</span>
             </div>
           ) : filtered.length === 0 ? (
@@ -153,7 +153,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                     disabled={selected}
                     className={`w-full flex flex-col px-5 py-2.5 text-left transition-all duration-100 group ${
                       selected
-                        ? 'bg-green-50 dark:bg-green-900/15 cursor-default'
+                        ? 'bg-red-50 dark:bg-red-900/15 cursor-default'
                         : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 cursor-pointer'
                     }`}
                   >
@@ -176,7 +176,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                       {/* Name */}
                       <p className={`flex-1 min-w-0 text-sm font-semibold leading-snug truncate ${
                         selected
-                          ? 'text-green-700 dark:text-green-400'
+                          ? 'text-red-700 dark:text-red-400'
                           : 'text-gray-800 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white'
                       }`}>
                         {formatMoveName(slug)}
@@ -216,7 +216,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
 
                       {/* Selected checkmark */}
                       {selected && (
-                        <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-500">
+                        <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>

@@ -21,7 +21,7 @@ const PokemonAvatar = ({ user, size = 'md', onClick }: Props) => {
     return (
       <div
         onClick={onClick}
-        className={`${sizeClass} rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center select-none shadow-lg shrink-0 ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-slate-400 dark:hover:ring-green-400 transition-all' : ''}`}
+        className={`${sizeClass} rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center select-none shadow-lg shrink-0 ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-slate-400 dark:hover:ring-red-400 transition-all' : ''}`}
       >
         <img
           src={getAvatarUrl(avatarId)}
@@ -35,7 +35,7 @@ const PokemonAvatar = ({ user, size = 'md', onClick }: Props) => {
   return (
     <div
       onClick={onClick}
-      className={`${sizeClass} rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold select-none shadow-lg shrink-0 ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-slate-400 dark:hover:ring-green-400 transition-all' : ''}`}
+      className={`${sizeClass} rounded-full bg-gradient-to-br from-red-400 to-red-500 flex items-center justify-center text-white font-bold select-none shadow-lg shrink-0 ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-slate-400 dark:hover:ring-red-400 transition-all' : ''}`}
     >
       {user.email?.[0]?.toUpperCase() ?? '?'}
     </div>

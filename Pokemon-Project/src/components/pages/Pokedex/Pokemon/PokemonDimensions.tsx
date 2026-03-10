@@ -19,8 +19,8 @@ const PokemonDimensions = ({ height, weight }: Props) => {
 
   return (
     <div className="mt-3 grid grid-cols-2 gap-2">
-      <div className="text-center p-1 bg-green-50 dark:bg-green-900/80 rounded border border-green-200 dark:border-green-800 shadow-sm">
-        <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+      <div className="text-center p-1 bg-red-50 dark:bg-red-900/80 rounded border border-red-200 dark:border-red-800 shadow-sm">
+        <p className="text-xs text-red-700 dark:text-red-400 font-medium">
           {t('height')} <span className={`text-xs ${size.color} ml-1`}>({size.label})</span>
         </p>
         <p className="font-bold text-slate-700 dark:text-slate-200">{(height / 10).toFixed(1)} {t('m')}</p>

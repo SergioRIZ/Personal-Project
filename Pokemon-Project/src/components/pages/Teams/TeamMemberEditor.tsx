@@ -263,7 +263,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-green-500 hover:bg-green-600 transition-colors cursor-pointer shadow-sm"
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-red-500 hover:bg-red-600 transition-colors cursor-pointer shadow-sm"
                 >
                   Done
                 </button>
@@ -299,7 +299,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                         onFocus={() => setItemDropdownOpen(true)}
                         onBlur={() => { setTimeout(() => { setItemDropdownOpen(false); handleItemBlur(); }, 150); }}
                         placeholder={t('teams_choose_item')}
-                        className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 dark:focus:border-green-600 transition-all"
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 dark:focus:border-red-600 transition-all"
                       />
                       {itemInput && (
                         <button
@@ -367,7 +367,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                     <SectionTitle accent={accentHex}>{t('teams_ability')}</SectionTitle>
                     {abilitiesLoading ? (
                       <div className="flex items-center gap-2 py-3">
-                        <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-green-500 rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
                         <span className="text-xs text-gray-400 dark:text-gray-500">{t('teams_loading_abilities')}</span>
                       </div>
                     ) : (
@@ -380,13 +380,13 @@ const TeamMemberEditor: React.FC<Props> = ({
                               onClick={() => onUpdateAbility(slot, ability.slug)}
                               className={`w-full text-left px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
                                 isSelected
-                                  ? 'bg-green-50 dark:bg-green-900/20 ring-1 ring-green-200 dark:ring-green-800'
+                                  ? 'bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200 dark:ring-red-800'
                                   : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
                               }`}
                             >
                               <div className="flex items-center gap-2.5">
                                 <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                                  isSelected ? 'border-green-500 bg-green-500' : 'border-gray-300 dark:border-gray-600'
+                                  isSelected ? 'border-red-500 bg-red-500' : 'border-gray-300 dark:border-gray-600'
                                 }`}>
                                   {isSelected && (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 text-white" viewBox="0 0 20 20" fill="currentColor">
@@ -395,7 +395,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                                   )}
                                 </span>
                                 <span className={`text-sm font-semibold ${
-                                  isSelected ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-200'
+                                  isSelected ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-200'
                                 }`}>
                                   {ability.name}
                                 </span>
@@ -423,7 +423,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                     <select
                       value={member.nature ?? ''}
                       onChange={e => onUpdateNature(slot, e.target.value || null)}
-                      className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-400 dark:focus:border-green-600 transition-all cursor-pointer"
+                      className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 dark:focus:border-red-600 transition-all cursor-pointer"
                     >
                       <option value="">{t('teams_choose_nature')}</option>
                       {NATURES.map(([name]) => (
@@ -480,7 +480,7 @@ const TeamMemberEditor: React.FC<Props> = ({
 
                           <button
                             onClick={() => setPickerMoveIndex(idx)}
-                            className="flex-1 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400 transition-colors cursor-pointer truncate"
+                            className="flex-1 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer truncate"
                           >
                             {formatMoveName(slug)}
                           </button>
@@ -517,7 +517,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                       <button
                         key={`empty-${i}`}
                         onClick={() => setPickerMoveIndex(moves.length + i)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-gray-300 dark:text-gray-600 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10 transition-all cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700"
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -578,7 +578,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                               value={evsLocal[stat]}
                               onChange={e => handleEVChange(stat, e.target.value)}
                               onBlur={handleEVBlur}
-                              className="w-14 px-1.5 py-1 text-xs text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-green-400 dark:focus:border-green-600 transition-colors tabular-nums font-semibold"
+                              className="w-14 px-1.5 py-1 text-xs text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-red-400 dark:focus:border-red-600 transition-colors tabular-nums font-semibold"
                             />
                           </div>
                         );
@@ -602,7 +602,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                             value={ivsLocal[stat]}
                             onChange={e => handleIVChange(stat, e.target.value)}
                             onBlur={handleIVBlur}
-                            className="w-full px-1 py-1.5 text-sm text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-green-400 dark:focus:border-green-600 transition-colors tabular-nums font-bold"
+                            className="w-full px-1 py-1.5 text-sm text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-red-400 dark:focus:border-red-600 transition-colors tabular-nums font-bold"
                           />
                         </div>
                       ))}

@@ -38,7 +38,7 @@ const PokemonAbilities = ({ abilities, abilityDescriptions }: Props) => {
 
           return (
             <Tooltip key={ability.ability.name} content={tooltipContent}>
-              <span className={`cursor-help px-2 py-1 bg-gradient-to-r from-green-50 to-slate-100 dark:from-green-900/30 dark:to-slate-700/40 border border-slate-200 dark:border-slate-600 rounded text-xs capitalize text-green-700 dark:text-green-400 shadow-sm ${ability.is_hidden ? 'italic' : ''}`}>
+              <span className={`cursor-help px-2 py-1 bg-gradient-to-r from-red-50 to-slate-100 dark:from-red-900/30 dark:to-slate-700/40 border border-slate-200 dark:border-slate-600 rounded text-xs capitalize text-red-700 dark:text-red-400 shadow-sm ${ability.is_hidden ? 'italic' : ''}`}>
                 {name}
                 {ability.is_hidden && (
                   <span className="text-xs ml-1 text-slate-500 dark:text-slate-400">

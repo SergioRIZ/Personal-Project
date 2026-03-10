@@ -24,8 +24,8 @@ const LanguageSelector = ({ currentLanguage, setCurrentLanguage }: Props) => {
               onClick={() => changeLanguage(lang)}
               className={`px-4 py-2 font-medium text-sm transition-all duration-300 cursor-pointer ${
                 currentLanguage === lang
-                  ? 'bg-gradient-to-r from-green-600 to-slate-600 text-white font-semibold'
-                  : 'bg-gradient-to-r from-green-50 to-slate-200 text-slate-700 hover:from-green-100 hover:to-slate-300'
+                  ? 'bg-gradient-to-r from-red-600 to-slate-600 text-white font-semibold'
+                  : 'bg-gradient-to-r from-red-50 to-slate-200 text-slate-700 hover:from-red-100 hover:to-slate-300'
               }`}
             >
               {lang.toUpperCase()}

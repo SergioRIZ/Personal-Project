@@ -50,7 +50,7 @@ const PokedexSettings = ({ isExpanded, onToggle }: Props) => {
           {!allSelected && (
             <button
               onClick={() => updateSetting('generations', [])}
-              className="text-xs text-green-600 dark:text-green-400 hover:underline cursor-pointer"
+              className="text-xs text-red-600 dark:text-red-400 hover:underline cursor-pointer"
             >
               {t('pokedex_show_all')}
             </button>
@@ -68,8 +68,8 @@ const PokedexSettings = ({ isExpanded, onToggle }: Props) => {
                 title={`#${start}–${end}`}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer border ${
                   isSelected
-                    ? 'bg-green-600 text-white border-green-600'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-green-400'
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-red-400'
                 }`}
               >
                 Gen {gen}
@@ -94,7 +94,7 @@ const PokedexSettings = ({ isExpanded, onToggle }: Props) => {
                 idx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : ''
               } ${
                 settings.resultsLimit === value
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-red-600 text-white'
                   : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >

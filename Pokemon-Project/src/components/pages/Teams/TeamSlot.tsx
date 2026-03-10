@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTypeSpriteUrl } from '../Pokedex/utils';
 import { useMoveDetails } from '../../../hooks/useMoveDetails';
 import { usePokemonAbilities } from '../../../hooks/usePokemonAbilities';
 import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
 import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
+import { useItemList } from '../../../hooks/useItemList';
 import TeamMemberEditor from './TeamMemberEditor';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
 
@@ -44,27 +45,14 @@ const TYPE_ACCENT: Record<string, string> = {
   fairy:    '#EE99AC',
 };
 
-const PhysicalIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M13.707 3.293a1 1 0 00-1.414 0l-8 8a1 1 0 000 1.414l8 8a1 1 0 001.414 0l8-8a1 1 0 000-1.414l-8-8z"/>
-  </svg>
-);
-const SpecialIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-  </svg>
-);
-const StatusIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-  </svg>
-);
-
-const DAMAGE_CLASS_STYLES = {
-  physical: { icon: <PhysicalIcon />, color: 'text-orange-500 dark:text-orange-400' },
-  special:  { icon: <SpecialIcon />,  color: 'text-blue-500 dark:text-blue-400'    },
-  status:   { icon: <StatusIcon />,   color: 'text-gray-400 dark:text-gray-500'    },
+const DAMAGE_CLASS_SPRITE: Record<string, string> = {
+  physical: '/move-types/Physic.png',
+  special:  '/move-types/Special.png',
+  status:   '/move-types/Status.png',
 };
+
+const getTypeIconUrl = (type: string): string =>
+  `/icons-types/${type.toLowerCase()}.svg`;
 
 const NATURES = [
   ['Hardy',   null,  null  ], ['Lonely',  'atk', 'def'],
@@ -120,13 +108,19 @@ const TeamSlot: React.FC<Props> = ({
   const { details: moveDetails } = useMoveDetails(member?.moves ?? []);
   const { abilities } = usePokemonAbilities(member?.pokemon_id ?? null);
   const { stats: baseStats } = usePokemonBaseStats(member?.pokemon_id ?? null);
+  const { items: allItems } = useItemList();
+
+  const matchedItem = useMemo(() => {
+    if (!member?.item) return null;
+    return allItems.find(i => i.name.toLowerCase() === member.item!.toLowerCase()) ?? null;
+  }, [member?.item, allItems]);
 
   /* ── Empty slot ──────────────────────────────────────────────────── */
   if (!member) {
     return (
       <button
         onClick={onAdd}
-        className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 hover:border-green-400 dark:hover:border-green-600 hover:text-green-400 dark:hover:text-green-500 hover:bg-green-50/50 dark:hover:bg-green-900/10 transition-all duration-200 cursor-pointer w-full min-h-[200px] sm:min-h-[280px] group"
+        className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 hover:border-red-400 dark:hover:border-red-600 hover:text-red-400 dark:hover:text-red-500 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-all duration-200 cursor-pointer w-full min-h-[200px] sm:min-h-[280px] group"
         title={t('teams_add_pokemon')}
       >
         <div className="w-14 h-14 rounded-full border-2 border-dashed border-current flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
@@ -280,53 +274,80 @@ const TeamSlot: React.FC<Props> = ({
             </div>
           ) : (
             <div className="flex justify-center py-4">
-              <div className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-green-500 rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
             </div>
           )}
         </div>
 
-        {/* ── Summary chips (ability + item + moves) ─────────────── */}
-        <div className="border-t border-gray-100 dark:border-gray-700 px-2.5 py-2 flex-1 space-y-2">
-          {/* Ability + item chips */}
-          {(selectedAbility || member.item) && (
-            <div className="flex flex-wrap gap-1">
+        {/* ── Summary table (ability, item, moves) ──────────────── */}
+        <div className="border-t border-gray-100 dark:border-gray-700 flex-1">
+          <table className="w-full text-[10px]">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
+              {/* Ability row */}
               {selectedAbility && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-[10px] text-gray-600 dark:text-gray-300 font-medium">
-                  {selectedAbility.name}
-                </span>
+                <tr className="group/ability">
+                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap">Abl</td>
+                  <td className="px-2 py-1 text-gray-600 dark:text-gray-300 font-medium cursor-help" title={selectedAbility.shortEffect} colSpan={2}>
+                    {selectedAbility.name}
+                  </td>
+                </tr>
               )}
-              {member.item && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-[10px] text-gray-600 dark:text-gray-300 font-medium">
-                  @ {member.item}
-                </span>
+              {/* Item row */}
+              {matchedItem && (
+                <tr>
+                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap">Item</td>
+                  <td className="px-2 py-1" colSpan={2}>
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src={matchedItem.sprite}
+                        data-fallback={matchedItem.spriteFallback}
+                        alt={matchedItem.name}
+                        title={matchedItem.desc}
+                        className="w-5 h-5 object-contain shrink-0"
+                        onError={e => {
+                          const img = e.target as HTMLImageElement;
+                          const fb = img.dataset.fallback;
+                          if (fb && img.src !== fb) img.src = fb;
+                        }}
+                      />
+                      <span className="text-gray-600 dark:text-gray-300 font-medium truncate">{matchedItem.name}</span>
+                    </div>
+                  </td>
+                </tr>
               )}
-            </div>
-          )}
-
-          {/* Move grid */}
-          {moves.length > 0 && (
-            <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-              {moves.map((move, i) => {
-                const detail = moveDetails[move];
-                const cat = detail ? DAMAGE_CLASS_STYLES[detail.damageClass] : null;
-                return (
-                  <div key={i} className="flex items-center gap-1 min-w-0">
-                    {cat && <span className={`shrink-0 ${cat.color}`}>{cat.icon}</span>}
-                    <span className="text-[10px] text-gray-600 dark:text-gray-300 truncate">
-                      {formatMoveName(move)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+              {/* Moves — 2 columns × 2 rows */}
+              {moves.length > 0 && (
+                <tr>
+                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap align-top">Mvs</td>
+                  <td className="px-1 py-1" colSpan={2}>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                      {moves.map((move, i) => {
+                        const detail = moveDetails[move];
+                        return (
+                          <div key={i} className="flex items-center gap-1 min-w-0">
+                            {detail && (
+                              <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-3 h-3 object-contain" />
+                            )}
+                            <span className="text-gray-600 dark:text-gray-300 truncate">{formatMoveName(move)}</span>
+                            {detail && DAMAGE_CLASS_SPRITE[detail.damageClass] && (
+                              <img src={DAMAGE_CLASS_SPRITE[detail.damageClass]} alt={detail.damageClass} className="shrink-0 w-7 h-auto object-contain" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* ── Edit button ──────────────────────────────────────────── */}
         <div className="border-t border-gray-100 dark:border-gray-700 px-2.5 py-2">
           <button
             onClick={e => { e.stopPropagation(); setIsEditorOpen(true); }}
-            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700"
+            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />

@@ -62,7 +62,9 @@
       "Read(//c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/**)",
       "Bash(find /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public -type d -iname \"*icon*\" -o -type d -iname \"*type*\" -o -type d -iname \"*sprite*\" 2>/dev/null | head -20)",
       "Bash(ls -lh /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public/icons-types/*.svg | wc -l)",
-      "Bash(ls -1 /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public/icons-types/*.svg)"
+      "Bash(ls -1 /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public/icons-types/*.svg)",
+      "Bash(find \"C:/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/src/components\" -type f -name \"*.tsx\" -o -name \"*.ts\" | grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "mcp__chrome-devtools__resize_page"
     ]
   }
 }
