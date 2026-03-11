@@ -95,7 +95,7 @@ const DropdownMenu = () => {
       {/* Menu trigger: avatar when logged in, hamburger when guest */}
       <button
         ref={buttonRef}
-        className={`fixed top-4 left-4 z-50 cursor-pointer transform hover:scale-105 active:scale-95 transition-all duration-300 ${showButton ? 'block' : 'hidden'} ${user ? '' : 'w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl border border-[var(--color-border)]'}`}
+        className={`absolute sm:fixed top-4 left-4 z-50 cursor-pointer transform hover:scale-105 active:scale-95 transition-all duration-300 ${showButton ? 'block' : 'hidden'} ${user ? '' : 'w-12 h-12 bg-[var(--color-card)] rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl border border-[var(--color-border)]'}`}
         onClick={openMenu}
         aria-expanded={isOpen}
         aria-label={t('menu', 'Menu')}
