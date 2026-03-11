@@ -42,7 +42,7 @@ const Profile = () => {
   });
 
   return (
-    <div className="min-h-screen app-bg pt-14 sm:pt-8 pb-8 px-4">
+    <div className="min-h-screen app-bg pt-20 sm:pt-8 pb-8 px-4">
       {/* Back button */}
       <div className="max-w-4xl mx-auto mb-6">
         <Link

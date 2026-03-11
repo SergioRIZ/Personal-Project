@@ -49,9 +49,9 @@ const AppearanceSettings = ({ isExpanded, onToggle }: Props) => {
       </div>
 
       {/* Language */}
-      <div className="flex items-center justify-between py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 py-3">
         <div className="flex items-center gap-3">
-          <Globe size={18} className="text-red-600 dark:text-red-400" />
+          <Globe size={18} className="text-red-600 dark:text-red-400 shrink-0" />
           <div>
             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t('appearance_language')}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -59,7 +59,7 @@ const AppearanceSettings = ({ isExpanded, onToggle }: Props) => {
             </p>
           </div>
         </div>
-        <div className="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+        <div className="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 shrink-0">
           {(['es', 'en'] as const).map((lang, idx) => (
             <button
               key={lang}

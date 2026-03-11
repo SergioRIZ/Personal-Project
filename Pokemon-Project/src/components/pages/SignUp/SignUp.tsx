@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import SignUpHeader from './components/SignUpHeader';
 import SignUpForm from './components/SignUpForm';
 import SignUpFooter from './components/SignUpFooter';
@@ -27,6 +28,7 @@ const SignUp = () => {
     validateSignUpForm
   );
 
+  const { t } = useTranslation();
   const onSubmit = async (data: Record<string, string>) => {
     const { error } = await signUp(data.email, data.password, data.username);
     if (error) {
@@ -48,7 +50,7 @@ const SignUp = () => {
             {formSuccess && (
               <Alert
                 type={Alert.types.SUCCESS}
-                message="¡Cuenta creada! Revisa tu email para confirmarla."
+                message={t('signup_success')}
               />
             )}
 

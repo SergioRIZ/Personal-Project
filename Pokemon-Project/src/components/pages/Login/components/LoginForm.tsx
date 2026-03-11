@@ -1,6 +1,7 @@
 import React from "react";
 import FormInput from "./FormInput";
 import PasswordInput from "./PasswordInput";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   formData: { email: string; password: string; rememberMe: boolean };
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange, handleSubmit, toggleShowPassword }: Props) => {
+  const { t } = useTranslation();
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -19,7 +21,7 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
           id="email"
           name="email"
           type="email"
-          label="PokéEmail"
+          label={t('login_email_label')}
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
@@ -31,11 +33,11 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
             </svg>
           }
         />
-        
+
         <PasswordInput
           id="password"
           name="password"
-          label="Contraseña Secreta"
+          label={t('login_password_label')}
           value={formData.password}
           onChange={handleChange}
           error={errors.password}
@@ -43,7 +45,7 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
           toggleShowPassword={toggleShowPassword}
           placeholder="••••••••"
         />
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <input
@@ -55,17 +57,17 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
               className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded accent-red-600"
             />
             <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-              Recordar sesión
+              {t('login_remember_me')}
             </label>
           </div>
-          
+
           <div className="text-sm">
             <a href="#" className="font-medium text-red-600 hover:text-red-800 transition-colors duration-200">
-              ¿Olvidaste tu contraseña?
+              {t('login_forgot_password')}
             </a>
           </div>
         </div>
-        
+
         <div className="overflow-hidden rounded-xl">
           <button
             type="submit"
@@ -78,10 +80,10 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Iniciando sesión...</span>
+                <span>{t('login_submitting')}</span>
               </>
             ) : (
-              <span>Iniciar Aventura</span>
+              <span>{t('login_start')}</span>
             )}
           </button>
         </div>

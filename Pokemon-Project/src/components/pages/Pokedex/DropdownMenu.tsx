@@ -5,7 +5,7 @@ import { navigate } from '../../../navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { signOut } from '../../../lib/auth';
 import { useSettings } from '../../../context/SettingsContext';
-import { MoonIcon, SunIcon } from 'lucide-react';
+import { MoonIcon, SunIcon, Globe } from 'lucide-react';
 import PokemonAvatar from '../../shared/PokemonAvatar';
 
 interface MenuItem {
@@ -153,7 +153,7 @@ const DropdownMenu = () => {
             <PokemonAvatar user={user} size="sm" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{user.email}</p>
-              <p className="text-xs text-[var(--text-muted)]">View profile</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('view_profile')}</p>
             </div>
           </Link>
         )}
@@ -181,8 +181,8 @@ const DropdownMenu = () => {
           ))}
         </div>
 
-        {/* Dark mode toggle */}
-        <div className="border-t border-[var(--color-border)] px-5 py-3">
+        {/* Dark mode & language toggles */}
+        <div className="border-t border-[var(--color-border)] px-5 py-3 space-y-1">
           <button
             onClick={() => updateSetting('darkMode', !settings.darkMode)}
             aria-label={settings.darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -193,6 +193,18 @@ const DropdownMenu = () => {
             </div>
             <span className="font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
               {settings.darkMode ? t('lightMode', 'Light mode') : t('darkMode', 'Dark mode')}
+            </span>
+          </button>
+          <button
+            onClick={() => updateSetting('language', settings.language === 'es' ? 'en' : 'es')}
+            aria-label="Toggle language"
+            className="flex items-center gap-3 w-full text-[var(--text-primary)] hover:bg-[var(--color-card-alt)] rounded-xl px-2 py-2.5 transition-colors duration-200 cursor-pointer"
+          >
+            <div className="flex items-center w-8 justify-center">
+              <Globe size={20} className="text-[var(--text-muted)]" />
+            </div>
+            <span className="font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
+              {settings.language === 'es' ? 'English' : 'Español'}
             </span>
           </button>
         </div>

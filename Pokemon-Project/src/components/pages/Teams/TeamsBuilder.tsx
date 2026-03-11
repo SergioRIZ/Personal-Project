@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useTeams } from '../../../context/TeamsContext';
 import { navigate } from '../../../navigation';
-import { Link } from '../../../Link';
 import TeamCard from './TeamCard';
 
 const TeamsBuilder: React.FC = () => {
@@ -73,25 +72,7 @@ const TeamsBuilder: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen app-bg pt-14 sm:pt-8 pb-8 px-4">
-      {/* Back link */}
-      <div className="max-w-5xl mx-auto mb-4">
-        <Link
-          to="/teams"
-          className="inline-flex items-center gap-2 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-200"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {t('teams_back', 'Back to Teams')}
-        </Link>
-      </div>
-
+    <div className="min-h-screen app-bg pt-20 sm:pt-8 pb-8 px-4">
       {/* Full team builder */}
       <div className="max-w-5xl mx-auto">
         <TeamCard team={team} />

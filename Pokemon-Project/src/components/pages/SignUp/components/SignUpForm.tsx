@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import FormField from "./FormField";
 import Button from "./Button";
 import PasswordStrengthMeter from "./PasswordStrengthMeter";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit, showPassword, setShowPassword, showConfirmPassword, setShowConfirmPassword }: Props) => {
+    const { t } = useTranslation();
     // User icon for username field
     const userIcon = (
       <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -82,8 +84,8 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
   
     return (
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300">Cuenta de Entrenador</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Crea tu cuenta y empieza tu aventura</p>
+        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-300">{t('signup_title')}</h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">{t('signup_subtitle')}</p>
         
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           {/* Username field */}
@@ -93,7 +95,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
             type="text"
             value={formData.username}
             onChange={handleChange}
-            label="Nombre de Entrenador"
+            label={t('signup_username_label')}
             placeholder="Ash Ketchum"
             error={errors.username}
             icon={userIcon}
@@ -106,7 +108,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
             type="email"
             value={formData.email}
             onChange={handleChange}
-            label="PokéEmail"
+            label={t('signup_email_label')}
             placeholder="trainer@pokemon.com"
             error={errors.email}
             icon={emailIcon}
@@ -120,7 +122,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              label="Contraseña Secreta"
+              label={t('signup_password_label')}
               placeholder="••••••••"
               error={errors.password}
               icon={lockIcon}
@@ -138,7 +140,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
             type={showConfirmPassword ? "text" : "password"}
             value={formData.confirmPassword}
             onChange={handleChange}
-            label="Confirmar Contraseña"
+            label={t('signup_confirm_password_label')}
             placeholder="••••••••"
             error={errors.confirmPassword}
             icon={lockIcon}
@@ -152,7 +154,7 @@ const SignUpForm = ({ formData, errors, isSubmitting, handleChange, handleSubmit
               disabled={isSubmitting}
               isLoading={isSubmitting}
             >
-              Iniciar Aventura
+              {t('signup_start')}
             </Button>
           </div>
         </form>

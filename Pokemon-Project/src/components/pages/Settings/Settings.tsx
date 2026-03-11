@@ -27,7 +27,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen app-bg flex justify-center items-start pt-14 sm:pt-12 pb-12">
+    <div className="min-h-screen app-bg flex justify-center items-start pt-20 sm:pt-12 pb-12">
       <div className="container max-w-2xl mx-auto px-6">
         <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl overflow-hidden transition-colors duration-300">
 

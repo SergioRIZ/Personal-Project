@@ -100,7 +100,7 @@ const Pokedex = () => {
   if (error) return <ErrorMessage error={error} />;
 
   return (
-    <div className="min-h-screen app-bg pt-14 sm:pt-6 pb-6">
+    <div className="min-h-screen app-bg pt-20 sm:pt-6 pb-6">
       <AuthLinks />
 
       <div className="container mx-auto px-4 pt-16 sm:pt-10">

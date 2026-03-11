@@ -1,6 +1,8 @@
 import { navigate } from '../../navigation';
+import { useTranslation } from 'react-i18next';
 
 export default function Page404() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen app-bg flex items-center justify-center p-4">
       <div className="text-center animate-slide-up">
@@ -27,10 +29,10 @@ export default function Page404() {
         </div>
 
         <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-          Page not found
+          {t('page_404_title')}
         </h2>
         <p className="text-[var(--text-secondary)] mb-8 max-w-sm mx-auto">
-          This page has fled into the tall grass. It might not exist or may have been moved.
+          {t('page_404_desc')}
         </p>
 
         <button
@@ -41,7 +43,7 @@ export default function Page404() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          Go Home
+          {t('page_404_cta')}
         </button>
       </div>
     </div>
