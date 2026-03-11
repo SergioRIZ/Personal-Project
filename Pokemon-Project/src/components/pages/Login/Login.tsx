@@ -1,5 +1,6 @@
 import '../css/register.css';
 import { LoginHeader, LoginForm, LoginFooter, Alert } from './components';
+import SocialAuth from '../SignUp/components/SocialAuth';
 import useLoginForm from './hooks/useLoginForm';
 import { useTranslation } from 'react-i18next';
 
@@ -48,6 +49,8 @@ export default function Login() {
               handleSubmit={handleSubmit}
               toggleShowPassword={toggleShowPassword}
             />
+
+            <SocialAuth />
           </div>
 
           <LoginFooter />

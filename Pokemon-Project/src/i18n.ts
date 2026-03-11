@@ -198,6 +198,9 @@ i18next
           signup_login: "Log in",
           signup_header_title: "Pokémon League",
           signup_header_subtitle: "Official platform for trainers",
+          // Social auth
+          social_or: "Or continue with",
+          social_google: "Continue with Google",
         }
       },
       es: {
@@ -393,6 +396,9 @@ i18next
           signup_login: "Inicia sesión",
           signup_header_title: "Liga Pokémon",
           signup_header_subtitle: "Plataforma oficial para entrenadores",
+          // Social auth
+          social_or: "O continuar con",
+          social_google: "Continuar con Google",
         }
       }
     },

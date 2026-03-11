@@ -1,6 +1,13 @@
-import { Link } from "../../../../Link";
+import { useTranslation } from "react-i18next";
+import { signInWithGoogle } from "../../../../lib/auth";
 
 const SocialAuth = () => {
+  const { t } = useTranslation();
+
+  const handleGoogle = async () => {
+    await signInWithGoogle();
+  };
+
   return (
     <div className="mt-8">
       <div className="relative">
@@ -8,15 +15,15 @@ const SocialAuth = () => {
           <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">O regístrate con</span>
+          <span className="px-2 bg-[var(--color-card)] text-gray-500 dark:text-gray-400">{t('social_or')}</span>
         </div>
       </div>
 
       <div className="mt-6 flex justify-center">
-        {/* Google Button */}
-        <Link
-          to="/auth/google"
-          className="w-full inline-flex items-center justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        <button
+          type="button"
+          onClick={handleGoogle}
+          className="w-full inline-flex items-center justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer transition-colors duration-200"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -26,8 +33,8 @@ const SocialAuth = () => {
               <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
             </g>
           </svg>
-          <span>Continuar con Google</span>
-        </Link>
+          <span>{t('social_google')}</span>
+        </button>
       </div>
     </div>
   );
