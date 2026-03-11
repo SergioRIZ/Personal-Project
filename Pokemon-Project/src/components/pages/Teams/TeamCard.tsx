@@ -157,7 +157,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
 
         {/* Slots grid */}
         <div className="p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[1, 2, 3, 4, 5, 6].map(slot => (
               <TeamSlot
                 key={slot}

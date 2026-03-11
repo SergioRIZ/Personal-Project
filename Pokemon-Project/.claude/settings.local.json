@@ -64,7 +64,8 @@
       "Bash(ls -lh /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public/icons-types/*.svg | wc -l)",
       "Bash(ls -1 /c/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/public/icons-types/*.svg)",
       "Bash(find \"C:/Users/Usuario/Desktop/PROYECTOS/Personal-Project/Pokemon-Project/src/components\" -type f -name \"*.tsx\" -o -name \"*.ts\" | grep -E \"\\\\.\\(tsx|ts\\)$\")",
-      "mcp__chrome-devtools__resize_page"
+      "mcp__chrome-devtools__resize_page",
+      "mcp__chrome-devtools__emulate"
     ]
   }
 }

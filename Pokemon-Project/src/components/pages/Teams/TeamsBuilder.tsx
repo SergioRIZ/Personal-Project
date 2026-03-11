@@ -73,7 +73,7 @@ const TeamsBuilder: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen app-bg py-8 px-4">
+    <div className="min-h-screen app-bg pt-16 sm:pt-8 pb-8 px-4">
       {/* Back link */}
       <div className="max-w-5xl mx-auto mb-4">
         <Link
