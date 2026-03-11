@@ -105,12 +105,19 @@ const Pokedex = () => {
 
       <div className="container mx-auto px-4 pt-16 sm:pt-10">
         <header className="text-center mb-6 sm:mb-8 px-10 sm:px-0">
-          <h1
-            className="text-2xl sm:text-4xl md:text-5xl font-extrabold gradient-text mb-2 drop-shadow-md"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            {t('title')}
-          </h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1
+              className="text-2xl sm:text-4xl md:text-5xl font-extrabold gradient-text mb-2 drop-shadow-md"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {t('title')}
+            </h1>
+            <img
+              src="/Context/RotomDex.webp"
+              alt="Rotom Dex"
+              className="w-10 h-10 sm:w-14 sm:h-14 object-contain drop-shadow-md -mt-1"
+            />
+          </div>
           {settings.generations.length > 0 && (
             <p
               className="text-sm text-[var(--text-secondary)] mt-1 font-medium"

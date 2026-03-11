@@ -185,16 +185,23 @@ const PokemonDetailPage = () => {
                 <button
                   onClick={() => pokemonId > 1 && navigate(`/pokemon/${pokemonId - 1}`)}
                   disabled={pokemonId <= 1}
-                  className={`flex items-center gap-1.5 text-sm font-bold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-1 text-sm font-bold transition-colors cursor-pointer ${
                     pokemonId > 1
                       ? 'text-[var(--text-secondary)] hover:text-[var(--color-primary)]'
                       : 'text-[var(--text-muted)] cursor-default'
                   }`}
                   style={{ fontFamily: 'var(--font-display)' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
+                  {pokemonId > 1 && (
+                    <img
+                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId - 1}.png`}
+                      alt={`#${pokemonId - 1}`}
+                      className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                    />
+                  )}
                   <span className="hidden sm:inline">
                     N.° {(pokemonId - 1).toString().padStart(4, '0')}
                   </span>
@@ -212,13 +219,18 @@ const PokemonDetailPage = () => {
                 {/* Next */}
                 <button
                   onClick={() => navigate(`/pokemon/${pokemonId + 1}`)}
-                  className="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                  className="flex items-center gap-1 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-colors cursor-pointer"
                   style={{ fontFamily: 'var(--font-display)' }}
                 >
                   <span className="hidden sm:inline">
                     N.° {(pokemonId + 1).toString().padStart(4, '0')}
                   </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <img
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId + 1}.png`}
+                    alt={`#${pokemonId + 1}`}
+                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                  />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                   </svg>
                 </button>
