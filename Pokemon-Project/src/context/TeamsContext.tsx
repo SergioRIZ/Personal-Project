@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './AuthContext';
 import {
   fetchTeams,
@@ -55,34 +55,39 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, [user]);
 
-  const createTeam = async (name: string): Promise<Team | null> => {
+  // Helper to refetch teams on error
+  const refetch = useCallback(() => {
+    if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+  }, [user]);
+
+  const createTeam = useCallback(async (name: string): Promise<Team | null> => {
     if (!user) return null;
     const newTeam = await createTeamApi(user.id, name);
     setTeams(prev => [...prev, newTeam]);
     return newTeam;
-  };
+  }, [user]);
 
-  const deleteTeam = async (teamId: string): Promise<void> => {
+  const deleteTeam = useCallback(async (teamId: string): Promise<void> => {
     setTeams(prev => prev.filter(t => t.id !== teamId));
     try {
       await deleteTeamApi(teamId);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const renameTeam = async (teamId: string, name: string): Promise<void> => {
+  const renameTeam = useCallback(async (teamId: string, name: string): Promise<void> => {
     setTeams(prev => prev.map(t => t.id === teamId ? { ...t, name } : t));
     try {
       await renameTeamApi(teamId, name);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const addMember = async (teamId: string, member: TeamMemberInput): Promise<void> => {
+  const addMember = useCallback(async (teamId: string, member: TeamMemberInput): Promise<void> => {
     const optimisticMember: TeamMember = {
       id: `optimistic-${Date.now()}`,
       team_id: teamId,
@@ -94,7 +99,6 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
       ivs: null,
       ...member,
     };
-    // Optimistic update
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       const filtered = t.members.filter(m => m.slot !== member.slot);
@@ -105,7 +109,6 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     }));
     try {
       const saved = await upsertTeamMember(teamId, member);
-      // Replace optimistic member with real one
       setTeams(prev => prev.map(t => {
         if (t.id !== teamId) return t;
         return {
@@ -114,12 +117,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
         };
       }));
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const removeMember = async (teamId: string, slot: number): Promise<void> => {
+  const removeMember = useCallback(async (teamId: string, slot: number): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.filter(m => m.slot !== slot) };
@@ -127,13 +130,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await removeTeamMember(teamId, slot);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberMoves = async (teamId: string, slot: number, moves: string[]): Promise<void> => {
-    // Optimistic update
+  const updateMemberMoves = useCallback(async (teamId: string, slot: number, moves: string[]): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return {
@@ -144,12 +146,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberMovesApi(teamId, slot, moves);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberAbility = async (teamId: string, slot: number, ability: string | null): Promise<void> => {
+  const updateMemberAbility = useCallback(async (teamId: string, slot: number, ability: string | null): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, ability } : m) };
@@ -157,12 +159,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberAbilityApi(teamId, slot, ability);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberItem = async (teamId: string, slot: number, item: string | null): Promise<void> => {
+  const updateMemberItem = useCallback(async (teamId: string, slot: number, item: string | null): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, item } : m) };
@@ -170,12 +172,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberItemApi(teamId, slot, item);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberNature = async (teamId: string, slot: number, nature: string | null): Promise<void> => {
+  const updateMemberNature = useCallback(async (teamId: string, slot: number, nature: string | null): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, nature } : m) };
@@ -183,12 +185,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberNatureApi(teamId, slot, nature);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberEVs = async (teamId: string, slot: number, evs: EVSpread | null): Promise<void> => {
+  const updateMemberEVs = useCallback(async (teamId: string, slot: number, evs: EVSpread | null): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, evs } : m) };
@@ -196,12 +198,12 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberEVsApi(teamId, slot, evs);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
 
-  const updateMemberIVs = async (teamId: string, slot: number, ivs: IVSpread | null): Promise<void> => {
+  const updateMemberIVs = useCallback(async (teamId: string, slot: number, ivs: IVSpread | null): Promise<void> => {
     setTeams(prev => prev.map(t => {
       if (t.id !== teamId) return t;
       return { ...t, members: t.members.map(m => m.slot === slot ? { ...m, ivs } : m) };
@@ -209,13 +211,21 @@ export function TeamsProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateMemberIVsApi(teamId, slot, ivs);
     } catch (err) {
-      if (user) fetchTeams(user.id).then(setTeams).catch(console.error);
+      refetch();
       console.error(err);
     }
-  };
+  }, [refetch]);
+
+  const value = useMemo(() => ({
+    teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember,
+    updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature,
+    updateMemberEVs, updateMemberIVs,
+  }), [teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember,
+    updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature,
+    updateMemberEVs, updateMemberIVs]);
 
   return (
-    <TeamsContext.Provider value={{ teams, loading, createTeam, deleteTeam, renameTeam, addMember, removeMember, updateMemberMoves, updateMemberAbility, updateMemberItem, updateMemberNature, updateMemberEVs, updateMemberIVs }}>
+    <TeamsContext.Provider value={value}>
       {children}
     </TeamsContext.Provider>
   );

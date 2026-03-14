@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PokemonTypes from './PokemonTypes';
 import PokemonStats from './PokemonStats';
@@ -14,21 +14,15 @@ interface Props {
   abilityDescriptions: AbilityMap;
 }
 
-const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) => {
+const PokemonCard = memo(({ pokemon, currentLanguage, abilityDescriptions }: Props) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { collectedIds, addPokemon, removePokemon } = useCollection();
-  const [showTooltip, setShowTooltip] = useState(false);
   const [isShiny, setIsShiny] = useState(false);
-  const [spriteOpacity, setSpriteOpacity] = useState(1);
 
   const handleShinyToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSpriteOpacity(0);
-    setTimeout(() => {
-      setIsShiny(s => !s);
-      setSpriteOpacity(1);
-    }, 150);
+    setIsShiny(s => !s);
   };
   const pokemonName = pokemon.name.replace('-', ' ');
   const isCollected = collectedIds.has(pokemon.id);
@@ -37,7 +31,6 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
     pokemon.sprites.front_default;
   const hasOfficialShiny = !!pokemon.sprites.other['official-artwork'].front_shiny;
   const shinySprite = pokemon.sprites.other['official-artwork'].front_shiny || normalSprite;
-  const sprite = isShiny ? shinySprite : normalSprite;
 
   return (
     <div className="group bg-[var(--color-card)] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-[var(--color-border)] w-full relative">
@@ -47,20 +40,16 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
       <div className="p-4">
         {/* Header: Name + ID */}
         <div className="flex items-center justify-between mb-3">
-          <div className="relative min-w-0 flex-1">
+          <div className="group/name relative min-w-0 flex-1">
             <h2
               className="text-base font-bold capitalize text-[var(--text-primary)] truncate"
               style={{ fontFamily: 'var(--font-display)' }}
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
             >
               {pokemonName}
             </h2>
-            {showTooltip && (
-              <div className="absolute left-0 top-full mt-1 px-3 py-1 bg-[var(--color-card)] text-[var(--text-primary)] text-sm rounded-lg shadow-lg border border-[var(--color-border)] z-50">
-                {pokemonName}
-              </div>
-            )}
+            <div className="absolute left-0 top-full mt-1 px-3 py-1 bg-[var(--color-card)] text-[var(--text-primary)] text-sm rounded-lg shadow-lg border border-[var(--color-border)] z-50 opacity-0 invisible group-hover/name:opacity-100 group-hover/name:visible transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+              {pokemonName}
+            </div>
           </div>
           <div
             className="bg-[var(--color-primary-light)] text-[var(--color-primary)] font-bold px-3 py-1 rounded-lg text-sm shrink-0"
@@ -75,7 +64,7 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
           style={{ background: 'linear-gradient(135deg, var(--color-card-alt), var(--color-surface))' }}
         >
           {/* Geometric pattern */}
-          <div className="absolute inset-0 opacity-[0.04]">
+          <div className="absolute inset-0 opacity-[0.04]" aria-hidden="true">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <pattern id={`grid-${pokemon.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
                 <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--color-primary)" strokeWidth="0.5" />
@@ -84,12 +73,24 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
             </svg>
           </div>
 
-          <img
-            src={sprite}
-            alt={pokemonName}
-            className="z-10 w-28 h-28 sm:w-36 sm:h-36 object-contain transform group-hover:scale-110 drop-shadow-lg"
-            style={{ opacity: spriteOpacity, transition: 'opacity 0.15s ease, transform 0.5s ease' }}
-          />
+          <div className="relative z-10 w-28 h-28 sm:w-36 sm:h-36 transform group-hover:scale-110" style={{ transition: 'transform 0.5s ease' }}>
+            <img
+              src={normalSprite}
+              alt={pokemonName}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-contain drop-shadow-lg"
+              style={{ opacity: isShiny ? 0 : 1, transition: 'opacity 0.2s ease' }}
+            />
+            {hasOfficialShiny && (
+              <img
+                src={shinySprite}
+                alt={`${pokemonName} shiny`}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-contain drop-shadow-lg"
+                style={{ opacity: isShiny ? 1 : 0, transition: 'opacity 0.2s ease' }}
+              />
+            )}
+          </div>
 
           {/* Shiny toggle button */}
           {hasOfficialShiny && (
@@ -140,6 +141,8 @@ const PokemonCard = ({ pokemon, currentLanguage, abilityDescriptions }: Props) =
       </div>
     </div>
   );
-};
+});
+
+PokemonCard.displayName = 'PokemonCard';
 
 export default PokemonCard;

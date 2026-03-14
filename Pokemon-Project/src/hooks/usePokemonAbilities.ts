@@ -7,27 +7,43 @@ export interface PokemonAbility {
   isHidden: boolean;
 }
 
-// Module-level caches — survive remounts
+// Module-level caches — survive remounts, keyed by `lang:slug` (capped)
+const CACHE_MAX = 300;
 const pokemonAbilityListCache = new Map<number, { slug: string; isHidden: boolean }[]>();
 const abilityDetailCache = new Map<string, { name: string; shortEffect: string }>();
+
+function setAbilityCache(key: string, value: { name: string; shortEffect: string }) {
+  if (abilityDetailCache.size >= CACHE_MAX) {
+    const firstKey = abilityDetailCache.keys().next().value!;
+    abilityDetailCache.delete(firstKey);
+  }
+  abilityDetailCache.set(key, value);
+}
 
 function formatSlug(slug: string): string {
   return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-async function fetchAbilityDetail(slug: string): Promise<{ name: string; shortEffect: string }> {
+async function fetchAbilityDetail(slug: string, lang: string): Promise<{ name: string; shortEffect: string }> {
   const res = await fetch(`https://pokeapi.co/api/v2/ability/${slug}`);
   if (!res.ok) throw new Error(`Ability not found: ${slug}`);
   const data = await res.json() as {
     names: Array<{ name: string; language: { name: string } }>;
     effect_entries: Array<{ short_effect: string; language: { name: string } }>;
+    flavor_text_entries: Array<{ flavor_text: string; language: { name: string } }>;
   };
-  const enName = data.names?.find(n => n.language.name === 'en')?.name ?? formatSlug(slug);
-  const enEntry = data.effect_entries?.find(e => e.language.name === 'en');
-  return { name: enName, shortEffect: enEntry?.short_effect ?? '' };
+  const localName = data.names?.find(n => n.language.name === lang)?.name
+    ?? data.names?.find(n => n.language.name === 'en')?.name
+    ?? formatSlug(slug);
+  const localEffect = data.effect_entries?.find(e => e.language.name === lang)?.short_effect
+    ?? data.flavor_text_entries?.filter(f => f.language.name === lang).pop()?.flavor_text
+    ?? data.effect_entries?.find(e => e.language.name === 'en')?.short_effect
+    ?? data.flavor_text_entries?.filter(f => f.language.name === 'en').pop()?.flavor_text
+    ?? '';
+  return { name: localName, shortEffect: localEffect };
 }
 
-export function usePokemonAbilities(pokemonId: number | null): {
+export function usePokemonAbilities(pokemonId: number | null, lang = 'en'): {
   abilities: PokemonAbility[];
   loading: boolean;
 } {
@@ -56,15 +72,16 @@ export function usePokemonAbilities(pokemonId: number | null): {
 
       if (cancelled) return;
 
-      // Step 2 — fetch details for each ability
+      // Step 2 — fetch details for each ability (language-aware)
       const results = await Promise.allSettled(
         list.map(async ({ slug, isHidden }) => {
+          const cacheKey = `${lang}:${slug}`;
           let detail: { name: string; shortEffect: string };
-          if (abilityDetailCache.has(slug)) {
-            detail = abilityDetailCache.get(slug)!;
+          if (abilityDetailCache.has(cacheKey)) {
+            detail = abilityDetailCache.get(cacheKey)!;
           } else {
-            detail = await fetchAbilityDetail(slug);
-            abilityDetailCache.set(slug, detail);
+            detail = await fetchAbilityDetail(slug, lang);
+            setAbilityCache(cacheKey, detail);
           }
           return { slug, name: detail.name, shortEffect: detail.shortEffect, isHidden } as PokemonAbility;
         })
@@ -82,7 +99,7 @@ export function usePokemonAbilities(pokemonId: number | null): {
 
     load().catch(console.error);
     return () => { cancelled = true; };
-  }, [pokemonId]);
+  }, [pokemonId, lang]);
 
   return { abilities, loading };
 }

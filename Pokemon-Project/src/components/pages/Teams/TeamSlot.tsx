@@ -7,6 +7,7 @@ import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
 import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import { useItemList } from '../../../hooks/useItemList';
 import TeamMemberEditor from './TeamMemberEditor';
+import { NATURES, getNatureModifiers } from '../../../lib/natures';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
 
 interface Props {
@@ -45,30 +46,8 @@ const TYPE_ACCENT: Record<string, string> = {
   fairy:    '#EE99AC',
 };
 
-const DAMAGE_CLASS_SPRITE: Record<string, string> = {
-  physical: '/move-types/Physic.png',
-  special:  '/move-types/Special.png',
-  status:   '/move-types/Status.png',
-};
-
 const getTypeIconUrl = (type: string): string =>
   `/icons-types/${type.toLowerCase()}.svg`;
-
-const NATURES = [
-  ['Hardy',   null,  null  ], ['Lonely',  'atk', 'def'],
-  ['Brave',   'atk', 'spe'], ['Adamant', 'atk', 'spa'],
-  ['Naughty', 'atk', 'spd'], ['Bold',    'def', 'atk'],
-  ['Docile',  null,  null  ], ['Relaxed', 'def', 'spe'],
-  ['Impish',  'def', 'spa'], ['Lax',     'def', 'spd'],
-  ['Timid',   'spe', 'atk'], ['Hasty',   'spe', 'def'],
-  ['Serious', null,  null  ], ['Jolly',   'spe', 'spa'],
-  ['Naive',   'spe', 'spd'], ['Modest',  'spa', 'atk'],
-  ['Mild',    'spa', 'def'], ['Quiet',   'spa', 'spe'],
-  ['Bashful', null,  null  ], ['Rash',    'spa', 'spd'],
-  ['Calm',    'spd', 'atk'], ['Gentle',  'spd', 'def'],
-  ['Sassy',   'spd', 'spe'], ['Careful', 'spd', 'spa'],
-  ['Quirky',  null,  null  ],
-] as const;
 
 const STAT_ORDER: (keyof BaseStats)[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const STAT_DISPLAY: Record<keyof BaseStats, string> = {
@@ -81,6 +60,22 @@ const STAT_BAR_COLORS: Record<keyof BaseStats, string> = {
   spa: 'bg-gradient-to-r from-blue-500 to-indigo-500',
   spd: 'bg-gradient-to-r from-emerald-500 to-green-500',
   spe: 'bg-gradient-to-r from-violet-500 to-purple-500',
+};
+const STAT_TEXT_COLORS: Record<keyof BaseStats, string> = {
+  hp:  'text-rose-600 dark:text-rose-400',
+  atk: 'text-amber-600 dark:text-amber-400',
+  def: 'text-yellow-600 dark:text-yellow-400',
+  spa: 'text-blue-600 dark:text-blue-400',
+  spd: 'text-emerald-600 dark:text-emerald-400',
+  spe: 'text-violet-600 dark:text-violet-400',
+};
+const STAT_ROW_BG: Record<keyof BaseStats, string> = {
+  hp:  'bg-rose-50/50 dark:bg-rose-900/15',
+  atk: 'bg-amber-50/50 dark:bg-amber-900/15',
+  def: 'bg-yellow-50/50 dark:bg-yellow-900/15',
+  spa: 'bg-blue-50/50 dark:bg-blue-900/15',
+  spd: 'bg-emerald-50/50 dark:bg-emerald-900/15',
+  spe: 'bg-violet-50/50 dark:bg-violet-900/15',
 };
 const STAT_BAR_MAX = 400;
 
@@ -102,17 +97,19 @@ const TeamSlot: React.FC<Props> = ({
   slot, member, onAdd, onRemove, onUpdateMoves, onUpdateAbility,
   onUpdateItem, onUpdateNature, onUpdateEVs, onUpdateIVs,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const lang = i18n.language;
 
-  const { details: moveDetails } = useMoveDetails(member?.moves ?? []);
-  const { abilities } = usePokemonAbilities(member?.pokemon_id ?? null);
+  const { details: moveDetails } = useMoveDetails(member?.moves ?? [], lang);
+  const { abilities } = usePokemonAbilities(member?.pokemon_id ?? null, lang);
   const { stats: baseStats } = usePokemonBaseStats(member?.pokemon_id ?? null);
-  const { items: allItems } = useItemList();
+  const { items: allItems } = useItemList(lang);
 
   const matchedItem = useMemo(() => {
     if (!member?.item) return null;
-    return allItems.find(i => i.name.toLowerCase() === member.item!.toLowerCase()) ?? null;
+    const q = member.item!.toLowerCase();
+    return allItems.find(i => i.name.toLowerCase() === q || i.slug === q || i.slug === q.replace(/\s+/g, '-')) ?? null;
   }, [member?.item, allItems]);
 
   /* ── Empty slot ──────────────────────────────────────────────────── */
@@ -139,32 +136,37 @@ const TeamSlot: React.FC<Props> = ({
   const moves = member.moves ?? [];
   const selectedAbility = abilities.find(a => a.slug === member.ability) ?? null;
 
-  const natureMods = { hp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 } as Record<keyof BaseStats, number>;
-  if (member.nature) {
-    const nat = NATURES.find(([n]) => n === member.nature);
-    if (nat?.[1]) {
-      natureMods[nat[1] as keyof BaseStats] = 1.1;
-      natureMods[nat[2] as keyof BaseStats] = 0.9;
-    }
-  }
+  const natureMods = useMemo(() => getNatureModifiers(member.nature ?? null), [member.nature]);
 
   return (
     <>
       <div
-        className="flex flex-col rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden cursor-pointer"
-        style={{ borderTopColor: accentHex, borderTopWidth: '3px' }}
+        className="group/card flex flex-col rounded-2xl cursor-pointer overflow-hidden bg-[var(--color-card)] shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-[var(--color-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+        role="button"
+        tabIndex={0}
+        aria-label={`${member.pokemon_name} #${member.pokemon_id} — ${t('teams_edit')}`}
         onClick={() => setIsEditorOpen(true)}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsEditorOpen(true); } }}
       >
-        {/* ── Card header ─────────────────────────────────────────── */}
+        {/* ── Header — full type-colored background ───────────── */}
         <div
-          className="relative flex flex-col items-center pt-4 pb-3 px-3 group/card"
-          style={{ background: `linear-gradient(160deg, ${accentHex}22 0%, transparent 65%)` }}
+          className="relative flex flex-col items-center pt-5 pb-4 px-3"
+          style={{ background: `linear-gradient(160deg, ${accentHex}35 0%, ${accentHex}15 50%, ${accentHex}08 100%)` }}
         >
+          {/* Pokeball watermark */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden" aria-hidden="true">
+            <svg viewBox="0 0 200 200" className="w-40 h-40 opacity-[0.06]">
+              <circle cx="100" cy="100" r="93" stroke={accentHex} strokeWidth="4" fill="none" />
+              <line x1="7" y1="100" x2="193" y2="100" stroke={accentHex} strokeWidth="4" />
+              <circle cx="100" cy="100" r="24" stroke={accentHex} strokeWidth="4" fill="none" />
+            </svg>
+          </div>
+
           {/* Remove button */}
           <button
             onClick={e => { e.stopPropagation(); onRemove(slot); }}
             aria-label={t('teams_remove_member')}
-            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 text-red-400 shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 hover:bg-red-50 dark:hover:bg-red-900/30 cursor-pointer border border-gray-200 dark:border-gray-600"
+            className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white/70 dark:bg-gray-900/70 text-red-400 shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 hover:bg-red-50 dark:hover:bg-red-900/40 cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -172,12 +174,11 @@ const TeamSlot: React.FC<Props> = ({
           </button>
 
           {/* Sprite */}
-          <div className="relative w-20 h-20 mb-1">
-            <div className="absolute inset-0 rounded-full" style={{ backgroundColor: `${accentHex}25` }} />
+          <div className="relative z-[1] w-24 h-24 mb-2">
             <img
               src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemon_id}.png`}
               alt={member.pokemon_name}
-              className="relative w-20 h-20 object-contain drop-shadow-md"
+              className="w-24 h-24 object-contain drop-shadow-lg group-hover/card:scale-110 transition-transform duration-500"
               loading="lazy"
               onError={e => {
                 (e.target as HTMLImageElement).src =
@@ -187,167 +188,177 @@ const TeamSlot: React.FC<Props> = ({
           </div>
 
           {/* Name + ID */}
-          <p className="font-bold capitalize text-gray-800 dark:text-white text-sm text-center leading-tight">
+          <p className="relative z-[1] font-extrabold capitalize text-[var(--text-primary)] text-sm text-center leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
             {member.pokemon_name.replace(/-/g, ' ')}
           </p>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2">
-            #{member.pokemon_id.toString().padStart(3, '0')}
-          </p>
+          <span className="relative z-[1] text-[10px] font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: accentHex }}>
+            #{member.pokemon_id.toString().padStart(4, '0')}
+          </span>
 
           {/* Type badges */}
-          <div className="flex flex-wrap justify-center gap-10">
+          <div className="relative z-[1] flex flex-wrap justify-center gap-1.5">
             {member.pokemon_types.map(type => (
               <img
                 key={type}
                 src={getTypeSpriteUrl(type)}
                 alt={type}
                 title={type}
-                className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform duration-200"
+                className="w-16 h-auto object-contain drop-shadow-md"
               />
             ))}
           </div>
         </div>
 
-        {/* ── Stat bars ───────────────────────────────────────────── */}
-        <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-2.5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-              Lv.50
-            </span>
-            {member.nature && (
-              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
-                {member.nature}
-              </span>
+        {/* ── Ability & Item — compact row ────────────────────── */}
+        {(selectedAbility || matchedItem) && (
+          <div className="flex items-stretch border-b border-[var(--color-border)]">
+            {selectedAbility && (
+              <div className="group/abl relative flex-1 flex items-center gap-1.5 px-2.5 py-2 min-w-0 border-r border-[var(--color-border)] last:border-r-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                </svg>
+                <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
+                  {selectedAbility.name}
+                </span>
+                {/* Tooltip */}
+                {selectedAbility.shortEffect && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/abl:opacity-100 group-focus-within/abl:opacity-100 transition-opacity duration-200">
+                    <p className="text-[10px] font-bold text-purple-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{selectedAbility.name}</p>
+                    <p className="text-[11px] leading-relaxed text-gray-300">{selectedAbility.shortEffect}</p>
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                  </div>
+                )}
+              </div>
+            )}
+            {matchedItem && (
+              <div className="group/itm relative flex-1 flex items-center gap-1.5 px-2.5 py-2 min-w-0">
+                <img
+                  src={matchedItem.sprite}
+                  data-fallback={matchedItem.spriteFallback}
+                  alt={matchedItem.name}
+                  className="w-4 h-4 shrink-0 object-contain"
+                  onError={e => {
+                    const img = e.target as HTMLImageElement;
+                    const fb = img.dataset.fallback;
+                    if (fb && img.src !== fb) img.src = fb;
+                  }}
+                />
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
+                  {matchedItem.name}
+                </span>
+                {matchedItem.desc && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/itm:opacity-100 group-focus-within/itm:opacity-100 transition-opacity duration-200">
+                    <p className="text-[10px] font-bold text-amber-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{matchedItem.name}</p>
+                    <p className="text-[11px] leading-relaxed text-gray-300">{matchedItem.desc}</p>
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                  </div>
+                )}
+              </div>
             )}
           </div>
+        )}
 
-          {baseStats ? (
-            <div className="space-y-1.5">
-              {STAT_ORDER.map(stat => {
-                const ev = (member.evs?.[stat]) ?? 0;
-                const iv = (member.ivs?.[stat]) ?? 0;
-                const calc = calcStat(baseStats[stat], ev, iv, stat === 'hp', natureMods[stat]);
-                const barPct = Math.min(100, (calc / STAT_BAR_MAX) * 100);
-                const isBoosted = natureMods[stat] === 1.1;
-                const isDropped = natureMods[stat] === 0.9;
-                return (
-                  <div key={stat} className="flex items-center gap-2">
-                    <span className={`text-[10px] font-extrabold w-7 shrink-0 ${
-                      isBoosted ? 'text-green-500' : isDropped ? 'text-red-400' : 'text-gray-400 dark:text-gray-500'
-                    }`}>
-                      {STAT_DISPLAY[stat]}
-                    </span>
-                    <div className="flex-1 h-2.5 rounded-md bg-gray-100 dark:bg-gray-700/80 overflow-hidden">
-                      <div
-                        className={`h-full rounded-md transition-all duration-700 ease-out ${
-                          isBoosted
-                            ? 'bg-gradient-to-r from-green-400 to-green-500'
-                            : isDropped
-                              ? 'bg-gradient-to-r from-red-300 to-red-400'
-                              : STAT_BAR_COLORS[stat]
-                        }`}
-                        style={{ width: `${barPct}%` }}
-                      />
+        {/* ── Stat bars ─────────────────────────────────────── */}
+        <div className="px-2.5 py-2">
+          <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
+            {baseStats ? (
+              <>
+                {STAT_ORDER.map((stat, i) => {
+                  const ev = (member.evs?.[stat]) ?? 0;
+                  const iv = (member.ivs?.[stat]) ?? 0;
+                  const calc = calcStat(baseStats[stat], ev, iv, stat === 'hp', natureMods[stat]);
+                  const barPct = Math.min(100, (calc / STAT_BAR_MAX) * 100);
+                  const isBoosted = natureMods[stat] === 1.1;
+                  const isDropped = natureMods[stat] === 0.9;
+                  return (
+                    <div
+                      key={stat}
+                      className={`flex items-center gap-1.5 px-2.5 py-[5px] ${STAT_ROW_BG[stat]} ${
+                        i < STAT_ORDER.length - 1 ? 'border-b border-[var(--color-border)]/30' : ''
+                      }`}
+                    >
+                      <span className={`text-[10px] font-extrabold w-7 shrink-0 ${
+                        isBoosted ? 'text-green-600 dark:text-green-400' : isDropped ? 'text-red-500 dark:text-red-400' : STAT_TEXT_COLORS[stat]
+                      }`} style={{ fontFamily: 'var(--font-display)' }}>
+                        {STAT_DISPLAY[stat]}{isBoosted ? '↑' : isDropped ? '↓' : ''}
+                      </span>
+                      <div className="flex-1 h-2 rounded-full bg-black/[0.06] dark:bg-white/[0.06] overflow-hidden shadow-inner">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${
+                            isBoosted
+                              ? 'bg-gradient-to-r from-green-400 to-green-500'
+                              : isDropped
+                                ? 'bg-gradient-to-r from-red-300 to-red-400'
+                                : STAT_BAR_COLORS[stat]
+                          }`}
+                          style={{ width: `${barPct}%` }}
+                        />
+                      </div>
+                      <span className={`text-[11px] font-black tabular-nums w-7 text-right shrink-0 ${
+                        isBoosted ? 'text-green-600 dark:text-green-400' : isDropped ? 'text-red-500 dark:text-red-400' : STAT_TEXT_COLORS[stat]
+                      }`} style={{ fontFamily: 'var(--font-display)' }}>
+                        {calc}
+                      </span>
                     </div>
-                    <span className={`text-[11px] font-bold tabular-nums w-8 text-right shrink-0 ${
-                      isBoosted ? 'text-green-500' : isDropped ? 'text-red-400' : 'text-gray-700 dark:text-gray-200'
-                    }`}>
-                      {calc}
+                  );
+                })}
+              </>
+            ) : (
+              <div className="flex justify-center py-4" role="status" aria-label="Loading stats">
+                <div className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Moves — colored left border ─────────────────────── */}
+        {moves.length > 0 && (
+          <div className="px-2.5 pb-2.5 mt-auto">
+            <div className="rounded-lg overflow-hidden border border-[var(--color-border)]/60">
+              {moves.map((move, i) => {
+                const detail = moveDetails[move];
+                const typeHex = detail ? (TYPE_ACCENT[detail.type] ?? '#A8A878') : '#A8A878';
+                return (
+                  <div
+                    key={`${move}-${i}`}
+                    className={`group/mv relative flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 border-l-[3px] ${
+                      i < moves.length - 1 ? 'border-b border-b-[var(--color-border)]/30' : ''
+                    }`}
+                    style={{
+                      borderLeftColor: typeHex,
+                      background: `linear-gradient(90deg, ${typeHex}10, transparent)`,
+                    }}
+                  >
+                    {detail && (
+                      <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-4 h-4 object-contain" />
+                    )}
+                    <span className="text-[11px] font-bold truncate text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+                      {detail?.name ?? formatMoveName(move)}
                     </span>
+                    {detail?.shortEffect && (
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/mv:opacity-100 group-focus-within/mv:opacity-100 transition-opacity duration-200">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="w-3.5 h-3.5 object-contain" />
+                          <p className="text-[10px] font-bold text-gray-200" style={{ fontFamily: 'var(--font-display)' }}>{detail.name}</p>
+                          {detail.power && <span className="text-[10px] font-bold text-gray-400 ml-auto">{detail.power} pw</span>}
+                        </div>
+                        <p className="text-[11px] leading-relaxed text-gray-300">{detail.shortEffect}</p>
+                        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                      </div>
+                    )}
                   </div>
                 );
               })}
-              {/* Total */}
-              <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-gray-700/50">
-                <span className="text-[10px] font-extrabold w-7 shrink-0 text-gray-400 dark:text-gray-500">
-                  Tot
-                </span>
-                <span className="flex-1" />
-                <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0 text-gray-700 dark:text-gray-200">
-                  {STAT_ORDER.reduce((sum, s) => {
-                    const ev = (member.evs?.[s]) ?? 0;
-                    const iv = (member.ivs?.[s]) ?? 0;
-                    return sum + calcStat(baseStats[s], ev, iv, s === 'hp', natureMods[s]);
-                  }, 0)}
-                </span>
-              </div>
             </div>
-          ) : (
-            <div className="flex justify-center py-4">
-              <div className="w-5 h-5 border-2 border-gray-200 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* ── Summary table (ability, item, moves) ──────────────── */}
-        <div className="border-t border-gray-100 dark:border-gray-700 flex-1">
-          <table className="w-full text-[10px]">
-            <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-              {/* Ability row */}
-              {selectedAbility && (
-                <tr className="group/ability">
-                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap">Abl</td>
-                  <td className="px-2 py-1 text-gray-600 dark:text-gray-300 font-medium cursor-help" title={selectedAbility.shortEffect} colSpan={2}>
-                    {selectedAbility.name}
-                  </td>
-                </tr>
-              )}
-              {/* Item row */}
-              {matchedItem && (
-                <tr>
-                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap">Item</td>
-                  <td className="px-2 py-1" colSpan={2}>
-                    <div className="flex items-center gap-1.5">
-                      <img
-                        src={matchedItem.sprite}
-                        data-fallback={matchedItem.spriteFallback}
-                        alt={matchedItem.name}
-                        title={matchedItem.desc}
-                        className="w-5 h-5 object-contain shrink-0"
-                        onError={e => {
-                          const img = e.target as HTMLImageElement;
-                          const fb = img.dataset.fallback;
-                          if (fb && img.src !== fb) img.src = fb;
-                        }}
-                      />
-                      <span className="text-gray-600 dark:text-gray-300 font-medium truncate">{matchedItem.name}</span>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {/* Moves — 2 columns × 2 rows */}
-              {moves.length > 0 && (
-                <tr>
-                  <td className="px-2 py-1 text-gray-400 dark:text-gray-500 font-bold uppercase w-0 whitespace-nowrap align-top">Mvs</td>
-                  <td className="px-1 py-1" colSpan={2}>
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                      {moves.map((move, i) => {
-                        const detail = moveDetails[move];
-                        return (
-                          <div key={i} className="flex items-center gap-1 min-w-0">
-                            {detail && (
-                              <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-3 h-3 object-contain" />
-                            )}
-                            <span className="text-gray-600 dark:text-gray-300 truncate">{formatMoveName(move)}</span>
-                            {detail && DAMAGE_CLASS_SPRITE[detail.damageClass] && (
-                              <img src={DAMAGE_CLASS_SPRITE[detail.damageClass]} alt={detail.damageClass} className="shrink-0 w-7 h-auto object-contain" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* ── Edit button ──────────────────────────────────────────── */}
-        <div className="border-t border-gray-100 dark:border-gray-700 px-2.5 py-2">
+        {/* ── Edit button ──────────────────────────────────────── */}
+        <div className="px-2.5 pb-2.5 mt-auto">
           <button
             onClick={e => { e.stopPropagation(); setIsEditorOpen(true); }}
-            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
+            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white bg-[var(--color-card-alt)] hover:bg-[var(--color-primary)] transition-all cursor-pointer"
+            style={{ fontFamily: 'var(--font-display)' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />

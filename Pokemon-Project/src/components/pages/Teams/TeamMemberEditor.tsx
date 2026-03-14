@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { getTypeSpriteUrl } from '../Pokedex/utils';
@@ -45,6 +45,16 @@ const STAT_LABELS: Record<string, string> = {
 };
 const EV_TOTAL_MAX = 510;
 
+const NATURE_NAMES_ES: Record<string, string> = {
+  Hardy: 'Fuerte', Lonely: 'Huraña', Brave: 'Audaz', Adamant: 'Firme',
+  Naughty: 'Pícara', Bold: 'Osada', Docile: 'Dócil', Relaxed: 'Plácida',
+  Impish: 'Agitada', Lax: 'Floja', Timid: 'Miedosa', Hasty: 'Activa',
+  Serious: 'Seria', Jolly: 'Alegre', Naive: 'Ingenua', Modest: 'Modesta',
+  Mild: 'Afable', Quiet: 'Mansa', Bashful: 'Tímida', Rash: 'Alocada',
+  Calm: 'Serena', Gentle: 'Amable', Sassy: 'Grosera', Careful: 'Cauta',
+  Quirky: 'Rara',
+};
+
 const STAT_BAR_COLORS: Record<keyof BaseStats, string> = {
   hp: 'bg-gradient-to-r from-rose-500 to-red-500',
   atk: 'bg-gradient-to-r from-amber-500 to-orange-500',
@@ -63,9 +73,6 @@ function calcStat(base: number, ev: number, iv: number, isHP: boolean, natureMod
 function formatMoveName(slug: string): string {
   return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
-
-/* ─── Popular competitive items ──────────────────────────────────────── */
-
 
 /* ─── Move category sprites ─────────────────────────────────────────── */
 
@@ -104,7 +111,11 @@ const TeamMemberEditor: React.FC<Props> = ({
   onUpdateMoves, onUpdateAbility, onUpdateItem,
   onUpdateNature, onUpdateEVs, onUpdateIVs,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+
+  /* ── Refs ──────────────────────────────────────────────────────────── */
+  const modalRef = useRef<HTMLDivElement>(null);
 
   /* ── Local state ────────────────────────────────────────────────────── */
   const [pickerMoveIndex, setPickerMoveIndex] = useState<number | null>(null);
@@ -118,10 +129,18 @@ const TeamMemberEditor: React.FC<Props> = ({
   );
 
   /* ── Data hooks ─────────────────────────────────────────────────────── */
-  const { details: moveDetails } = useMoveDetails(member.moves ?? []);
-  const { abilities, loading: abilitiesLoading } = usePokemonAbilities(member.pokemon_id);
+  const { details: moveDetails } = useMoveDetails(member.moves ?? [], lang);
+  const { abilities, loading: abilitiesLoading } = usePokemonAbilities(member.pokemon_id, lang);
   const { stats: baseStats } = usePokemonBaseStats(member.pokemon_id);
-  const { items: allItems } = useItemList();
+  const { items: allItems } = useItemList(lang);
+
+  // Sync item input with localized name when items load
+  useEffect(() => {
+    if (!member.item || allItems.length === 0) return;
+    const q = member.item.toLowerCase();
+    const match = allItems.find(i => i.name.toLowerCase() === q || i.slug === q || i.slug === q.replace(/\s+/g, '-'));
+    if (match && match.name !== itemInput) setItemInput(match.name);
+  }, [allItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Derived ────────────────────────────────────────────────────────── */
   const moves = member.moves ?? [];
@@ -143,6 +162,13 @@ const TeamMemberEditor: React.FC<Props> = ({
     if (!q) return allItems;
     return allItems
       .filter(item => item.name.toLowerCase().includes(q) || item.slug.includes(q));
+  }, [itemInput, allItems]);
+
+  // Find matched item for showing sprite next to input
+  const matchedItem = useMemo(() => {
+    if (!itemInput.trim()) return null;
+    const q = itemInput.toLowerCase().trim();
+    return allItems.find(i => i.name.toLowerCase() === q || i.slug === q || i.slug === q.replace(/\s+/g, '-')) ?? null;
   }, [itemInput, allItems]);
 
   /* ── Handlers ───────────────────────────────────────────────────────── */
@@ -176,14 +202,34 @@ const TeamMemberEditor: React.FC<Props> = ({
     onUpdateIVs(slot, allZero ? null : ivsLocal);
   };
 
-  /* ── Escape key ─────────────────────────────────────────────────────── */
+  /* ── Close helper — flush pending EV/IV edits before closing ────────── */
+  const handleClose = () => {
+    const evTot = Object.values(evsLocal).reduce((s, v) => s + v, 0);
+    onUpdateEVs(slot, evTot > 0 ? evsLocal : null);
+    const allZeroIV = Object.values(ivsLocal).every(v => v === 0);
+    onUpdateIVs(slot, allZeroIV ? null : ivsLocal);
+    onClose();
+  };
+
+  /* ── Escape key + focus trap ───────────────────────────────────────── */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && pickerMoveIndex === null) onClose();
+      if (e.key === 'Escape' && pickerMoveIndex === null) { handleClose(); return; }
+      if (e.key === 'Tab' && modalRef.current && pickerMoveIndex === null) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener('keydown', handler);
+    modalRef.current?.focus();
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose, pickerMoveIndex]);
+  }, [handleClose, pickerMoveIndex]);
 
   /* ── Prevent body scroll ────────────────────────────────────────────── */
   useEffect(() => {
@@ -199,10 +245,17 @@ const TeamMemberEditor: React.FC<Props> = ({
       {createPortal(
         <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto">
           {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} aria-hidden="true" />
 
           {/* ═══ Modal container ═══ */}
-          <div className="relative z-10 w-full max-w-5xl my-4 mx-4 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="team-editor-title"
+            tabIndex={-1}
+            className="relative z-10 w-full max-w-7xl my-4 mx-4 rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden focus:outline-none"
+          >
 
             {/* ═══════════ HEADER ═══════════════════════════════════════ */}
             <div
@@ -234,7 +287,7 @@ const TeamMemberEditor: React.FC<Props> = ({
 
               {/* Name + Types */}
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white capitalize leading-tight">
+                <h2 id="team-editor-title" className="text-xl font-bold text-gray-900 dark:text-white capitalize leading-tight">
                   {member.pokemon_name.replace(/-/g, ' ')}
                 </h2>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
@@ -256,19 +309,19 @@ const TeamMemberEditor: React.FC<Props> = ({
               {/* Action buttons */}
               <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
                 <button
-                  onClick={() => { onRemove(slot); onClose(); }}
+                  onClick={() => { onRemove(slot); handleClose(); }}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
                 >
                   {t('teams_remove_member')}
                 </button>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-red-500 hover:bg-red-600 transition-colors cursor-pointer shadow-sm"
                 >
-                  Done
+                  {t('teams_done', 'Done')}
                 </button>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   aria-label="Close"
                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors cursor-pointer"
                 >
@@ -281,26 +334,42 @@ const TeamMemberEditor: React.FC<Props> = ({
 
             {/* ═══════════ BODY ═════════════════════════════════════════ */}
             <div className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6">
 
-                {/* ─── COLUMN 1 : Details ──────────────────────────────── */}
+                {/* ─── LEFT COLUMN : Item + Nature ─────────────────────── */}
                 <div className="space-y-5">
 
                   {/* ▸ Item ───────────────────────────────────────────── */}
                   <section>
                     <SectionTitle accent={accentHex}>{t('teams_item')}</SectionTitle>
-
-                    {/* Search input */}
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={itemInput}
-                        onChange={e => { setItemInput(e.target.value); setItemDropdownOpen(true); }}
-                        onFocus={() => setItemDropdownOpen(true)}
-                        onBlur={() => { setTimeout(() => { setItemDropdownOpen(false); handleItemBlur(); }, 150); }}
-                        placeholder={t('teams_choose_item')}
-                        className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 dark:focus:border-red-600 transition-all"
-                      />
+                      <div className="relative flex items-center">
+                        {matchedItem && (
+                          <img
+                            src={matchedItem.sprite}
+                            alt={matchedItem.name}
+                            className="absolute left-2 w-6 h-6 object-contain pointer-events-none z-10"
+                            onError={e => {
+                              const img = e.target as HTMLImageElement;
+                              if (matchedItem.spriteFallback && img.src !== matchedItem.spriteFallback) {
+                                img.src = matchedItem.spriteFallback;
+                              } else {
+                                img.style.display = 'none';
+                              }
+                            }}
+                          />
+                        )}
+                        <input
+                          type="text"
+                          value={itemInput}
+                          onChange={e => { setItemInput(e.target.value); setItemDropdownOpen(true); }}
+                          onFocus={() => setItemDropdownOpen(true)}
+                          onBlur={() => { setTimeout(() => { setItemDropdownOpen(false); handleItemBlur(); }, 150); }}
+                          placeholder={t('teams_choose_item')}
+                          aria-label={t('teams_item')}
+                          className={`w-full py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 dark:focus:border-red-600 transition-all ${matchedItem ? 'pl-9 pr-3' : 'px-3'}`}
+                        />
+                      </div>
                       {itemInput && (
                         <button
                           onMouseDown={e => e.preventDefault()}
@@ -312,11 +381,8 @@ const TeamMemberEditor: React.FC<Props> = ({
                           </svg>
                         </button>
                       )}
-                      {/* Autocomplete dropdown */}
                       {itemDropdownOpen && filteredItems.length > 0 && (
-                        <div
-                          className="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-y-auto"
-                        >
+                        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-y-auto">
                           {filteredItems.map(item => (
                             <button
                               key={item.slug}
@@ -345,13 +411,9 @@ const TeamMemberEditor: React.FC<Props> = ({
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/></svg>
                               </span>
                               <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">
-                                  {item.name}
-                                </p>
+                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">{item.name}</p>
                                 {item.desc && (
-                                  <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-snug mt-0.5 line-clamp-2">
-                                    {item.desc}
-                                  </p>
+                                  <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-snug mt-0.5 line-clamp-2">{item.desc}</p>
                                 )}
                               </div>
                             </button>
@@ -359,62 +421,6 @@ const TeamMemberEditor: React.FC<Props> = ({
                         </div>
                       )}
                     </div>
-
-                  </section>
-
-                  {/* ▸ Ability ────────────────────────────────────────── */}
-                  <section>
-                    <SectionTitle accent={accentHex}>{t('teams_ability')}</SectionTitle>
-                    {abilitiesLoading ? (
-                      <div className="flex items-center gap-2 py-3">
-                        <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
-                        <span className="text-xs text-gray-400 dark:text-gray-500">{t('teams_loading_abilities')}</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        {abilities.map(ability => {
-                          const isSelected = member.ability === ability.slug;
-                          return (
-                            <button
-                              key={ability.slug}
-                              onClick={() => onUpdateAbility(slot, ability.slug)}
-                              className={`w-full text-left px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200 dark:ring-red-800'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                                  isSelected ? 'border-red-500 bg-red-500' : 'border-gray-300 dark:border-gray-600'
-                                }`}>
-                                  {isSelected && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className={`text-sm font-semibold ${
-                                  isSelected ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-200'
-                                }`}>
-                                  {ability.name}
-                                </span>
-                                {ability.isHidden && (
-                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 uppercase">
-                                    {t('teams_hidden_ability')}
-                                  </span>
-                                )}
-                              </div>
-                              {ability.shortEffect && (
-                                <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 pl-[1.625rem] leading-relaxed line-clamp-2">
-                                  {ability.shortEffect}
-                                </p>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
                   </section>
 
                   {/* ▸ Nature ────────────────────────────────────────── */}
@@ -423,241 +429,248 @@ const TeamMemberEditor: React.FC<Props> = ({
                     <select
                       value={member.nature ?? ''}
                       onChange={e => onUpdateNature(slot, e.target.value || null)}
+                      aria-label={t('teams_nature')}
                       className="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 dark:focus:border-red-600 transition-all cursor-pointer"
                     >
                       <option value="">{t('teams_choose_nature')}</option>
-                      {NATURES.map(([name]) => (
-                        <option key={name as string} value={name as string}>{name as string}</option>
-                      ))}
-                    </select>
-                    {(() => {
-                      if (!member.nature) return null;
-                      const nat = NATURES.find(([n]) => n === member.nature);
-                      if (!nat || !nat[1]) return null;
-                      return (
-                        <div className="flex items-center gap-3 mt-2 px-1">
-                          <span className="text-xs font-semibold text-green-500 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                            </svg>
-                            {STAT_LABELS[nat[1] as string]}
-                          </span>
-                          <span className="text-xs font-semibold text-red-400 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            {STAT_LABELS[nat[2] as string]}
-                          </span>
-                        </div>
-                      );
-                    })()}
-                  </section>
-                </div>
-
-                {/* ─── COLUMN 2 : Moves ────────────────────────────────── */}
-                <div>
-                  <SectionTitle accent={accentHex}>{t('teams_moves')}</SectionTitle>
-
-                  <div className="space-y-1.5">
-                    {moves.map((slug, idx) => {
-                      const detail = moveDetails[slug];
-                      const catSprite = detail ? DAMAGE_CLASS_SPRITE[detail.damageClass] : null;
-                      return (
-                        <div
-                          key={idx}
-                          className="group flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          {detail ? (
-                            <img
-                              src={getTypeIconUrl(detail.type)}
-                              alt={detail.type}
-                              title={detail.type}
-                              className="shrink-0 w-5 h-5 object-contain drop-shadow"
-                            />
-                          ) : (
-                            <span className="shrink-0 w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                          )}
-
-                          <button
-                            onClick={() => setPickerMoveIndex(idx)}
-                            className="flex-1 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer truncate"
-                          >
-                            {formatMoveName(slug)}
-                          </button>
-
-                          {detail && (
-                            <span className="text-xs font-bold text-gray-400 dark:text-gray-500 tabular-nums w-8 text-right shrink-0">
-                              {detail.power ?? '\u2014'}
-                            </span>
-                          )}
-
-                          {catSprite && (
-                            <img
-                              src={catSprite}
-                              alt={detail!.damageClass}
-                              title={detail!.damageClass}
-                              className="shrink-0 w-16 h-auto object-contain"
-                            />
-                          )}
-
-                          <button
-                            onClick={() => handleMoveRemove(idx)}
-                            className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-gray-300 dark:text-gray-600 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                          </button>
-                        </div>
-                      );
-                    })}
-
-                    {/* Empty move slots */}
-                    {moves.length < 4 && Array.from({ length: 4 - moves.length }).map((_, i) => (
-                      <button
-                        key={`empty-${i}`}
-                        onClick={() => setPickerMoveIndex(moves.length + i)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                        </svg>
-                        <span className="font-medium">{t('teams_add_move')}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                </div>
-
-                {/* ─── COLUMN 3 : Stats ────────────────────────────────── */}
-                <div className="md:col-span-2 lg:col-span-1 space-y-5">
-
-                  {/* ▸ EVs ─────────────────────────────────────────────── */}
-                  <section>
-                    <div className="flex items-center justify-between mb-3">
-                      <SectionTitle accent={accentHex}>{t('teams_evs')}</SectionTitle>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        evTotal >= EV_TOTAL_MAX
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {EV_TOTAL_MAX - evTotal} {t('teams_ev_remaining')}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2.5">
-                      {STAT_ORDER.map(stat => {
-                        const isBoosted = natureMods[stat] === 1.1;
-                        const isDropped = natureMods[stat] === 0.9;
-                        const barPct = Math.min(100, (evsLocal[stat] / 252) * 100);
+                      {NATURES.map(([name, up, down]) => {
+                        const displayName = lang === 'es' ? (NATURE_NAMES_ES[name as string] ?? name as string) : name as string;
                         return (
-                          <div key={stat} className="flex items-center gap-2">
-                            <span className={`text-[11px] font-extrabold w-9 shrink-0 ${
-                              isBoosted ? 'text-green-500' : isDropped ? 'text-red-400' : 'text-gray-500 dark:text-gray-400'
-                            }`}>
-                              {STAT_DISPLAY[stat]}
-                              {isBoosted && <span className="text-[8px] ml-0.5">\u2191</span>}
-                              {isDropped && <span className="text-[8px] ml-0.5">\u2193</span>}
-                            </span>
-                            <div className="flex-1 h-3.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all duration-300 ease-out ${
-                                  isBoosted
-                                    ? 'bg-gradient-to-r from-green-400 to-green-500'
-                                    : isDropped
-                                      ? 'bg-gradient-to-r from-red-300 to-red-400'
-                                      : STAT_BAR_COLORS[stat]
-                                }`}
-                                style={{ width: `${barPct}%` }}
-                              />
-                            </div>
-                            <input
-                              type="number"
-                              min={0}
-                              max={252}
-                              value={evsLocal[stat]}
-                              onChange={e => handleEVChange(stat, e.target.value)}
-                              onBlur={handleEVBlur}
-                              className="w-14 px-1.5 py-1 text-xs text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-red-400 dark:focus:border-red-600 transition-colors tabular-nums font-semibold"
-                            />
-                          </div>
+                          <option key={name as string} value={name as string}>
+                            {displayName}{up ? ` (+${STAT_LABELS[up as string]} / -${STAT_LABELS[down as string]})` : ` (${t('teams_neutral', 'Neutral')})`}
+                          </option>
                         );
                       })}
-                    </div>
+                    </select>
                   </section>
+                </div>
 
-                  {/* ▸ IVs ─────────────────────────────────────────────── */}
-                  <section>
-                    <SectionTitle accent={accentHex}>{t('teams_ivs')}</SectionTitle>
-                    <div className="grid grid-cols-6 gap-2">
-                      {STAT_ORDER.map(stat => (
-                        <div key={stat} className="flex flex-col items-center gap-1">
-                          <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">
-                            {STAT_DISPLAY[stat]}
-                          </label>
-                          <input
-                            type="number"
-                            min={0}
-                            max={31}
-                            value={ivsLocal[stat]}
-                            onChange={e => handleIVChange(stat, e.target.value)}
-                            onBlur={handleIVBlur}
-                            className="w-full px-1 py-1.5 text-sm text-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-red-400 dark:focus:border-red-600 transition-colors tabular-nums font-bold"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                {/* ─── RIGHT COLUMN : Unified Stats + Ability + Moves ── */}
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 
-                  {/* ▸ Calculated Stats ─────────────────────────────────── */}
-                  {baseStats && (
-                    <section>
-                      <SectionTitle accent={accentHex}>Lv.50 Stats</SectionTitle>
-                      <div className="grid grid-cols-3 gap-2">
+                  {/* ▸ Stats table ─────────────────────────────────────── */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm" aria-label="Stats">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-left px-3 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-16">Stat</th>
+                          <th className="text-center px-2 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-14">Base</th>
+                          <th className="text-center px-2 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">EV</th>
+                          <th className="text-center px-2 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-14">IV</th>
+                          <th className="text-center px-2 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider w-14">Lv.50</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {STAT_ORDER.map(stat => {
-                          const calc = calcStat(baseStats[stat], evsLocal[stat], ivsLocal[stat], stat === 'hp', natureMods[stat]);
                           const isBoosted = natureMods[stat] === 1.1;
                           const isDropped = natureMods[stat] === 0.9;
+                          const barPct = Math.min(100, (evsLocal[stat] / 252) * 100);
+                          const calc = baseStats ? calcStat(baseStats[stat], evsLocal[stat], ivsLocal[stat], stat === 'hp', natureMods[stat]) : null;
                           return (
-                            <div
+                            <tr
                               key={stat}
-                              className={`text-center px-2 py-2 rounded-xl transition-colors ${
-                                isBoosted
-                                  ? 'bg-green-50 dark:bg-green-900/15'
-                                  : isDropped
-                                    ? 'bg-red-50 dark:bg-red-900/15'
-                                    : 'bg-gray-50 dark:bg-gray-800/60'
-                              }`}
+                              className={
+                                isBoosted ? 'bg-green-50/50 dark:bg-green-900/10' :
+                                isDropped ? 'bg-red-50/50 dark:bg-red-900/10' : ''
+                              }
                             >
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">
-                                {STAT_DISPLAY[stat]}
-                              </p>
-                              <p className={`text-lg font-black tabular-nums leading-tight ${
-                                isBoosted ? 'text-green-600 dark:text-green-400'
-                                : isDropped ? 'text-red-500 dark:text-red-400'
-                                : 'text-gray-800 dark:text-gray-100'
+                              <td className="px-3 py-2">
+                                <span className={`text-xs font-extrabold ${
+                                  isBoosted ? 'text-green-500' : isDropped ? 'text-red-400' : 'text-gray-600 dark:text-gray-300'
+                                }`}>
+                                  {STAT_DISPLAY[stat]}
+                                  {isBoosted && <span className="text-[8px] ml-0.5">{'\u2191'}</span>}
+                                  {isDropped && <span className="text-[8px] ml-0.5">{'\u2193'}</span>}
+                                </span>
+                              </td>
+                              <td className="text-center px-2 py-2">
+                                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 tabular-nums">
+                                  {baseStats ? baseStats[stat] : '\u2014'}
+                                </span>
+                              </td>
+                              <td className="px-2 py-2">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="range"
+                                    min={0}
+                                    max={252}
+                                    step={4}
+                                    value={evsLocal[stat]}
+                                    onChange={e => handleEVChange(stat, e.target.value)}
+                                    onMouseUp={handleEVBlur}
+                                    onTouchEnd={handleEVBlur}
+                                    aria-label={`EV ${STAT_DISPLAY[stat]}`}
+                                    className="ev-slider flex-1 h-2 cursor-pointer"
+                                    style={{
+                                      '--slider-color': isBoosted ? '#22c55e' : isDropped ? '#f87171' : undefined,
+                                    } as React.CSSProperties}
+                                  />
+                                  <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${
+                                    isBoosted ? 'text-green-500' : isDropped ? 'text-red-400' : 'text-gray-600 dark:text-gray-300'
+                                  }`}>
+                                    {evsLocal[stat]}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="text-center px-2 py-2">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={31}
+                                  value={ivsLocal[stat]}
+                                  onChange={e => handleIVChange(stat, e.target.value)}
+                                  onBlur={handleIVBlur}
+                                  aria-label={`IV ${STAT_DISPLAY[stat]}`}
+                                  className="w-12 px-1 py-0.5 text-xs text-center rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:border-red-400 dark:focus:border-red-600 transition-colors tabular-nums font-bold"
+                                />
+                              </td>
+                              <td className="text-center px-2 py-2">
+                                <span className={`text-sm font-black tabular-nums ${
+                                  isBoosted ? 'text-green-600 dark:text-green-400'
+                                  : isDropped ? 'text-red-500 dark:text-red-400'
+                                  : 'text-gray-800 dark:text-gray-100'
+                                }`}>
+                                  {calc ?? '\u2014'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        <tr className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+                          <td className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</td>
+                          <td className="text-center px-2 py-2 text-xs font-bold text-gray-400 dark:text-gray-500 tabular-nums">
+                            {baseStats ? STAT_ORDER.reduce((s, k) => s + baseStats[k], 0) : '\u2014'}
+                          </td>
+                          <td className="px-2 py-2">
+                            <div className="flex items-center justify-end">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                evTotal >= EV_TOTAL_MAX
+                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                               }`}>
-                                {calc}
-                              </p>
-                              <p className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">
-                                Base {baseStats[stat]}
-                              </p>
+                                {evTotal}/{EV_TOTAL_MAX}
+                              </span>
+                            </div>
+                          </td>
+                          <td />
+                          <td className="text-center px-2 py-2 text-sm font-black tabular-nums text-gray-800 dark:text-gray-100">
+                            {baseStats
+                              ? STAT_ORDER.reduce((sum, s) => sum + calcStat(baseStats[s], evsLocal[s], ivsLocal[s], s === 'hp', natureMods[s]), 0)
+                              : '\u2014'}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  {/* ▸ Ability ─────────────────────────────────────────── */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{t('teams_ability')}</p>
+                    {abilitiesLoading ? (
+                      <div className="flex items-center gap-2 py-1" role="status" aria-label={t('teams_loading_abilities')}>
+                        <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 border-t-red-500 rounded-full animate-spin" />
+                        <span className="text-sm text-gray-400 dark:text-gray-500">{t('teams_loading_abilities')}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {abilities.map(ability => {
+                          const isSelected = member.ability === ability.slug;
+                          return (
+                            <div key={ability.slug} className="relative group/abl">
+                              <button
+                                onClick={() => onUpdateAbility(slot, ability.slug)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-red-500 text-white shadow-sm'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                {ability.name}
+                                {ability.isHidden && (
+                                  <span className={`px-1 py-0.5 rounded text-[8px] font-bold uppercase ${
+                                    isSelected
+                                      ? 'bg-white/20 text-white'
+                                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                                  }`}>
+                                    {t('teams_hidden_ability')}
+                                  </span>
+                                )}
+                              </button>
+                              {ability.shortEffect && (
+                                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 invisible group-hover/abl:opacity-100 group-hover/abl:visible group-focus-within/abl:opacity-100 group-focus-within/abl:visible transition-all duration-200 pointer-events-none">
+                                  <p className="text-[10px] font-bold text-purple-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{ability.name}</p>
+                                  <p className="text-[11px] leading-relaxed text-gray-300">{ability.shortEffect}</p>
+                                  <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                                </div>
+                              )}
                             </div>
                           );
                         })}
                       </div>
-                      {/* Total row */}
-                      <div className="mt-2 flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</span>
-                        <span className="text-lg font-black tabular-nums text-gray-800 dark:text-gray-100">
-                          {STAT_ORDER.reduce(
-                            (sum, s) => sum + calcStat(baseStats[s], evsLocal[s], ivsLocal[s], s === 'hp', natureMods[s]),
-                            0,
-                          )}
-                        </span>
-                      </div>
-                    </section>
-                  )}
+                    )}
+                  </div>
+
+                  {/* ▸ Moves ───────────────────────────────────────────── */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{t('teams_moves')}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {moves.map((slug, idx) => {
+                        const detail = moveDetails[slug];
+                        const catSprite = detail ? DAMAGE_CLASS_SPRITE[detail.damageClass] : null;
+                        return (
+                          <div
+                            key={idx}
+                            className="group flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            {detail ? (
+                              <img src={getTypeIconUrl(detail.type)} alt={detail.type} title={detail.type} className="shrink-0 w-5 h-5 object-contain drop-shadow" />
+                            ) : (
+                              <span className="shrink-0 w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                            )}
+                            <button
+                              onClick={() => setPickerMoveIndex(idx)}
+                              className="flex-1 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer truncate"
+                            >
+                              {detail?.name ?? formatMoveName(slug)}
+                            </button>
+                            {detail && (
+                              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 tabular-nums w-7 text-right shrink-0">
+                                {detail.power ?? '\u2014'}
+                              </span>
+                            )}
+                            {catSprite && (
+                              <img src={catSprite} alt={detail!.damageClass} title={detail!.damageClass} className="shrink-0 w-14 h-auto object-contain" />
+                            )}
+                            <button
+                              onClick={() => handleMoveRemove(idx)}
+                              aria-label={`${t('teams_remove_member', 'Remove')} ${detail?.name ?? formatMoveName(slug)}`}
+                              className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full text-gray-300 dark:text-gray-600 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                          </div>
+                        );
+                      })}
+                      {/* Empty move slots */}
+                      {moves.length < 4 && Array.from({ length: 4 - moves.length }).map((_, i) => (
+                        <button
+                          key={`empty-${i}`}
+                          onClick={() => setPickerMoveIndex(moves.length + i)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all cursor-pointer border border-dashed border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                          </svg>
+                          <span className="font-medium">{t('teams_add_move')}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>

@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from 'react';
+
 export interface ItemEntry {
   slug: string;
   name: string;
@@ -28,205 +30,365 @@ const LOCAL_SPRITES: Record<string, string> = {
   'rusted-shield': 'rusted-shield.webp',
 };
 
-function e(slug: string, category: string, desc: string): ItemEntry {
+interface RawItem {
+  slug: string;
+  category: string;
+  descEn: string;
+}
+
+function sprite(slug: string) {
   const localFile = LOCAL_SPRITES[slug];
   return {
-    slug,
-    name: slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     sprite: localFile ? `${LOCAL_SPRITE_BASE}/${localFile}` : `${POKEAPI_SPRITE_BASE}/${slug}.png`,
     spriteFallback: `${POKEAPI_SPRITE_BASE}/${slug}.png`,
-    category,
-    desc,
   };
 }
 
-/* ── Curated battle-viable held items with descriptions ───────────────── */
+function formatSlug(slug: string): string {
+  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
 
-const BATTLE_ITEMS: ItemEntry[] = [
+/* ── Curated battle-viable held items ───────────────────────────────── */
+
+const RAW_ITEMS: RawItem[] = [
   // ── Core competitive ──
-  e('leftovers', 'recovery', 'Restores 1/16 max HP every turn.'),
-  e('life-orb', 'damage', '1.3× damage but costs 1/10 max HP per attack.'),
-  e('choice-band', 'choice', '1.5× Attack but locks into one move.'),
-  e('choice-specs', 'choice', '1.5× Sp. Atk but locks into one move.'),
-  e('choice-scarf', 'choice', '1.5× Speed but locks into one move.'),
-  e('focus-sash', 'defensive', 'Survives a KO hit at 1 HP when at full HP.'),
-  e('assault-vest', 'defensive', '1.5× Sp. Def but can only use attacking moves.'),
-  e('eviolite', 'defensive', '1.5× Def and Sp. Def for not fully evolved Pokémon.'),
-  e('heavy-duty-boots', 'utility', 'Protects from entry hazard damage.'),
-  e('rocky-helmet', 'defensive', 'Contact moves deal 1/6 max HP to the attacker.'),
-  e('air-balloon', 'utility', 'Grants Ground immunity until hit by an attack.'),
-  e('expert-belt', 'damage', 'Super effective moves deal 1.2× damage.'),
-  e('weakness-policy', 'boost', '+2 Attack and Sp. Atk when hit by a super effective move.'),
-  e('booster-energy', 'boost', 'Activates Protosynthesis or Quark Drive.'),
+  { slug: 'leftovers', category: 'recovery', descEn: 'Restores 1/16 max HP every turn.' },
+  { slug: 'life-orb', category: 'damage', descEn: '1.3× damage but costs 1/10 max HP per attack.' },
+  { slug: 'choice-band', category: 'choice', descEn: '1.5× Attack but locks into one move.' },
+  { slug: 'choice-specs', category: 'choice', descEn: '1.5× Sp. Atk but locks into one move.' },
+  { slug: 'choice-scarf', category: 'choice', descEn: '1.5× Speed but locks into one move.' },
+  { slug: 'focus-sash', category: 'defensive', descEn: 'Survives a KO hit at 1 HP when at full HP.' },
+  { slug: 'assault-vest', category: 'defensive', descEn: '1.5× Sp. Def but can only use attacking moves.' },
+  { slug: 'eviolite', category: 'defensive', descEn: '1.5× Def and Sp. Def for not fully evolved Pokémon.' },
+  { slug: 'heavy-duty-boots', category: 'utility', descEn: 'Protects from entry hazard damage.' },
+  { slug: 'rocky-helmet', category: 'defensive', descEn: 'Contact moves deal 1/6 max HP to the attacker.' },
+  { slug: 'air-balloon', category: 'utility', descEn: 'Grants Ground immunity until hit by an attack.' },
+  { slug: 'expert-belt', category: 'damage', descEn: 'Super effective moves deal 1.2× damage.' },
+  { slug: 'weakness-policy', category: 'boost', descEn: '+2 Attack and Sp. Atk when hit by a super effective move.' },
+  { slug: 'booster-energy', category: 'boost', descEn: 'Activates Protosynthesis or Quark Drive.' },
 
   // ── Orbs & status ──
-  e('toxic-orb', 'status', 'Badly poisons the holder at end of turn. Combos with Poison Heal/Guts.'),
-  e('flame-orb', 'status', 'Burns the holder at end of turn. Combos with Guts/Magic Guard.'),
-  e('light-ball', 'damage', 'Doubles Pikachu\'s Attack and Sp. Atk.'),
+  { slug: 'toxic-orb', category: 'status', descEn: 'Badly poisons the holder at end of turn. Combos with Poison Heal/Guts.' },
+  { slug: 'flame-orb', category: 'status', descEn: 'Burns the holder at end of turn. Combos with Guts/Magic Guard.' },
+  { slug: 'light-ball', category: 'damage', descEn: "Doubles Pikachu's Attack and Sp. Atk." },
 
   // ── Offensive ──
-  e('scope-lens', 'damage', 'Raises critical hit ratio by one stage.'),
-  e('razor-claw', 'damage', 'Raises critical hit ratio by one stage.'),
-  e('metronome', 'damage', 'Boosts move power by 20% each consecutive use (max 2×).'),
-  e('loaded-dice', 'damage', 'Multi-hit moves hit 4-5 times guaranteed.'),
-  e('punching-glove', 'damage', '1.1× punching move power and prevents contact effects.'),
-  e('throat-spray', 'boost', '+1 Sp. Atk after using a sound-based move. Single use.'),
-  e('shell-bell', 'recovery', 'Restores 1/8 of damage dealt to the opponent.'),
+  { slug: 'scope-lens', category: 'damage', descEn: 'Raises critical hit ratio by one stage.' },
+  { slug: 'razor-claw', category: 'damage', descEn: 'Raises critical hit ratio by one stage.' },
+  { slug: 'metronome', category: 'damage', descEn: 'Boosts move power by 20% each consecutive use (max 2×).' },
+  { slug: 'loaded-dice', category: 'damage', descEn: 'Multi-hit moves hit 4-5 times guaranteed.' },
+  { slug: 'punching-glove', category: 'damage', descEn: '1.1× punching move power and prevents contact effects.' },
+  { slug: 'throat-spray', category: 'boost', descEn: '+1 Sp. Atk after using a sound-based move. Single use.' },
+  { slug: 'shell-bell', category: 'recovery', descEn: 'Restores 1/8 of damage dealt to the opponent.' },
 
   // ── Defensive / utility ──
-  e('safety-goggles', 'utility', 'Immune to weather damage and powder moves.'),
-  e('covert-cloak', 'utility', 'Protects from secondary effects of moves.'),
-  e('clear-amulet', 'utility', 'Prevents stat reduction by other Pokémon.'),
-  e('shed-shell', 'utility', 'Allows switching out even when trapped.'),
-  e('utility-umbrella', 'utility', 'Negates weather effects on the holder.'),
-  e('protective-pads', 'utility', 'Protects from contact move side effects.'),
-  e('black-sludge', 'recovery', 'Poison types restore 1/16 HP per turn; others lose 1/8 HP.'),
+  { slug: 'safety-goggles', category: 'utility', descEn: 'Immune to weather damage and powder moves.' },
+  { slug: 'covert-cloak', category: 'utility', descEn: 'Protects from secondary effects of moves.' },
+  { slug: 'clear-amulet', category: 'utility', descEn: 'Prevents stat reduction by other Pokémon.' },
+  { slug: 'shed-shell', category: 'utility', descEn: 'Allows switching out even when trapped.' },
+  { slug: 'utility-umbrella', category: 'utility', descEn: 'Negates weather effects on the holder.' },
+  { slug: 'protective-pads', category: 'utility', descEn: 'Protects from contact move side effects.' },
+  { slug: 'black-sludge', category: 'recovery', descEn: 'Poison types restore 1/16 HP per turn; others lose 1/8 HP.' },
 
   // ── Herbs ──
-  e('mental-herb', 'utility', 'Cures infatuation, Taunt, Encore, Torment, Disable, and Heal Block. Single use.'),
-  e('power-herb', 'utility', 'Two-turn moves execute in one turn. Single use.'),
-  e('white-herb', 'utility', 'Restores lowered stats to normal. Single use.'),
-  e('mirror-herb', 'utility', 'Copies the opponent\'s stat boosts. Single use.'),
+  { slug: 'mental-herb', category: 'utility', descEn: 'Cures infatuation, Taunt, Encore, Torment, Disable, and Heal Block. Single use.' },
+  { slug: 'power-herb', category: 'utility', descEn: 'Two-turn moves execute in one turn. Single use.' },
+  { slug: 'white-herb', category: 'utility', descEn: 'Restores lowered stats to normal. Single use.' },
+  { slug: 'mirror-herb', category: 'utility', descEn: "Copies the opponent's stat boosts. Single use." },
 
   // ── Reaction items ──
-  e('red-card', 'utility', 'Forces the attacker to switch out after hitting the holder. Single use.'),
-  e('eject-button', 'utility', 'Holder switches out when hit by an attack. Single use.'),
-  e('eject-pack', 'utility', 'Holder switches out when any of its stats are lowered. Single use.'),
-  e('room-service', 'boost', 'Lowers Speed by 1 stage when Trick Room is set. Single use.'),
-  e('blunder-policy', 'boost', '+2 Speed when a move misses. Single use.'),
-  e('adrenaline-orb', 'boost', '+1 Speed when intimidated. Single use.'),
+  { slug: 'red-card', category: 'utility', descEn: 'Forces the attacker to switch out after hitting the holder. Single use.' },
+  { slug: 'eject-button', category: 'utility', descEn: 'Holder switches out when hit by an attack. Single use.' },
+  { slug: 'eject-pack', category: 'utility', descEn: 'Holder switches out when any of its stats are lowered. Single use.' },
+  { slug: 'room-service', category: 'boost', descEn: 'Lowers Speed by 1 stage when Trick Room is set. Single use.' },
+  { slug: 'blunder-policy', category: 'boost', descEn: '+2 Speed when a move misses. Single use.' },
+  { slug: 'adrenaline-orb', category: 'boost', descEn: '+1 Speed when intimidated. Single use.' },
 
   // ── Terrain & weather extenders ──
-  e('light-clay', 'support', 'Extends Light Screen and Reflect from 5 to 8 turns.'),
-  e('terrain-extender', 'support', 'Extends terrain effects from 5 to 8 turns.'),
-  e('heat-rock', 'support', 'Extends Sunny Day from 5 to 8 turns.'),
-  e('damp-rock', 'support', 'Extends Rain Dance from 5 to 8 turns.'),
-  e('smooth-rock', 'support', 'Extends Sandstorm from 5 to 8 turns.'),
-  e('icy-rock', 'support', 'Extends Hail/Snow from 5 to 8 turns.'),
-  e('grip-claw', 'support', 'Binding moves last 7 turns instead of 4-5.'),
+  { slug: 'light-clay', category: 'support', descEn: 'Extends Light Screen and Reflect from 5 to 8 turns.' },
+  { slug: 'terrain-extender', category: 'support', descEn: 'Extends terrain effects from 5 to 8 turns.' },
+  { slug: 'heat-rock', category: 'support', descEn: 'Extends Sunny Day from 5 to 8 turns.' },
+  { slug: 'damp-rock', category: 'support', descEn: 'Extends Rain Dance from 5 to 8 turns.' },
+  { slug: 'smooth-rock', category: 'support', descEn: 'Extends Sandstorm from 5 to 8 turns.' },
+  { slug: 'icy-rock', category: 'support', descEn: 'Extends Hail/Snow from 5 to 8 turns.' },
+  { slug: 'grip-claw', category: 'support', descEn: 'Binding moves last 7 turns instead of 4-5.' },
 
   // ── Type-boosting items ──
-  e('charcoal', 'type-boost', '1.2× Fire-type move power.'),
-  e('mystic-water', 'type-boost', '1.2× Water-type move power.'),
-  e('miracle-seed', 'type-boost', '1.2× Grass-type move power.'),
-  e('magnet', 'type-boost', '1.2× Electric-type move power.'),
-  e('never-melt-ice', 'type-boost', '1.2× Ice-type move power.'),
-  e('black-belt', 'type-boost', '1.2× Fighting-type move power.'),
-  e('poison-barb', 'type-boost', '1.2× Poison-type move power.'),
-  e('soft-sand', 'type-boost', '1.2× Ground-type move power.'),
-  e('sharp-beak', 'type-boost', '1.2× Flying-type move power.'),
-  e('twisted-spoon', 'type-boost', '1.2× Psychic-type move power.'),
-  e('silver-powder', 'type-boost', '1.2× Bug-type move power.'),
-  e('hard-stone', 'type-boost', '1.2× Rock-type move power.'),
-  e('spell-tag', 'type-boost', '1.2× Ghost-type move power.'),
-  e('dragon-fang', 'type-boost', '1.2× Dragon-type move power.'),
-  e('black-glasses', 'type-boost', '1.2× Dark-type move power.'),
-  e('metal-coat', 'type-boost', '1.2× Steel-type move power.'),
-  e('silk-scarf', 'type-boost', '1.2× Normal-type move power.'),
-  e('fairy-feather', 'type-boost', '1.2× Fairy-type move power.'),
+  { slug: 'charcoal', category: 'type-boost', descEn: '1.2× Fire-type move power.' },
+  { slug: 'mystic-water', category: 'type-boost', descEn: '1.2× Water-type move power.' },
+  { slug: 'miracle-seed', category: 'type-boost', descEn: '1.2× Grass-type move power.' },
+  { slug: 'magnet', category: 'type-boost', descEn: '1.2× Electric-type move power.' },
+  { slug: 'never-melt-ice', category: 'type-boost', descEn: '1.2× Ice-type move power.' },
+  { slug: 'black-belt', category: 'type-boost', descEn: '1.2× Fighting-type move power.' },
+  { slug: 'poison-barb', category: 'type-boost', descEn: '1.2× Poison-type move power.' },
+  { slug: 'soft-sand', category: 'type-boost', descEn: '1.2× Ground-type move power.' },
+  { slug: 'sharp-beak', category: 'type-boost', descEn: '1.2× Flying-type move power.' },
+  { slug: 'twisted-spoon', category: 'type-boost', descEn: '1.2× Psychic-type move power.' },
+  { slug: 'silver-powder', category: 'type-boost', descEn: '1.2× Bug-type move power.' },
+  { slug: 'hard-stone', category: 'type-boost', descEn: '1.2× Rock-type move power.' },
+  { slug: 'spell-tag', category: 'type-boost', descEn: '1.2× Ghost-type move power.' },
+  { slug: 'dragon-fang', category: 'type-boost', descEn: '1.2× Dragon-type move power.' },
+  { slug: 'black-glasses', category: 'type-boost', descEn: '1.2× Dark-type move power.' },
+  { slug: 'metal-coat', category: 'type-boost', descEn: '1.2× Steel-type move power.' },
+  { slug: 'silk-scarf', category: 'type-boost', descEn: '1.2× Normal-type move power.' },
+  { slug: 'fairy-feather', category: 'type-boost', descEn: '1.2× Fairy-type move power.' },
 
   // ── Gems ──
-  e('normal-gem', 'type-boost', '1.3× power for one Normal-type move. Single use.'),
+  { slug: 'normal-gem', category: 'type-boost', descEn: '1.3× power for one Normal-type move. Single use.' },
 
   // ── Plates ──
-  e('flame-plate', 'type-boost', '1.2× Fire-type move power. Changes Arceus to Fire type.'),
-  e('splash-plate', 'type-boost', '1.2× Water-type move power. Changes Arceus to Water type.'),
-  e('meadow-plate', 'type-boost', '1.2× Grass-type move power. Changes Arceus to Grass type.'),
-  e('zap-plate', 'type-boost', '1.2× Electric-type move power. Changes Arceus to Electric type.'),
-  e('icicle-plate', 'type-boost', '1.2× Ice-type move power. Changes Arceus to Ice type.'),
-  e('fist-plate', 'type-boost', '1.2× Fighting-type move power. Changes Arceus to Fighting type.'),
-  e('toxic-plate', 'type-boost', '1.2× Poison-type move power. Changes Arceus to Poison type.'),
-  e('earth-plate', 'type-boost', '1.2× Ground-type move power. Changes Arceus to Ground type.'),
-  e('sky-plate', 'type-boost', '1.2× Flying-type move power. Changes Arceus to Flying type.'),
-  e('mind-plate', 'type-boost', '1.2× Psychic-type move power. Changes Arceus to Psychic type.'),
-  e('insect-plate', 'type-boost', '1.2× Bug-type move power. Changes Arceus to Bug type.'),
-  e('stone-plate', 'type-boost', '1.2× Rock-type move power. Changes Arceus to Rock type.'),
-  e('spooky-plate', 'type-boost', '1.2× Ghost-type move power. Changes Arceus to Ghost type.'),
-  e('draco-plate', 'type-boost', '1.2× Dragon-type move power. Changes Arceus to Dragon type.'),
-  e('dread-plate', 'type-boost', '1.2× Dark-type move power. Changes Arceus to Dark type.'),
-  e('iron-plate', 'type-boost', '1.2× Steel-type move power. Changes Arceus to Steel type.'),
-  e('pixie-plate', 'type-boost', '1.2× Fairy-type move power. Changes Arceus to Fairy type.'),
+  { slug: 'flame-plate', category: 'type-boost', descEn: '1.2× Fire-type move power. Changes Arceus to Fire type.' },
+  { slug: 'splash-plate', category: 'type-boost', descEn: '1.2× Water-type move power. Changes Arceus to Water type.' },
+  { slug: 'meadow-plate', category: 'type-boost', descEn: '1.2× Grass-type move power. Changes Arceus to Grass type.' },
+  { slug: 'zap-plate', category: 'type-boost', descEn: '1.2× Electric-type move power. Changes Arceus to Electric type.' },
+  { slug: 'icicle-plate', category: 'type-boost', descEn: '1.2× Ice-type move power. Changes Arceus to Ice type.' },
+  { slug: 'fist-plate', category: 'type-boost', descEn: '1.2× Fighting-type move power. Changes Arceus to Fighting type.' },
+  { slug: 'toxic-plate', category: 'type-boost', descEn: '1.2× Poison-type move power. Changes Arceus to Poison type.' },
+  { slug: 'earth-plate', category: 'type-boost', descEn: '1.2× Ground-type move power. Changes Arceus to Ground type.' },
+  { slug: 'sky-plate', category: 'type-boost', descEn: '1.2× Flying-type move power. Changes Arceus to Flying type.' },
+  { slug: 'mind-plate', category: 'type-boost', descEn: '1.2× Psychic-type move power. Changes Arceus to Psychic type.' },
+  { slug: 'insect-plate', category: 'type-boost', descEn: '1.2× Bug-type move power. Changes Arceus to Bug type.' },
+  { slug: 'stone-plate', category: 'type-boost', descEn: '1.2× Rock-type move power. Changes Arceus to Rock type.' },
+  { slug: 'spooky-plate', category: 'type-boost', descEn: '1.2× Ghost-type move power. Changes Arceus to Ghost type.' },
+  { slug: 'draco-plate', category: 'type-boost', descEn: '1.2× Dragon-type move power. Changes Arceus to Dragon type.' },
+  { slug: 'dread-plate', category: 'type-boost', descEn: '1.2× Dark-type move power. Changes Arceus to Dark type.' },
+  { slug: 'iron-plate', category: 'type-boost', descEn: '1.2× Steel-type move power. Changes Arceus to Steel type.' },
+  { slug: 'pixie-plate', category: 'type-boost', descEn: '1.2× Fairy-type move power. Changes Arceus to Fairy type.' },
 
   // ── Berries: recovery & status cure ──
-  e('sitrus-berry', 'berry', 'Restores 1/4 max HP when HP drops below 50%.'),
-  e('lum-berry', 'berry', 'Cures any status condition. Single use.'),
-  e('aguav-berry', 'berry', 'Restores 1/3 HP when HP drops below 25%.'),
-  e('figy-berry', 'berry', 'Restores 1/3 HP when HP drops below 25%.'),
-  e('iapapa-berry', 'berry', 'Restores 1/3 HP when HP drops below 25%.'),
-  e('mago-berry', 'berry', 'Restores 1/3 HP when HP drops below 25%.'),
-  e('wiki-berry', 'berry', 'Restores 1/3 HP when HP drops below 25%.'),
-  e('chesto-berry', 'berry', 'Wakes up the holder from Sleep. Single use.'),
-  e('rawst-berry', 'berry', 'Cures the holder of a Burn. Single use.'),
-  e('pecha-berry', 'berry', 'Cures the holder of Poison. Single use.'),
-  e('cheri-berry', 'berry', 'Cures the holder of Paralysis. Single use.'),
-  e('aspear-berry', 'berry', 'Cures the holder of Freeze. Single use.'),
-  e('persim-berry', 'berry', 'Cures the holder of Confusion. Single use.'),
+  { slug: 'sitrus-berry', category: 'berry', descEn: 'Restores 1/4 max HP when HP drops below 50%.' },
+  { slug: 'lum-berry', category: 'berry', descEn: 'Cures any status condition. Single use.' },
+  { slug: 'aguav-berry', category: 'berry', descEn: 'Restores 1/3 HP when HP drops below 25%.' },
+  { slug: 'figy-berry', category: 'berry', descEn: 'Restores 1/3 HP when HP drops below 25%.' },
+  { slug: 'iapapa-berry', category: 'berry', descEn: 'Restores 1/3 HP when HP drops below 25%.' },
+  { slug: 'mago-berry', category: 'berry', descEn: 'Restores 1/3 HP when HP drops below 25%.' },
+  { slug: 'wiki-berry', category: 'berry', descEn: 'Restores 1/3 HP when HP drops below 25%.' },
+  { slug: 'chesto-berry', category: 'berry', descEn: 'Wakes up the holder from Sleep. Single use.' },
+  { slug: 'rawst-berry', category: 'berry', descEn: 'Cures the holder of a Burn. Single use.' },
+  { slug: 'pecha-berry', category: 'berry', descEn: 'Cures the holder of Poison. Single use.' },
+  { slug: 'cheri-berry', category: 'berry', descEn: 'Cures the holder of Paralysis. Single use.' },
+  { slug: 'aspear-berry', category: 'berry', descEn: 'Cures the holder of Freeze. Single use.' },
+  { slug: 'persim-berry', category: 'berry', descEn: 'Cures the holder of Confusion. Single use.' },
 
-  // ── Berries: type resistance (halve super effective hit) ──
-  e('occa-berry', 'berry', 'Halves damage from one super effective Fire-type move.'),
-  e('passho-berry', 'berry', 'Halves damage from one super effective Water-type move.'),
-  e('wacan-berry', 'berry', 'Halves damage from one super effective Electric-type move.'),
-  e('rindo-berry', 'berry', 'Halves damage from one super effective Grass-type move.'),
-  e('yache-berry', 'berry', 'Halves damage from one super effective Ice-type move.'),
-  e('chople-berry', 'berry', 'Halves damage from one super effective Fighting-type move.'),
-  e('kebia-berry', 'berry', 'Halves damage from one super effective Poison-type move.'),
-  e('shuca-berry', 'berry', 'Halves damage from one super effective Ground-type move.'),
-  e('coba-berry', 'berry', 'Halves damage from one super effective Flying-type move.'),
-  e('payapa-berry', 'berry', 'Halves damage from one super effective Psychic-type move.'),
-  e('tanga-berry', 'berry', 'Halves damage from one super effective Bug-type move.'),
-  e('charti-berry', 'berry', 'Halves damage from one super effective Rock-type move.'),
-  e('kasib-berry', 'berry', 'Halves damage from one super effective Ghost-type move.'),
-  e('haban-berry', 'berry', 'Halves damage from one super effective Dragon-type move.'),
-  e('colbur-berry', 'berry', 'Halves damage from one super effective Dark-type move.'),
-  e('babiri-berry', 'berry', 'Halves damage from one super effective Steel-type move.'),
-  e('roseli-berry', 'berry', 'Halves damage from one super effective Fairy-type move.'),
+  // ── Berries: type resistance ──
+  { slug: 'occa-berry', category: 'berry', descEn: 'Halves damage from one super effective Fire-type move.' },
+  { slug: 'passho-berry', category: 'berry', descEn: 'Halves damage from one super effective Water-type move.' },
+  { slug: 'wacan-berry', category: 'berry', descEn: 'Halves damage from one super effective Electric-type move.' },
+  { slug: 'rindo-berry', category: 'berry', descEn: 'Halves damage from one super effective Grass-type move.' },
+  { slug: 'yache-berry', category: 'berry', descEn: 'Halves damage from one super effective Ice-type move.' },
+  { slug: 'chople-berry', category: 'berry', descEn: 'Halves damage from one super effective Fighting-type move.' },
+  { slug: 'kebia-berry', category: 'berry', descEn: 'Halves damage from one super effective Poison-type move.' },
+  { slug: 'shuca-berry', category: 'berry', descEn: 'Halves damage from one super effective Ground-type move.' },
+  { slug: 'coba-berry', category: 'berry', descEn: 'Halves damage from one super effective Flying-type move.' },
+  { slug: 'payapa-berry', category: 'berry', descEn: 'Halves damage from one super effective Psychic-type move.' },
+  { slug: 'tanga-berry', category: 'berry', descEn: 'Halves damage from one super effective Bug-type move.' },
+  { slug: 'charti-berry', category: 'berry', descEn: 'Halves damage from one super effective Rock-type move.' },
+  { slug: 'kasib-berry', category: 'berry', descEn: 'Halves damage from one super effective Ghost-type move.' },
+  { slug: 'haban-berry', category: 'berry', descEn: 'Halves damage from one super effective Dragon-type move.' },
+  { slug: 'colbur-berry', category: 'berry', descEn: 'Halves damage from one super effective Dark-type move.' },
+  { slug: 'babiri-berry', category: 'berry', descEn: 'Halves damage from one super effective Steel-type move.' },
+  { slug: 'roseli-berry', category: 'berry', descEn: 'Halves damage from one super effective Fairy-type move.' },
 
   // ── Berries: pinch stat boost ──
-  e('liechi-berry', 'berry', '+1 Attack when HP drops below 25%.'),
-  e('ganlon-berry', 'berry', '+1 Defense when HP drops below 25%.'),
-  e('salac-berry', 'berry', '+1 Speed when HP drops below 25%.'),
-  e('petaya-berry', 'berry', '+1 Sp. Atk when HP drops below 25%.'),
-  e('apicot-berry', 'berry', '+1 Sp. Def when HP drops below 25%.'),
-  e('lansat-berry', 'berry', '+1 critical hit ratio when HP drops below 25%.'),
-  e('starf-berry', 'berry', '+2 to a random stat when HP drops below 25%.'),
-  e('micle-berry', 'berry', '+1.2× accuracy for the next move when HP drops below 25%.'),
-  e('custap-berry', 'berry', 'Moves first in priority bracket when HP drops below 25%.'),
+  { slug: 'liechi-berry', category: 'berry', descEn: '+1 Attack when HP drops below 25%.' },
+  { slug: 'ganlon-berry', category: 'berry', descEn: '+1 Defense when HP drops below 25%.' },
+  { slug: 'salac-berry', category: 'berry', descEn: '+1 Speed when HP drops below 25%.' },
+  { slug: 'petaya-berry', category: 'berry', descEn: '+1 Sp. Atk when HP drops below 25%.' },
+  { slug: 'apicot-berry', category: 'berry', descEn: '+1 Sp. Def when HP drops below 25%.' },
+  { slug: 'lansat-berry', category: 'berry', descEn: '+1 critical hit ratio when HP drops below 25%.' },
+  { slug: 'starf-berry', category: 'berry', descEn: '+2 to a random stat when HP drops below 25%.' },
+  { slug: 'micle-berry', category: 'berry', descEn: '+1.2× accuracy for the next move when HP drops below 25%.' },
+  { slug: 'custap-berry', category: 'berry', descEn: 'Moves first in priority bracket when HP drops below 25%.' },
 
   // ── Berries: other combat ──
-  e('leppa-berry', 'berry', 'Restores 10 PP to a depleted move.'),
-  e('jaboca-berry', 'berry', 'Deals 1/8 max HP to attacker when hit by a physical move.'),
-  e('rowap-berry', 'berry', 'Deals 1/8 max HP to attacker when hit by a special move.'),
-  e('kee-berry', 'berry', '+1 Defense when hit by a physical move.'),
-  e('maranga-berry', 'berry', '+1 Sp. Def when hit by a special move.'),
+  { slug: 'leppa-berry', category: 'berry', descEn: 'Restores 10 PP to a depleted move.' },
+  { slug: 'jaboca-berry', category: 'berry', descEn: 'Deals 1/8 max HP to attacker when hit by a physical move.' },
+  { slug: 'rowap-berry', category: 'berry', descEn: 'Deals 1/8 max HP to attacker when hit by a special move.' },
+  { slug: 'kee-berry', category: 'berry', descEn: '+1 Defense when hit by a physical move.' },
+  { slug: 'maranga-berry', category: 'berry', descEn: '+1 Sp. Def when hit by a special move.' },
 
   // ── Species-specific ──
-  e('thick-club', 'species', 'Doubles Cubone and Marowak\'s Attack.'),
-  e('lucky-punch', 'species', 'Raises Chansey\'s critical hit ratio by 2 stages.'),
-  e('deep-sea-tooth', 'species', 'Doubles Clamperl\'s Sp. Atk.'),
-  e('deep-sea-scale', 'species', 'Doubles Clamperl\'s Sp. Def.'),
-  e('soul-dew', 'species', '1.2× Psychic and Dragon moves for Latios/Latias.'),
-  e('adamant-orb', 'species', '1.2× Dragon and Steel moves for Dialga.'),
-  e('lustrous-orb', 'species', '1.2× Dragon and Water moves for Palkia.'),
-  e('griseous-orb', 'species', '1.2× Dragon and Ghost moves for Giratina. Changes to Origin Forme.'),
-  e('rusted-sword', 'species', 'Changes Zacian to Crowned Sword forme. Gains Steel type.'),
-  e('rusted-shield', 'species', 'Changes Zamazenta to Crowned Shield forme. Gains Steel type.'),
+  { slug: 'thick-club', category: 'species', descEn: "Doubles Cubone and Marowak's Attack." },
+  { slug: 'lucky-punch', category: 'species', descEn: "Raises Chansey's critical hit ratio by 2 stages." },
+  { slug: 'deep-sea-tooth', category: 'species', descEn: "Doubles Clamperl's Sp. Atk." },
+  { slug: 'deep-sea-scale', category: 'species', descEn: "Doubles Clamperl's Sp. Def." },
+  { slug: 'soul-dew', category: 'species', descEn: '1.2× Psychic and Dragon moves for Latios/Latias.' },
+  { slug: 'adamant-orb', category: 'species', descEn: '1.2× Dragon and Steel moves for Dialga.' },
+  { slug: 'lustrous-orb', category: 'species', descEn: '1.2× Dragon and Water moves for Palkia.' },
+  { slug: 'griseous-orb', category: 'species', descEn: '1.2× Dragon and Ghost moves for Giratina. Changes to Origin Forme.' },
+  { slug: 'rusted-sword', category: 'species', descEn: 'Changes Zacian to Crowned Sword forme. Gains Steel type.' },
+  { slug: 'rusted-shield', category: 'species', descEn: 'Changes Zamazenta to Crowned Shield forme. Gains Steel type.' },
 
   // ── Misc competitive ──
-  e('wide-lens', 'utility', '1.1× accuracy for all moves.'),
-  e('zoom-lens', 'utility', '1.2× accuracy if the holder moves after the target.'),
-  e('kings-rock', 'utility', '10% flinch chance on damaging moves.'),
-  e('bright-powder', 'utility', 'Lowers opponent\'s accuracy by 10%.'),
-  e('lax-incense', 'utility', 'Lowers opponent\'s accuracy by 10%.'),
-  e('ring-target', 'utility', 'Moves that would have no effect due to type land normally.'),
-  e('iron-ball', 'utility', 'Halves Speed and grounds Flying types. Grounds holder.'),
-  e('lagging-tail', 'utility', 'Holder always moves last in its priority bracket.'),
-  e('quick-claw', 'utility', '20% chance to move first in its priority bracket.'),
-  e('absorb-bulb', 'boost', '+1 Sp. Atk when hit by a Water-type move. Single use.'),
-  e('cell-battery', 'boost', '+1 Attack when hit by an Electric-type move. Single use.'),
-  e('luminous-moss', 'boost', '+1 Sp. Def when hit by a Water-type move. Single use.'),
-  e('snowball', 'boost', '+1 Attack when hit by an Ice-type move. Single use.'),
+  { slug: 'wide-lens', category: 'utility', descEn: '1.1× accuracy for all moves.' },
+  { slug: 'zoom-lens', category: 'utility', descEn: '1.2× accuracy if the holder moves after the target.' },
+  { slug: 'kings-rock', category: 'utility', descEn: '10% flinch chance on damaging moves.' },
+  { slug: 'bright-powder', category: 'utility', descEn: "Lowers opponent's accuracy by 10%." },
+  { slug: 'lax-incense', category: 'utility', descEn: "Lowers opponent's accuracy by 10%." },
+  { slug: 'ring-target', category: 'utility', descEn: 'Moves that would have no effect due to type land normally.' },
+  { slug: 'iron-ball', category: 'utility', descEn: 'Halves Speed and grounds Flying types. Grounds holder.' },
+  { slug: 'lagging-tail', category: 'utility', descEn: 'Holder always moves last in its priority bracket.' },
+  { slug: 'quick-claw', category: 'utility', descEn: '20% chance to move first in its priority bracket.' },
+  { slug: 'absorb-bulb', category: 'boost', descEn: '+1 Sp. Atk when hit by a Water-type move. Single use.' },
+  { slug: 'cell-battery', category: 'boost', descEn: '+1 Attack when hit by an Electric-type move. Single use.' },
+  { slug: 'luminous-moss', category: 'boost', descEn: '+1 Sp. Def when hit by a Water-type move. Single use.' },
+  { slug: 'snowball', category: 'boost', descEn: '+1 Attack when hit by an Ice-type move. Single use.' },
+
+  // ── Mega Stones ──
+  { slug: 'venusaurite', category: 'mega-stone', descEn: 'Mega Evolves Venusaur.' },
+  { slug: 'charizardite-x', category: 'mega-stone', descEn: 'Mega Evolves Charizard into Mega Charizard X.' },
+  { slug: 'charizardite-y', category: 'mega-stone', descEn: 'Mega Evolves Charizard into Mega Charizard Y.' },
+  { slug: 'blastoisinite', category: 'mega-stone', descEn: 'Mega Evolves Blastoise.' },
+  { slug: 'beedrillite', category: 'mega-stone', descEn: 'Mega Evolves Beedrill.' },
+  { slug: 'pidgeotite', category: 'mega-stone', descEn: 'Mega Evolves Pidgeot.' },
+  { slug: 'alakazite', category: 'mega-stone', descEn: 'Mega Evolves Alakazam.' },
+  { slug: 'slowbronite', category: 'mega-stone', descEn: 'Mega Evolves Slowbro.' },
+  { slug: 'gengarite', category: 'mega-stone', descEn: 'Mega Evolves Gengar.' },
+  { slug: 'kangaskhanite', category: 'mega-stone', descEn: 'Mega Evolves Kangaskhan.' },
+  { slug: 'pinsirite', category: 'mega-stone', descEn: 'Mega Evolves Pinsir.' },
+  { slug: 'gyaradosite', category: 'mega-stone', descEn: 'Mega Evolves Gyarados.' },
+  { slug: 'aerodactylite', category: 'mega-stone', descEn: 'Mega Evolves Aerodactyl.' },
+  { slug: 'mewtwonite-x', category: 'mega-stone', descEn: 'Mega Evolves Mewtwo into Mega Mewtwo X.' },
+  { slug: 'mewtwonite-y', category: 'mega-stone', descEn: 'Mega Evolves Mewtwo into Mega Mewtwo Y.' },
+  { slug: 'ampharosite', category: 'mega-stone', descEn: 'Mega Evolves Ampharos.' },
+  { slug: 'steelixite', category: 'mega-stone', descEn: 'Mega Evolves Steelix.' },
+  { slug: 'scizorite', category: 'mega-stone', descEn: 'Mega Evolves Scizor.' },
+  { slug: 'heracronite', category: 'mega-stone', descEn: 'Mega Evolves Heracross.' },
+  { slug: 'houndoominite', category: 'mega-stone', descEn: 'Mega Evolves Houndoom.' },
+  { slug: 'tyranitarite', category: 'mega-stone', descEn: 'Mega Evolves Tyranitar.' },
+  { slug: 'sceptilite', category: 'mega-stone', descEn: 'Mega Evolves Sceptile.' },
+  { slug: 'blazikenite', category: 'mega-stone', descEn: 'Mega Evolves Blaziken.' },
+  { slug: 'swampertite', category: 'mega-stone', descEn: 'Mega Evolves Swampert.' },
+  { slug: 'gardevoirite', category: 'mega-stone', descEn: 'Mega Evolves Gardevoir.' },
+  { slug: 'sablenite', category: 'mega-stone', descEn: 'Mega Evolves Sableye.' },
+  { slug: 'mawilite', category: 'mega-stone', descEn: 'Mega Evolves Mawile.' },
+  { slug: 'aggronite', category: 'mega-stone', descEn: 'Mega Evolves Aggron.' },
+  { slug: 'medichamite', category: 'mega-stone', descEn: 'Mega Evolves Medicham.' },
+  { slug: 'manectite', category: 'mega-stone', descEn: 'Mega Evolves Manectric.' },
+  { slug: 'sharpedonite', category: 'mega-stone', descEn: 'Mega Evolves Sharpedo.' },
+  { slug: 'cameruptite', category: 'mega-stone', descEn: 'Mega Evolves Camerupt.' },
+  { slug: 'altarianite', category: 'mega-stone', descEn: 'Mega Evolves Altaria.' },
+  { slug: 'banettite', category: 'mega-stone', descEn: 'Mega Evolves Banette.' },
+  { slug: 'absolite', category: 'mega-stone', descEn: 'Mega Evolves Absol.' },
+  { slug: 'glalitite', category: 'mega-stone', descEn: 'Mega Evolves Glalie.' },
+  { slug: 'salamencite', category: 'mega-stone', descEn: 'Mega Evolves Salamence.' },
+  { slug: 'metagrossite', category: 'mega-stone', descEn: 'Mega Evolves Metagross.' },
+  { slug: 'latiasite', category: 'mega-stone', descEn: 'Mega Evolves Latias.' },
+  { slug: 'latiosite', category: 'mega-stone', descEn: 'Mega Evolves Latios.' },
+  { slug: 'lopunnite', category: 'mega-stone', descEn: 'Mega Evolves Lopunny.' },
+  { slug: 'garchompite', category: 'mega-stone', descEn: 'Mega Evolves Garchomp.' },
+  { slug: 'lucarionite', category: 'mega-stone', descEn: 'Mega Evolves Lucario.' },
+  { slug: 'abomasite', category: 'mega-stone', descEn: 'Mega Evolves Abomasnow.' },
+  { slug: 'galladite', category: 'mega-stone', descEn: 'Mega Evolves Gallade.' },
+  { slug: 'audinite', category: 'mega-stone', descEn: 'Mega Evolves Audino.' },
+  { slug: 'diancite', category: 'mega-stone', descEn: 'Mega Evolves Diancie.' },
 ];
 
-export function useItemList(): { items: ItemEntry[]; loading: boolean } {
-  return { items: BATTLE_ITEMS, loading: false };
+/* ── Localized item cache — keyed by `lang:slug` ───────────────────── */
+
+const ITEM_CACHE_MAX = 500;
+const itemI18nCache = new Map<string, { name: string; desc: string }>();
+
+function setItemCache(key: string, value: { name: string; desc: string }) {
+  if (itemI18nCache.size >= ITEM_CACHE_MAX) {
+    const firstKey = itemI18nCache.keys().next().value!;
+    itemI18nCache.delete(firstKey);
+  }
+  itemI18nCache.set(key, value);
+}
+
+async function fetchItemI18n(slug: string, lang: string): Promise<{ name: string; desc: string }> {
+  const res = await fetch(`https://pokeapi.co/api/v2/item/${slug}`);
+  if (!res.ok) return { name: formatSlug(slug), desc: '' };
+  const data = await res.json() as {
+    names: Array<{ name: string; language: { name: string } }>;
+    flavor_text_entries: Array<{ text: string; language: { name: string } }>;
+    effect_entries: Array<{ short_effect: string; language: { name: string } }>;
+  };
+  const localName = data.names?.find(n => n.language.name === lang)?.name
+    ?? data.names?.find(n => n.language.name === 'en')?.name
+    ?? formatSlug(slug);
+  const localDesc = data.effect_entries?.find(e => e.language.name === lang)?.short_effect
+    ?? data.flavor_text_entries?.filter(f => f.language.name === lang).pop()?.text
+    ?? data.effect_entries?.find(e => e.language.name === 'en')?.short_effect
+    ?? data.flavor_text_entries?.filter(f => f.language.name === 'en').pop()?.text
+    ?? '';
+  return { name: localName, desc: localDesc };
+}
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+
+function buildItems(lang: string): ItemEntry[] {
+  return RAW_ITEMS.map(raw => {
+    const key = `${lang}:${raw.slug}`;
+    const cached = itemI18nCache.get(key);
+    const sprites = sprite(raw.slug);
+    return {
+      slug: raw.slug,
+      name: cached?.name ?? formatSlug(raw.slug),
+      ...sprites,
+      category: raw.category,
+      desc: cached?.desc || raw.descEn,
+    };
+  });
+}
+
+export function useItemList(lang = 'en'): { items: ItemEntry[]; loading: boolean } {
+  const [items, setItems] = useState<ItemEntry[]>(() => buildItems(lang));
+  const [loading, setLoading] = useState(false);
+  const runIdRef = useRef(0);
+
+  useEffect(() => {
+    // For English, just use slug-based names + hardcoded descriptions
+    if (lang === 'en') {
+      setItems(buildItems(lang));
+      setLoading(false);
+      return;
+    }
+
+    const currentRun = ++runIdRef.current;
+
+    // Check which items still need fetching
+    const uncached = RAW_ITEMS.filter(r => !itemI18nCache.has(`${lang}:${r.slug}`));
+
+    if (uncached.length === 0) {
+      setItems(buildItems(lang));
+      setLoading(false);
+      return;
+    }
+
+    // Show what we have so far (slug-formatted names for uncached)
+    setItems(buildItems(lang));
+    setLoading(true);
+
+    const chunks = chunkArray(uncached, 8);
+
+    (async () => {
+      for (let ci = 0; ci < chunks.length; ci++) {
+        if (runIdRef.current !== currentRun) return;
+        if (ci > 0) await new Promise(r => setTimeout(r, 300));
+        const results = await Promise.allSettled(
+          chunks[ci].map(raw => fetchItemI18n(raw.slug, lang))
+        );
+        if (runIdRef.current !== currentRun) return;
+        for (let j = 0; j < results.length; j++) {
+          if (results[j].status === 'fulfilled') {
+            const val = (results[j] as PromiseFulfilledResult<{ name: string; desc: string }>).value;
+            setItemCache(`${lang}:${chunks[ci][j].slug}`, val);
+          }
+        }
+        // Update items progressively
+        setItems(buildItems(lang));
+      }
+      if (runIdRef.current === currentRun) setLoading(false);
+    })();
+
+    return () => { runIdRef.current++; };
+  }, [lang]);
+
+  return { items, loading };
 }

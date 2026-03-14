@@ -62,9 +62,9 @@ const LoginForm = ({ formData, errors, isSubmitting, showPassword, handleChange,
           </div>
 
           <div className="text-sm">
-            <a href="#" className="font-medium text-red-600 hover:text-red-800 transition-colors duration-200">
+            <span className="font-medium text-red-600/50 cursor-default select-none">
               {t('login_forgot_password')}
-            </a>
+            </span>
           </div>
         </div>
 

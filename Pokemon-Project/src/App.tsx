@@ -17,10 +17,11 @@ const Profile = lazy(() => import('./components/pages/Profile/Profile'));
 const Teams = lazy(() => import('./components/pages/Teams/Teams'));
 const TeamsBuilder = lazy(() => import('./components/pages/Teams/TeamsBuilder'));
 const PokemonDetail = lazy(() => import('./components/pages/Pokedex/Pokemon/PokemonDetail'));
+const Calculator = lazy(() => import('./components/pages/Calculator/Calculator'));
 const Page404 = lazy(() => import('./components/pages/404'));
 
 const PageLoader = () => (
-  <div className="min-h-screen app-bg flex items-center justify-center">
+  <div className="min-h-screen app-bg flex items-center justify-center" role="status" aria-label="Loading">
     <div className="relative w-16 h-16">
       <div className="absolute inset-0 rounded-full border-4 border-[var(--color-border)]" />
       <div
@@ -61,6 +62,7 @@ const AppRoutes = [
   { path: '/profile', Component: Profile },
   { path: '/teams', Component: Teams },
   { path: '/teamsbuilder/:id', Component: TeamsBuilder },
+  { path: '/calculator', Component: Calculator },
 ];
 
 function App() {
@@ -72,8 +74,13 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <main className="grain">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-primary)] focus:text-white focus:text-sm focus:font-bold focus:shadow-lg">
+              Skip to content
+            </a>
             <GlobalNav />
-            <Router routes={AppRoutes} defaultComponent={Page404} />
+            <div id="main-content">
+              <Router routes={AppRoutes} defaultComponent={Page404} />
+            </div>
           </main>
         </Suspense>
       </ErrorBoundary>

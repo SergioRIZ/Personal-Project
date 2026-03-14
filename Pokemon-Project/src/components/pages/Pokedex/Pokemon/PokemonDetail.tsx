@@ -45,14 +45,9 @@ const PokemonDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [abilityDescriptions, setAbilityDescriptions] = useState<AbilityMap>({});
   const [isShiny, setIsShiny] = useState(false);
-  const [spriteOpacity, setSpriteOpacity] = useState(1);
 
   const handleShinyToggle = () => {
-    setSpriteOpacity(0);
-    setTimeout(() => {
-      setIsShiny(s => !s);
-      setSpriteOpacity(1);
-    }, 150);
+    setIsShiny(s => !s);
   };
 
   const { species, loading: speciesLoading } = usePokemonSpecies(
@@ -107,7 +102,6 @@ const PokemonDetailPage = () => {
     : '';
   const hasOfficialShiny = !!pokemon?.sprites.other['official-artwork'].front_shiny;
   const shinySprite = pokemon?.sprites.other['official-artwork'].front_shiny || normalSprite;
-  const sprite = isShiny ? shinySprite : normalSprite;
   const isCollected = pokemon ? collectedIds.has(pokemon.id) : false;
 
   const weaknesses = useMemo(() => {
@@ -121,10 +115,11 @@ const PokemonDetailPage = () => {
       .filter(w => w.multiplier > 1);
   }, [pokemon]);
 
-  const abilitiesList = pokemon?.abilities.map(a => ({
+  const abilitiesList = useMemo(() => pokemon?.abilities.map(a => ({
     name: abilityDescriptions[a.ability.name]?.name ?? a.ability.name.replace('-', ' '),
+    description: abilityDescriptions[a.ability.name]?.description ?? '',
     isHidden: a.is_hidden,
-  })) ?? [];
+  })) ?? [], [pokemon, abilityDescriptions]);
 
   const genderDisplay = useMemo(() => {
     if (!species) return null;
@@ -285,7 +280,7 @@ const PokemonDetailPage = () => {
                   onClick={handleShinyToggle}
                   aria-label={isShiny ? 'Ver forma normal' : 'Ver forma shiny'}
                   title={isShiny ? 'Ver forma normal' : 'Ver forma shiny'}
-                  className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-xl shadow-md transition-all duration-200 cursor-pointer ${
+                  className={`absolute top-3 right-3 z-20 w-10 h-10 flex items-center justify-center rounded-xl shadow-md transition-all duration-200 cursor-pointer ${
                     isShiny
                       ? 'bg-yellow-400 text-white'
                       : 'bg-[var(--color-card)]/80 hover:bg-[var(--color-card)] text-[var(--text-muted)] hover:text-yellow-400 border border-[var(--color-border)]'
@@ -297,7 +292,7 @@ const PokemonDetailPage = () => {
                 </button>
               )}
               {/* Geometric pattern background */}
-              <div className="absolute inset-0 opacity-[0.03]">
+              <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
                 <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                   <pattern id="detail-grid" width="20" height="20" patternUnits="userSpaceOnUse">
                     <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--color-primary)" strokeWidth="0.5" />
@@ -307,7 +302,7 @@ const PokemonDetailPage = () => {
               </div>
 
               {/* Pokeball outline — large and centered */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-[0.06]">
+              <div className="absolute inset-0 flex items-center justify-center opacity-[0.06]" aria-hidden="true">
                 <svg viewBox="0 0 200 200" className="w-56 h-56 sm:w-64 sm:h-64">
                   <circle cx="100" cy="100" r="93" stroke="var(--color-primary)" strokeWidth="3" fill="none" />
                   <line x1="7" y1="100" x2="193" y2="100" stroke="var(--color-primary)" strokeWidth="3" />
@@ -316,16 +311,32 @@ const PokemonDetailPage = () => {
                 </svg>
               </div>
 
-              <img
-                src={sprite}
-                alt={pokemonName}
-                className="relative z-10 w-56 h-56 sm:w-72 sm:h-72 object-contain animate-float"
-                style={{
-                  opacity: spriteOpacity,
-                  transition: 'opacity 0.15s ease',
-                  filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 2px 8px rgba(0,0,0,0.12))',
-                }}
-              />
+              <div className="relative z-10 w-56 h-56 sm:w-72 sm:h-72 animate-float">
+                <img
+                  src={normalSprite}
+                  alt={pokemonName}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-contain"
+                  style={{
+                    opacity: isShiny ? 0 : 1,
+                    transition: 'opacity 0.2s ease',
+                    filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 2px 8px rgba(0,0,0,0.12))',
+                  }}
+                />
+                {hasOfficialShiny && (
+                  <img
+                    src={shinySprite}
+                    alt={`${pokemonName} shiny`}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-contain"
+                    style={{
+                      opacity: isShiny ? 1 : 0,
+                      transition: 'opacity 0.2s ease',
+                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 2px 8px rgba(0,0,0,0.12))',
+                    }}
+                  />
+                )}
+              </div>
 
               {/* Types below image */}
               <div className="flex gap-4 mt-4 relative z-10">
@@ -344,7 +355,7 @@ const PokemonDetailPage = () => {
             {/* RIGHT: Info */}
             <div className="p-6 space-y-5">
               {/* Description */}
-              <div className="min-h-[3rem]">
+              <section aria-label={t('detail_description', 'Description')} className="min-h-[3rem]">
                 {speciesLoading ? (
                   <div className="space-y-2">
                     <div className="h-3 w-full bg-[var(--color-card-alt)] rounded animate-pulse" />
@@ -355,7 +366,7 @@ const PokemonDetailPage = () => {
                     {species?.description || t('detail_no_description')}
                   </p>
                 )}
-              </div>
+              </section>
 
               {/* Info table */}
               <div className="grid grid-cols-2 gap-3">
@@ -396,8 +407,16 @@ const PokemonDetailPage = () => {
                   </p>
                   <div className="flex flex-wrap gap-x-2 gap-y-0.5">
                     {abilitiesList.map((a, i) => (
-                      <span key={i} className={`text-sm font-bold capitalize ${a.isHidden ? 'text-[var(--text-muted)] italic' : 'text-[var(--text-primary)]'}`}>
-                        {a.name}{a.isHidden ? ` (${t('detail_hidden_ability')})` : ''}
+                      <span key={i} className="relative group" tabIndex={0} role="button" aria-describedby={a.description ? `ability-desc-${i}` : undefined}>
+                        <span className={`text-sm font-bold capitalize cursor-help border-b border-dotted border-current ${a.isHidden ? 'text-[var(--text-muted)] italic' : 'text-[var(--text-primary)]'}`}>
+                          {a.name}{a.isHidden ? ` (${t('detail_hidden_ability')})` : ''}
+                        </span>
+                        {a.description && (
+                          <span id={`ability-desc-${i}`} role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 sm:w-56 px-3 py-2 text-xs font-normal normal-case not-italic text-white bg-gray-900 dark:bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus:opacity-100 group-focus:visible transition-all duration-200 z-50 pointer-events-none text-center leading-relaxed">
+                            {a.description}
+                            <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                          </span>
+                        )}
                       </span>
                     ))}
                   </div>
@@ -428,8 +447,8 @@ const PokemonDetailPage = () => {
               </div>
 
               {/* Weaknesses */}
-              <div>
-                <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+              <section aria-labelledby="weaknesses-heading">
+                <h3 id="weaknesses-heading" className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2" style={{ fontFamily: 'var(--font-display)' }}>
                   {t('detail_weaknesses')}
                 </h3>
                 {weaknesses.length === 0 ? (
@@ -437,12 +456,18 @@ const PokemonDetailPage = () => {
                 ) : (
                   <div className="bg-[var(--color-card-alt)] rounded-xl border border-[var(--color-border)] overflow-hidden">
                     <table className="w-full">
+                      <thead className="sr-only">
+                        <tr>
+                          <th scope="col">{t('detail_multiplier', 'Multiplier')}</th>
+                          <th scope="col">{t('detail_types', 'Types')}</th>
+                        </tr>
+                      </thead>
                       <tbody>
                         {weaknesses.filter(w => w.multiplier === 2).length > 0 && (
                           <tr className={weaknesses.some(w => w.multiplier > 2) ? 'border-b border-[var(--color-border)]' : ''}>
-                            <td className="px-3 py-2.5 w-12 align-middle border-r border-[var(--color-border)]">
+                            <th scope="row" className="px-3 py-2.5 w-12 align-middle border-r border-[var(--color-border)]">
                               <span className="text-xs font-bold text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-display)' }}>×2</span>
-                            </td>
+                            </th>
                             <td className="px-3 py-2.5">
                               <div className="flex flex-wrap gap-1.5">
                                 {weaknesses.filter(w => w.multiplier === 2).map(({ type }) => (
@@ -460,9 +485,9 @@ const PokemonDetailPage = () => {
                         )}
                         {weaknesses.filter(w => w.multiplier > 2).length > 0 && (
                           <tr>
-                            <td className="px-3 py-2.5 w-12 align-middle border-r border-[var(--color-border)]">
+                            <th scope="row" className="px-3 py-2.5 w-12 align-middle border-r border-[var(--color-border)]">
                               <span className="text-xs font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>×4</span>
-                            </td>
+                            </th>
                             <td className="px-3 py-2.5">
                               <div className="flex flex-wrap gap-1.5">
                                 {weaknesses.filter(w => w.multiplier > 2).map(({ type }) => (
@@ -482,12 +507,12 @@ const PokemonDetailPage = () => {
                     </table>
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* Base Stats */}
-              <div>
+              <section aria-labelledby="stats-heading">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
+                  <h3 id="stats-heading" className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('baseStats')}
                   </h3>
                   <span className="text-xs font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
@@ -496,6 +521,13 @@ const PokemonDetailPage = () => {
                 </div>
                 <div className="bg-[var(--color-card-alt)] rounded-xl border border-[var(--color-border)] overflow-hidden">
                   <table className="w-full">
+                    <thead className="sr-only">
+                      <tr>
+                        <th scope="col">{t('detail_stat_name', 'Stat')}</th>
+                        <th scope="col">{t('detail_stat_value', 'Value')}</th>
+                        <th scope="col">{t('detail_stat_bar', 'Bar')}</th>
+                      </tr>
+                    </thead>
                     <tbody>
                       {pokemon.stats.map((stat, i) => {
                         const pct = Math.min(100, (stat.base_stat / 255) * 100);
@@ -504,11 +536,11 @@ const PokemonDetailPage = () => {
 
                         return (
                           <tr key={stat.stat.name} className={i < pokemon.stats.length - 1 ? 'border-b border-[var(--color-border)]' : ''}>
-                            <td className="px-3 py-2 w-24 border-r border-[var(--color-border)]">
+                            <th scope="row" className="px-3 py-2 w-24 border-r border-[var(--color-border)]">
                               <span className={`text-[11px] font-bold ${textColor}`} style={{ fontFamily: 'var(--font-display)' }}>
                                 {translateStatName(stat.stat.name, currentLanguage)}
                               </span>
-                            </td>
+                            </th>
                             <td className="px-3 py-2 w-10 text-right border-r border-[var(--color-border)]">
                               <span className="text-xs font-bold text-[var(--text-primary)] tabular-nums" style={{ fontFamily: 'var(--font-display)' }}>
                                 {stat.base_stat}
@@ -528,7 +560,7 @@ const PokemonDetailPage = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </section>
             {/* /right panel */}
             </div>
           {/* /grid */}

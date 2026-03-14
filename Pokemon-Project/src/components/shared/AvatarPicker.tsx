@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { AVATAR_CHARACTERS, AVATAR_CATEGORIES, getAvatarUrl } from '../../lib/avatars';
@@ -23,16 +23,28 @@ interface Props {
 
 const AvatarPicker = ({ currentAvatarId, onSelect, onClose }: Props) => {
   const { t } = useTranslation();
+  const modalRef = useRef<HTMLDivElement>(null);
 
-  // Lock body scroll + Escape key
+  // Lock body scroll + Escape key + focus trap
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener('keydown', handler);
+    modalRef.current?.focus();
 
     return () => {
       document.body.style.overflow = prev;
@@ -52,17 +64,26 @@ const AvatarPicker = ({ currentAvatarId, onSelect, onClose }: Props) => {
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="avatar-picker-title"
+        tabIndex={-1}
+        className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 focus:outline-none"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          <h2 id="avatar-picker-title" className="text-lg font-bold text-gray-900 dark:text-white">
             {t('avatar_title')}
           </h2>
           <button
             onClick={onClose}
+            aria-label={t('closeMenu', 'Close')}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -100,6 +121,7 @@ const AvatarPicker = ({ currentAvatarId, onSelect, onClose }: Props) => {
                       <button
                         key={char.id}
                         onClick={() => handleSelect(char.id)}
+                        aria-label={char.name}
                         title={char.name}
                         className={`relative flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer ${
                           isSelected

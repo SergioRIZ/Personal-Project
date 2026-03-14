@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useMoveDetails } from '../../../hooks/useMoveDetails';
@@ -11,8 +11,17 @@ interface Props {
   onClose: () => void;
 }
 
-// Module-level cache — re-opening the picker for the same Pokémon is instant
+// Module-level cache — re-opening the picker for the same Pokémon is instant (capped at 100)
+const MOVES_CACHE_MAX = 100;
 const pokemonMovesCache = new Map<number, string[]>();
+
+function setMovesCache(key: number, value: string[]) {
+  if (pokemonMovesCache.size >= MOVES_CACHE_MAX) {
+    const firstKey = pokemonMovesCache.keys().next().value!;
+    pokemonMovesCache.delete(firstKey);
+  }
+  pokemonMovesCache.set(key, value);
+}
 
 function formatMoveName(slug: string): string {
   return slug
@@ -37,6 +46,28 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
   const [search, setSearch] = useState('');
   const [allMoves, setAllMoves] = useState<string[]>([]);
   const [loadingList, setLoadingList] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // ESC key + focus trap
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    // Move focus into modal
+    modalRef.current?.focus();
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   // Fetch the Pokémon's learnable move list
   useEffect(() => {
@@ -49,7 +80,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
       .then(r => r.json())
       .then((data: { moves: Array<{ move: { name: string } }> }) => {
         const slugs = [...new Set(data.moves.map(m => m.move.name))].sort();
-        pokemonMovesCache.set(pokemonId, slugs);
+        setMovesCache(pokemonId, slugs);
         setAllMoves(slugs);
       })
       .catch(console.error)
@@ -57,30 +88,38 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
   }, [pokemonId]);
 
   // Fetch type/power/category/description for every move (progressive batches of 10)
-  const { details: moveDetails } = useMoveDetails(allMoves);
+  const { details: moveDetails } = useMoveDetails(allMoves, i18n.language);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return allMoves;
-    return allMoves.filter(slug =>
-      slug.includes(q) || formatMoveName(slug).toLowerCase().includes(q)
-    );
-  }, [allMoves, search]);
+    return allMoves.filter(slug => {
+      const localName = moveDetails[slug]?.name?.toLowerCase() ?? '';
+      return slug.includes(q) || formatMoveName(slug).toLowerCase().includes(q) || localName.includes(q);
+    });
+  }, [allMoves, search, moveDetails]);
 
-  const currentSet = new Set(currentMoves);
+  const currentSet = useMemo(() => new Set(currentMoves), [currentMoves]);
 
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[82vh]">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="move-picker-title"
+        tabIndex={-1}
+        className="relative z-10 w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[82vh] focus:outline-none"
+      >
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 shrink-0">
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 dark:text-white text-base leading-tight">
+            <h3 id="move-picker-title" className="font-bold text-gray-900 dark:text-white text-base leading-tight">
               {t('teams_pick_move_title')}
             </h3>
             {!loadingList && allMoves.length > 0 && (
@@ -91,6 +130,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
           </div>
           <button
             onClick={onClose}
+            aria-label={t('closeMenu', 'Close')}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -129,7 +169,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
         {/* ── Move list ────────────────────────────────────────────── */}
         <div className="overflow-y-auto flex-1">
           {loadingList ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16">
+            <div className="flex flex-col items-center justify-center gap-3 py-16" role="status" aria-label={t('teams_loading_moves')}>
               <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm text-gray-400 dark:text-gray-500">{t('teams_loading_moves')}</span>
             </div>
@@ -179,7 +219,7 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
                           ? 'text-red-700 dark:text-red-400'
                           : 'text-gray-800 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white'
                       }`}>
-                        {formatMoveName(slug)}
+                        {detail?.name ?? formatMoveName(slug)}
                       </p>
 
                       {/* Power */}

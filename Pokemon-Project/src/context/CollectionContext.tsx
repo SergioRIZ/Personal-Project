@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './AuthContext';
 import {
   fetchCollection,
@@ -34,7 +34,7 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
       .finally(() => setLoading(false));
   }, [user]);
 
-  const collectedIds = new Set(collectionItems.map(item => item.pokemon_id));
+  const collectedIds = useMemo(() => new Set(collectionItems.map(item => item.pokemon_id)), [collectionItems]);
 
   const addPokemon = async (id: number, name: string) => {
     if (!user) return;

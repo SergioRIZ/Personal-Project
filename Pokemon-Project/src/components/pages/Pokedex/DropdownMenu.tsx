@@ -34,6 +34,21 @@ const PokedexIcon = () => (
   </svg>
 );
 
+const CalcIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+    <rect x="4" y="2" width="16" height="20" rx="2" />
+    <line x1="8" y1="6" x2="16" y2="6" />
+    <line x1="8" y1="10" x2="8" y2="10.01" />
+    <line x1="12" y1="10" x2="12" y2="10.01" />
+    <line x1="16" y1="10" x2="16" y2="10.01" />
+    <line x1="8" y1="14" x2="8" y2="14.01" />
+    <line x1="12" y1="14" x2="12" y2="14.01" />
+    <line x1="16" y1="14" x2="16" y2="14.01" />
+    <line x1="8" y1="18" x2="8" y2="18.01" />
+    <line x1="12" y1="18" x2="16" y2="18" />
+  </svg>
+);
+
 const TeamsIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="ml-1">
     <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
@@ -51,6 +66,7 @@ const DropdownMenu = () => {
     { label: t('home', 'Home'), to: '/', icon: <HomeICON /> },
     { label: 'Pokédex', to: '/pokedex', icon: <PokedexIcon /> },
     { label: t('teams', 'Teams'), to: '/teams', icon: <TeamsIcon /> },
+    { label: t('calculator', 'Calculator'), to: '/calculator', icon: <CalcIcon /> },
     { label: t('settings', 'Settings'), to: '/settings', icon: <SettingsIcon /> },
   ], [t, i18n.language]);
 
@@ -63,8 +79,8 @@ const DropdownMenu = () => {
   };
 
   const closeMenu = useCallback(() => {
-    if (isOpen) setIsOpen(false);
-  }, [isOpen]);
+    setIsOpen(false);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -88,7 +104,10 @@ const DropdownMenu = () => {
       const timer = setTimeout(() => setShowButton(true), 600);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') closeMenu(); };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, closeMenu]);
 
   return (
     <div className="z-50">
@@ -113,6 +132,7 @@ const DropdownMenu = () => {
       <div
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 z-40 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={closeMenu}
+        aria-hidden="true"
       />
 
       {/* Sidebar */}
@@ -159,7 +179,7 @@ const DropdownMenu = () => {
         )}
 
         {/* Nav items */}
-        <div className="py-3 flex-1">
+        <nav aria-label={t('menu', 'Menu')} className="py-3 flex-1">
           {menuItems.map((item, index) => (
             <Link
               key={index}
@@ -175,11 +195,11 @@ const DropdownMenu = () => {
                 }
               }}
             >
-              <div className="flex items-center w-8 text-[var(--text-muted)] group-hover:text-[var(--color-primary)] transition-colors">{item.icon}</div>
+              <div className="flex items-center w-8 text-[var(--text-muted)] group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true">{item.icon}</div>
               <span className="font-semibold ml-3" style={{ fontFamily: 'var(--font-display)' }}>{item.label}</span>
             </Link>
           ))}
-        </div>
+        </nav>
 
         {/* Dark mode & language toggles */}
         <div className="border-t border-[var(--color-border)] px-5 py-3 space-y-1">

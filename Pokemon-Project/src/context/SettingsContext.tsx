@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import i18n from '../i18n';
 
@@ -44,7 +44,10 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   );
 
   // Always merge with defaults — guards against stale/old localStorage data
-  const settings: AppSettings = { ...DEFAULT_SETTINGS, ...storedSettings };
+  const settings: AppSettings = useMemo(
+    () => ({ ...DEFAULT_SETTINGS, ...storedSettings }),
+    [storedSettings],
+  );
 
   // Apply dark mode immediately on mount and whenever it changes
   useEffect(() => {
@@ -56,21 +59,26 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     i18n.changeLanguage(settings.language);
   }, [settings.language]);
 
-  const updateSetting = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
+  const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     // Apply dark mode synchronously — don't wait for the React re-render cycle.
     if (key === 'darkMode') {
       document.documentElement.classList.toggle('dark', value as boolean);
     }
     setStoredSettings(prev => ({ ...DEFAULT_SETTINGS, ...prev, [key]: value }));
-  };
+  }, [setStoredSettings]);
 
-  const resetSettings = () => {
+  const resetSettings = useCallback(() => {
     document.documentElement.classList.toggle('dark', DEFAULT_SETTINGS.darkMode);
     setStoredSettings(DEFAULT_SETTINGS);
-  };
+  }, [setStoredSettings]);
+
+  const value = useMemo(
+    () => ({ settings, updateSetting, resetSettings }),
+    [settings, updateSetting, resetSettings],
+  );
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSetting, resetSettings }}>
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

@@ -74,7 +74,7 @@ const TeamsBuilder: React.FC = () => {
   return (
     <div className="min-h-screen app-bg pt-20 sm:pt-8 pb-8 px-4">
       {/* Full team builder */}
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-[90rem] mx-auto">
         <TeamCard team={team} />
       </div>
     </div>
