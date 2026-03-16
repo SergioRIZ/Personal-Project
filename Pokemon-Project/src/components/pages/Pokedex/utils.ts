@@ -71,6 +71,7 @@ const TYPE_TRANSLATIONS: Record<string, Record<string, string>> = {
   dark: { es: 'siniestro', en: 'dark' },
   steel: { es: 'acero', en: 'steel' },
   fairy: { es: 'hada', en: 'fairy' },
+  stellar: { es: 'estelar', en: 'stellar' },
 };
 
 export const translateType = (type: string, currentLanguage: string): string =>

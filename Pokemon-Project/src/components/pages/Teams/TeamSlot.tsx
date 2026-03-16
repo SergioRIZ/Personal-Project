@@ -53,30 +53,14 @@ const STAT_ORDER: (keyof BaseStats)[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'
 const STAT_DISPLAY: Record<keyof BaseStats, string> = {
   hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe',
 };
-const STAT_BAR_COLORS: Record<keyof BaseStats, string> = {
-  hp:  'bg-gradient-to-r from-rose-500 to-red-500',
-  atk: 'bg-gradient-to-r from-amber-500 to-orange-500',
-  def: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-  spa: 'bg-gradient-to-r from-blue-500 to-indigo-500',
-  spd: 'bg-gradient-to-r from-emerald-500 to-green-500',
-  spe: 'bg-gradient-to-r from-violet-500 to-purple-500',
-};
-const STAT_TEXT_COLORS: Record<keyof BaseStats, string> = {
-  hp:  'text-rose-600 dark:text-rose-400',
-  atk: 'text-amber-600 dark:text-amber-400',
-  def: 'text-yellow-600 dark:text-yellow-400',
-  spa: 'text-blue-600 dark:text-blue-400',
-  spd: 'text-emerald-600 dark:text-emerald-400',
-  spe: 'text-violet-600 dark:text-violet-400',
-};
-const STAT_ROW_BG: Record<keyof BaseStats, string> = {
-  hp:  'bg-rose-50/50 dark:bg-rose-900/15',
-  atk: 'bg-amber-50/50 dark:bg-amber-900/15',
-  def: 'bg-yellow-50/50 dark:bg-yellow-900/15',
-  spa: 'bg-blue-50/50 dark:bg-blue-900/15',
-  spd: 'bg-emerald-50/50 dark:bg-emerald-900/15',
-  spe: 'bg-violet-50/50 dark:bg-violet-900/15',
-};
+// Bar color based on calculated stat value (Showdown-style gradient)
+function getStatBarColor(value: number): string {
+  if (value < 60) return '#F44336';       // red
+  if (value < 90) return '#FF9800';       // orange
+  if (value < 120) return '#FFEB3B';      // yellow
+  if (value < 150) return '#8BC34A';      // light green
+  return '#4CAF50';                        // green
+}
 const STAT_BAR_MAX = 400;
 
 function calcStat(base: number, ev: number, iv: number, isHP: boolean, natureMod: number): number {
@@ -99,6 +83,7 @@ const TeamSlot: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [hoveredMove, setHoveredMove] = useState<string | null>(null);
   const lang = i18n.language;
 
   const { details: moveDetails } = useMoveDetails(member?.moves ?? [], lang);
@@ -111,6 +96,8 @@ const TeamSlot: React.FC<Props> = ({
     const q = member.item!.toLowerCase();
     return allItems.find(i => i.name.toLowerCase() === q || i.slug === q || i.slug === q.replace(/\s+/g, '-')) ?? null;
   }, [member?.item, allItems]);
+
+  const natureMods = useMemo(() => getNatureModifiers(member?.nature ?? null), [member?.nature]);
 
   /* ── Empty slot ──────────────────────────────────────────────────── */
   if (!member) {
@@ -135,8 +122,6 @@ const TeamSlot: React.FC<Props> = ({
   const accentHex = TYPE_ACCENT[primaryType] ?? '#A8A878';
   const moves = member.moves ?? [];
   const selectedAbility = abilities.find(a => a.slug === member.ability) ?? null;
-
-  const natureMods = useMemo(() => getNatureModifiers(member.nature ?? null), [member.nature]);
 
   return (
     <>
@@ -188,10 +173,10 @@ const TeamSlot: React.FC<Props> = ({
           </div>
 
           {/* Name + ID */}
-          <p className="relative z-[1] font-extrabold capitalize text-[var(--text-primary)] text-sm text-center leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
+          <p className="relative z-[1] font-extrabold capitalize text-[var(--text-primary)] text-lg text-center leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
             {member.pokemon_name.replace(/-/g, ' ')}
           </p>
-          <span className="relative z-[1] text-[10px] font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: accentHex }}>
+          <span className="relative z-[1] text-sm font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: accentHex }}>
             #{member.pokemon_id.toString().padStart(4, '0')}
           </span>
 
@@ -203,7 +188,7 @@ const TeamSlot: React.FC<Props> = ({
                 src={getTypeSpriteUrl(type)}
                 alt={type}
                 title={type}
-                className="w-16 h-auto object-contain drop-shadow-md"
+                className="w-20 h-auto object-contain drop-shadow-md"
               />
             ))}
           </div>
@@ -213,44 +198,44 @@ const TeamSlot: React.FC<Props> = ({
         {(selectedAbility || matchedItem) && (
           <div className="flex items-stretch border-b border-[var(--color-border)]">
             {selectedAbility && (
-              <div className="group/abl relative flex-1 flex items-center gap-1.5 px-2.5 py-2 min-w-0 border-r border-[var(--color-border)] last:border-r-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+              <div className="group/abl relative flex-1 flex items-center gap-1.5 px-2.5 py-2.5 min-w-0 border-r border-[var(--color-border)] last:border-r-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 shrink-0 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                 </svg>
-                <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
+                <span className="text-sm font-bold text-purple-600 dark:text-purple-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
                   {selectedAbility.name}
                 </span>
                 {/* Tooltip */}
                 {selectedAbility.shortEffect && (
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/abl:opacity-100 group-focus-within/abl:opacity-100 transition-opacity duration-200">
-                    <p className="text-[10px] font-bold text-purple-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{selectedAbility.name}</p>
-                    <p className="text-[11px] leading-relaxed text-gray-300">{selectedAbility.shortEffect}</p>
-                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                  <div className="absolute left-0 top-full mt-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/abl:opacity-100 group-focus-within/abl:opacity-100 transition-opacity duration-200">
+                    <p className="text-xs font-bold text-purple-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{selectedAbility.name}</p>
+                    <p className="text-sm leading-relaxed text-gray-300">{selectedAbility.shortEffect}</p>
+                    <span className="absolute bottom-full left-4 border-4 border-transparent border-b-gray-900 dark:border-b-gray-800" />
                   </div>
                 )}
               </div>
             )}
             {matchedItem && (
-              <div className="group/itm relative flex-1 flex items-center gap-1.5 px-2.5 py-2 min-w-0">
+              <div className="group/itm relative flex-1 flex items-center gap-1.5 px-2.5 py-2.5 min-w-0">
                 <img
                   src={matchedItem.sprite}
                   data-fallback={matchedItem.spriteFallback}
                   alt={matchedItem.name}
-                  className="w-4 h-4 shrink-0 object-contain"
+                  className="w-5 h-5 shrink-0 object-contain"
                   onError={e => {
                     const img = e.target as HTMLImageElement;
                     const fb = img.dataset.fallback;
                     if (fb && img.src !== fb) img.src = fb;
                   }}
                 />
-                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
+                <span className="text-sm font-bold text-amber-600 dark:text-amber-400 truncate" style={{ fontFamily: 'var(--font-display)' }}>
                   {matchedItem.name}
                 </span>
                 {matchedItem.desc && (
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/itm:opacity-100 group-focus-within/itm:opacity-100 transition-opacity duration-200">
-                    <p className="text-[10px] font-bold text-amber-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{matchedItem.name}</p>
-                    <p className="text-[11px] leading-relaxed text-gray-300">{matchedItem.desc}</p>
-                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                  <div className="absolute right-0 top-full mt-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/itm:opacity-100 group-focus-within/itm:opacity-100 transition-opacity duration-200">
+                    <p className="text-xs font-bold text-amber-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{matchedItem.name}</p>
+                    <p className="text-sm leading-relaxed text-gray-300">{matchedItem.desc}</p>
+                    <span className="absolute bottom-full right-4 border-4 border-transparent border-b-gray-900 dark:border-b-gray-800" />
                   </div>
                 )}
               </div>
@@ -270,33 +255,26 @@ const TeamSlot: React.FC<Props> = ({
                   const barPct = Math.min(100, (calc / STAT_BAR_MAX) * 100);
                   const isBoosted = natureMods[stat] === 1.1;
                   const isDropped = natureMods[stat] === 0.9;
+                  const barHex = getStatBarColor(calc);
+                  const natureText = isBoosted ? 'text-green-600 dark:text-green-400' : isDropped ? 'text-red-500 dark:text-red-400' : '';
+                  const natureRowBg = isBoosted ? 'bg-green-50/40 dark:bg-green-900/10' : isDropped ? 'bg-red-50/40 dark:bg-red-900/10' : '';
                   return (
                     <div
                       key={stat}
-                      className={`flex items-center gap-1.5 px-2.5 py-[5px] ${STAT_ROW_BG[stat]} ${
+                      className={`flex items-center gap-2 px-3 py-1.5 ${natureRowBg} ${
                         i < STAT_ORDER.length - 1 ? 'border-b border-[var(--color-border)]/30' : ''
                       }`}
                     >
-                      <span className={`text-[10px] font-extrabold w-7 shrink-0 ${
-                        isBoosted ? 'text-green-600 dark:text-green-400' : isDropped ? 'text-red-500 dark:text-red-400' : STAT_TEXT_COLORS[stat]
-                      }`} style={{ fontFamily: 'var(--font-display)' }}>
+                      <span className={`text-sm font-extrabold w-10 shrink-0 ${natureText || 'text-[var(--text-primary)]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                         {STAT_DISPLAY[stat]}{isBoosted ? '↑' : isDropped ? '↓' : ''}
                       </span>
-                      <div className="flex-1 h-2 rounded-full bg-black/[0.06] dark:bg-white/[0.06] overflow-hidden shadow-inner">
+                      <div className="flex-1 h-3 rounded-full bg-black/[0.08] dark:bg-white/[0.08] overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${
-                            isBoosted
-                              ? 'bg-gradient-to-r from-green-400 to-green-500'
-                              : isDropped
-                                ? 'bg-gradient-to-r from-red-300 to-red-400'
-                                : STAT_BAR_COLORS[stat]
-                          }`}
-                          style={{ width: `${barPct}%` }}
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{ width: `${barPct}%`, backgroundColor: barHex }}
                         />
                       </div>
-                      <span className={`text-[11px] font-black tabular-nums w-7 text-right shrink-0 ${
-                        isBoosted ? 'text-green-600 dark:text-green-400' : isDropped ? 'text-red-500 dark:text-red-400' : STAT_TEXT_COLORS[stat]
-                      }`} style={{ fontFamily: 'var(--font-display)' }}>
+                      <span className={`text-sm font-black tabular-nums w-9 text-right shrink-0 ${natureText || 'text-[var(--text-primary)]'}`} style={{ fontFamily: 'var(--font-display)' }}>
                         {calc}
                       </span>
                     </div>
@@ -311,41 +289,44 @@ const TeamSlot: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* ── Moves — colored left border ─────────────────────── */}
+        {/* ── Moves — colored left border + inline description ── */}
         {moves.length > 0 && (
           <div className="px-2.5 pb-2.5 mt-auto">
             <div className="rounded-lg overflow-hidden border border-[var(--color-border)]/60">
               {moves.map((move, i) => {
                 const detail = moveDetails[move];
                 const typeHex = detail ? (TYPE_ACCENT[detail.type] ?? '#A8A878') : '#A8A878';
+                const isHovered = hoveredMove === move;
                 return (
                   <div
                     key={`${move}-${i}`}
-                    className={`group/mv relative flex items-center gap-1.5 pl-2.5 pr-2 py-1.5 border-l-[3px] ${
-                      i < moves.length - 1 ? 'border-b border-b-[var(--color-border)]/30' : ''
-                    }`}
-                    style={{
-                      borderLeftColor: typeHex,
-                      background: `linear-gradient(90deg, ${typeHex}10, transparent)`,
-                    }}
+                    className={`${i < moves.length - 1 ? 'border-b border-b-[var(--color-border)]/30' : ''}`}
+                    onMouseEnter={() => setHoveredMove(move)}
+                    onMouseLeave={() => setHoveredMove(null)}
                   >
-                    {detail && (
-                      <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-4 h-4 object-contain" />
-                    )}
-                    <span className="text-[11px] font-bold truncate text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
-                      {detail?.name ?? formatMoveName(move)}
-                    </span>
-                    {detail?.shortEffect && (
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 pointer-events-none group-hover/mv:opacity-100 group-focus-within/mv:opacity-100 transition-opacity duration-200">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="w-3.5 h-3.5 object-contain" />
-                          <p className="text-[10px] font-bold text-gray-200" style={{ fontFamily: 'var(--font-display)' }}>{detail.name}</p>
-                          {detail.power && <span className="text-[10px] font-bold text-gray-400 ml-auto">{detail.power} pw</span>}
-                        </div>
-                        <p className="text-[11px] leading-relaxed text-gray-300">{detail.shortEffect}</p>
-                        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
-                      </div>
-                    )}
+                    <div
+                      className="flex items-center gap-2 pl-3 pr-2.5 py-2.5 border-l-[4px] transition-colors"
+                      style={{
+                        borderLeftColor: typeHex,
+                        background: `linear-gradient(90deg, ${typeHex}${isHovered ? '20' : '10'}, transparent)`,
+                      }}
+                    >
+                      {detail && (
+                        <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-5 h-5 object-contain" />
+                      )}
+                      <span className="text-sm font-bold truncate text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+                        {detail?.name ?? formatMoveName(move)}
+                      </span>
+                    </div>
+                    {/* Inline description */}
+                    <div
+                      className="overflow-hidden transition-all duration-200 ease-out"
+                      style={{ maxHeight: isHovered && detail?.shortEffect ? '6rem' : '0' }}
+                    >
+                      <p className="px-3 pb-2 text-xs leading-relaxed text-[var(--text-muted)]">
+                        {detail?.shortEffect}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
@@ -357,10 +338,10 @@ const TeamSlot: React.FC<Props> = ({
         <div className="px-2.5 pb-2.5 mt-auto">
           <button
             onClick={e => { e.stopPropagation(); setIsEditorOpen(true); }}
-            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-bold text-[var(--text-muted)] hover:text-white bg-[var(--color-card-alt)] hover:bg-[var(--color-primary)] transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-[var(--text-muted)] hover:text-white bg-[var(--color-card-alt)] hover:bg-[var(--color-primary)] transition-all cursor-pointer"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
             </svg>
             {t('teams_edit')}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePokemonSearch, type PokemonEntry } from '../../../hooks/usePokemonSearch';
 
 interface Props {
@@ -15,6 +16,7 @@ function getDisplayName(p: PokemonEntry): string {
 }
 
 const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...' }: Props) => {
+  const { t } = useTranslation();
   const { allPokemon } = usePokemonSearch();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -68,7 +70,7 @@ const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...
           </span>
           {value.megaForm && (
             <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-gradient-to-r from-amber-500 to-pink-500 text-white">
-              MEGA
+              {t('calc_mega', 'Mega').toUpperCase()}
             </span>
           )}
           <span className="text-[10px] font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
@@ -122,7 +124,7 @@ const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...
               <span className="text-sm font-semibold capitalize flex-1 truncate">{getDisplayName(p)}</span>
               {p.megaForm && (
                 <span className="px-1 py-0.5 rounded text-[7px] font-black uppercase bg-gradient-to-r from-amber-500 to-pink-500 text-white shrink-0">
-                  MEGA
+                  {t('calc_mega', 'Mega').toUpperCase()}
                 </span>
               )}
               <span className="text-[10px] font-bold text-[var(--text-muted)] shrink-0" style={{ fontFamily: 'var(--font-display)' }}>

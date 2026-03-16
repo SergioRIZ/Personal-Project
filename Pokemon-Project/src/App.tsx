@@ -17,6 +17,7 @@ const Profile = lazy(() => import('./components/pages/Profile/Profile'));
 const Teams = lazy(() => import('./components/pages/Teams/Teams'));
 const TeamsBuilder = lazy(() => import('./components/pages/Teams/TeamsBuilder'));
 const PokemonDetail = lazy(() => import('./components/pages/Pokedex/Pokemon/PokemonDetail'));
+const TeamCompare = lazy(() => import('./components/pages/Teams/TeamCompare'));
 const Calculator = lazy(() => import('./components/pages/Calculator/Calculator'));
 const Page404 = lazy(() => import('./components/pages/404'));
 
@@ -61,6 +62,7 @@ const AppRoutes = [
   { path: '/settings', Component: Settings },
   { path: '/profile', Component: Profile },
   { path: '/teams', Component: Teams },
+  { path: '/teams/compare', Component: TeamCompare },
   { path: '/teamsbuilder/:id', Component: TeamsBuilder },
   { path: '/calculator', Component: Calculator },
 ];

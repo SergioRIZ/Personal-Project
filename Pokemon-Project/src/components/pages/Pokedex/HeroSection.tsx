@@ -116,6 +116,17 @@ const CollectionCardIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
   </svg>
 );
+const CalculatorCardIcon = () => (
+  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" />
+  </svg>
+);
+const CompareCardIcon = () => (
+  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+  </svg>
+);
 
 /* ── keyframes ───────────────────────────────────────────────────── */
 const HERO_STYLES = `
@@ -202,9 +213,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
   ];
 
   const features = [
-    { icon: <PokedexCardIcon />, title: 'Pokédex',                      desc: t('hero_feat_pokedex'),    to: '/pokedex' },
-    { icon: <TeamsCardIcon />,   title: t('teams'),                      desc: t('hero_feat_teams'),      to: '/teams' },
+    { icon: <PokedexCardIcon />,    title: 'Pokédex',                      desc: t('hero_feat_pokedex'),    to: '/pokedex' },
+    { icon: <TeamsCardIcon />,      title: t('teams'),                      desc: t('hero_feat_teams'),      to: '/teams' },
     { icon: <CollectionCardIcon />, title: t('profile_collection_title'), desc: t('hero_feat_collection'), to: '/profile' },
+    { icon: <CalculatorCardIcon />, title: t('calc_title'),               desc: t('hero_feat_calculator'), to: '/calculator' },
+    { icon: <CompareCardIcon />,    title: t('compare_title'),             desc: t('hero_feat_compare'),    to: '/teams/compare' },
   ];
 
   const sprites = settings.darkMode ? DARK_POKEMON : LIGHT_POKEMON;
@@ -331,12 +344,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
           </div>
 
           {/* Feature cards */}
-          <div className="hero-s5 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 w-full max-w-3xl">
+          <div className="hero-s5 flex flex-wrap justify-center gap-4 mt-6 w-full max-w-4xl">
             {features.map(({ icon, title, desc, to }) => (
               <Link
                 key={to}
                 to={to}
-                className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-[var(--color-card)]/60 backdrop-blur-md border border-[var(--color-border)] shadow-md hover:shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+                className="group flex flex-col items-center gap-3 p-5 rounded-2xl bg-[var(--color-card)]/60 backdrop-blur-md border border-[var(--color-border)] shadow-md hover:shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer w-full sm:w-[calc(33.333%-1rem)] min-w-[180px]"
                 style={{ animation: 'hero-card-glow 4s ease-in-out infinite' }}
               >
                 <div className="w-12 h-12 rounded-xl bg-[var(--color-primary-light)] flex items-center justify-center text-[var(--color-primary)] group-hover:scale-110 group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all duration-200">
@@ -345,7 +358,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, totalPokemon }) =>
                 <span className="text-sm font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                   {title}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                <span className="text-xs text-[var(--text-secondary)] leading-relaxed text-center">
                   {desc}
                 </span>
               </Link>

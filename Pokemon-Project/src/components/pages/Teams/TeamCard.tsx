@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeams } from '../../../context/TeamsContext';
 import TeamSlot from './TeamSlot';
-import TypeCoveragePanel from './TypeCoveragePanel';
 import PokemonPickerModal from './PokemonPickerModal';
 import type { Team, EVSpread, IVSpread } from '../../../lib/teams';
 
@@ -175,10 +174,6 @@ const TeamCard: React.FC<Props> = ({ team }) => {
             ))}
           </div>
 
-          {/* Type coverage — only shown when team has at least one member */}
-          {team.members.length > 0 && (
-            <TypeCoveragePanel members={team.members} />
-          )}
         </div>
       </div>
 

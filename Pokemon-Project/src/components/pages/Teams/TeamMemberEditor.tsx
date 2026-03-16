@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { getTypeSpriteUrl } from '../Pokedex/utils';
@@ -203,18 +203,27 @@ const TeamMemberEditor: React.FC<Props> = ({
   };
 
   /* ── Close helper — flush pending EV/IV edits before closing ────────── */
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     const evTot = Object.values(evsLocal).reduce((s, v) => s + v, 0);
     onUpdateEVs(slot, evTot > 0 ? evsLocal : null);
     const allZeroIV = Object.values(ivsLocal).every(v => v === 0);
     onUpdateIVs(slot, allZeroIV ? null : ivsLocal);
     onClose();
-  };
+  }, [evsLocal, ivsLocal, onUpdateEVs, onUpdateIVs, slot, onClose]);
+
+  // Stable ref so keydown handler always calls latest handleClose
+  const handleCloseRef = useRef(handleClose);
+  handleCloseRef.current = handleClose;
+
+  /* ── Initial focus on mount ────────────────────────────────────────── */
+  useEffect(() => {
+    modalRef.current?.focus();
+  }, []);
 
   /* ── Escape key + focus trap ───────────────────────────────────────── */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && pickerMoveIndex === null) { handleClose(); return; }
+      if (e.key === 'Escape' && pickerMoveIndex === null) { handleCloseRef.current(); return; }
       if (e.key === 'Tab' && modalRef.current && pickerMoveIndex === null) {
         const focusable = modalRef.current.querySelectorAll<HTMLElement>(
           'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -227,9 +236,8 @@ const TeamMemberEditor: React.FC<Props> = ({
       }
     };
     window.addEventListener('keydown', handler);
-    modalRef.current?.focus();
     return () => window.removeEventListener('keydown', handler);
-  }, [handleClose, pickerMoveIndex]);
+  }, [pickerMoveIndex]);
 
   /* ── Prevent body scroll ────────────────────────────────────────────── */
   useEffect(() => {
@@ -599,10 +607,10 @@ const TeamMemberEditor: React.FC<Props> = ({
                                 )}
                               </button>
                               {ability.shortEffect && (
-                                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 invisible group-hover/abl:opacity-100 group-hover/abl:visible group-focus-within/abl:opacity-100 group-focus-within/abl:visible transition-all duration-200 pointer-events-none">
+                                <div className="absolute left-0 bottom-full mb-2 w-56 px-3 py-2.5 rounded-xl bg-gray-900 dark:bg-gray-800 shadow-xl z-50 opacity-0 invisible group-hover/abl:opacity-100 group-hover/abl:visible group-focus-within/abl:opacity-100 group-focus-within/abl:visible transition-all duration-200 pointer-events-none">
                                   <p className="text-[10px] font-bold text-purple-400 mb-0.5" style={{ fontFamily: 'var(--font-display)' }}>{ability.name}</p>
                                   <p className="text-[11px] leading-relaxed text-gray-300">{ability.shortEffect}</p>
-                                  <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                                  <span className="absolute top-full left-4 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
                                 </div>
                               )}
                             </div>

@@ -40,7 +40,7 @@ async function fetchAbilityDetail(slug: string, lang: string): Promise<{ name: s
     ?? data.effect_entries?.find(e => e.language.name === 'en')?.short_effect
     ?? data.flavor_text_entries?.filter(f => f.language.name === 'en').pop()?.flavor_text
     ?? '';
-  return { name: localName, shortEffect: localEffect };
+  return { name: localName, shortEffect: localEffect.replace(/[\n\f\r]+/g, ' ').trim() };
 }
 
 export function usePokemonAbilities(pokemonId: number | null, lang = 'en'): {

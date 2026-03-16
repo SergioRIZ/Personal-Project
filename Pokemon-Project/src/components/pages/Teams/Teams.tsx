@@ -53,6 +53,18 @@ const Teams: React.FC = () => {
                 {t('teams_subtitle')}
               </p>
             </div>
+            {teams.length >= 2 && (
+              <button
+                onClick={() => navigate('/teams/compare')}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-card-alt)] hover:bg-[var(--color-border)] text-[var(--text-primary)] font-bold text-sm transition-all duration-200 cursor-pointer shrink-0 border border-[var(--color-border)]"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                </svg>
+                {t('teams_compare')}
+              </button>
+            )}
             <button
               onClick={handleCreate}
               disabled={creating}

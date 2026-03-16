@@ -68,9 +68,10 @@ async function fetchMoveDetail(slug: string, lang: string, retries = 2): Promise
         ?? data.effect_entries?.find(e => e.language.name === 'en')?.short_effect
         ?? data.flavor_text_entries?.filter(f => f.language.name === 'en').pop()?.flavor_text
         ?? '';
+      const cleaned = localEffect.replace(/[\n\f\r]+/g, ' ').trim();
       const shortEffect = data.effect_chance
-        ? localEffect.replace(/\$effect_chance/g, String(data.effect_chance))
-        : localEffect.replace(/\$effect_chance%\s?/g, '').trim();
+        ? cleaned.replace(/\$effect_chance/g, String(data.effect_chance))
+        : cleaned.replace(/\$effect_chance%\s?/g, '').trim();
 
       return {
         slug,

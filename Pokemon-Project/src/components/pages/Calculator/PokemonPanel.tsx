@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { usePokemonData } from '../../../hooks/usePokemonData';
 import { useMegaForm } from '../../../hooks/useMegaForm';
 import { useItemList } from '../../../hooks/useItemList';
-import { getTypeSpriteUrl } from '../Pokedex/utils';
-import { NATURES, getNatureModifiers } from '../../../lib/natures';
+import { getTypeSpriteUrl, translateType } from '../Pokedex/utils';
+import { NATURES, getNatureModifiers, translateNature } from '../../../lib/natures';
 import { calcStat, DEFAULT_EVS, DEFAULT_IVS } from '../../../lib/damageCalc';
 import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import PokemonSearchInput from './PokemonSearchInput';
@@ -70,10 +70,11 @@ interface Props {
 }
 
 const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
-  const { t } = useTranslation();
-  const { data, loading } = usePokemonData(state.pokemonId, 'en');
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const { data, loading } = usePokemonData(state.pokemonId, lang);
   const { megaData } = useMegaForm(state.megaForm);
-  const { items: allItems } = useItemList('en');
+  const { items: allItems } = useItemList(lang);
   const [itemInput, setItemInput] = useState('');
   const [itemDropdownOpen, setItemDropdownOpen] = useState(false);
 
@@ -174,7 +175,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
             {/* Mega badge */}
             {state.megaForm && (
               <span className="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md">
-                MEGA
+                {t('calc_mega', 'Mega').toUpperCase()}
               </span>
             )}
 
@@ -208,7 +209,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
                 className="w-full px-2 py-1.5 text-xs font-semibold rounded-lg bg-[var(--color-card-alt)] border border-[var(--color-border)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 cursor-pointer"
               >
                 {NATURES.map(([name]) => (
-                  <option key={name} value={name}>{name}</option>
+                  <option key={name} value={name}>{translateNature(name, lang)}</option>
                 ))}
               </select>
             </div>
@@ -223,7 +224,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
               >
                 {abilities.map(a => (
                   <option key={a.slug} value={a.slug}>
-                    {a.name}{a.isHidden ? ' (H)' : ''}
+                    {a.name}{a.isHidden ? ` ${t('calc_hidden_ability', '(H)')}` : ''}
                   </option>
                 ))}
               </select>
@@ -348,9 +349,10 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
                 className="flex-1 px-2 py-1.5 text-xs font-semibold rounded-lg bg-[var(--color-card-alt)] border border-[var(--color-border)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 cursor-pointer"
               >
                 <option value="">{t('calc_no_tera', 'None')}</option>
-                {TERA_TYPES.map(type => (
-                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-                ))}
+                {TERA_TYPES.map(type => {
+                  const translated = translateType(type, lang);
+                  return <option key={type} value={type}>{translated.charAt(0).toUpperCase() + translated.slice(1)}</option>;
+                })}
               </select>
               {state.teraType && (
                 <img src={getTypeSpriteUrl(state.teraType)} alt={state.teraType} className="w-12 h-auto object-contain" />
@@ -381,7 +383,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
           {/* Stats — compact EV/IV */}
           <div className="rounded-xl border border-[var(--color-border)] overflow-hidden">
             <div className="grid grid-cols-[auto_1fr_3rem_3rem] gap-x-1 items-center px-1.5 py-1 bg-[var(--color-card-alt)] text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
-              <span></span><span>Stat</span><span className="text-center">EV</span><span className="text-center">IV</span>
+              <span></span><span>{t('calc_stat_header', 'Stat')}</span><span className="text-center">EV</span><span className="text-center">IV</span>
             </div>
             {STAT_ORDER.map(stat => {
               const isBoosted = natureMods[stat] === 1.1;

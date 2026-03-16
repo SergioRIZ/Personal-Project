@@ -6,20 +6,20 @@ interface Props {
   onChange: (env: CalcEnvironment) => void;
 }
 
-const WEATHERS: { value: Weather; icon: string; label: string }[] = [
-  { value: 'none', icon: '—',  label: 'None' },
-  { value: 'sun',  icon: '☀️', label: 'Sun' },
-  { value: 'rain', icon: '🌧️', label: 'Rain' },
-  { value: 'sand', icon: '🏜️', label: 'Sand' },
-  { value: 'snow', icon: '❄️', label: 'Snow' },
+const WEATHERS: { value: Weather; icon: string; i18nKey: string }[] = [
+  { value: 'none', icon: '—',  i18nKey: 'calc_weather_none' },
+  { value: 'sun',  icon: '☀️', i18nKey: 'calc_weather_sun' },
+  { value: 'rain', icon: '🌧️', i18nKey: 'calc_weather_rain' },
+  { value: 'sand', icon: '🏜️', i18nKey: 'calc_weather_sand' },
+  { value: 'snow', icon: '❄️', i18nKey: 'calc_weather_snow' },
 ];
 
-const TERRAINS: { value: Terrain; icon: string; label: string }[] = [
-  { value: 'none',     icon: '—',  label: 'None' },
-  { value: 'electric', icon: '⚡', label: 'Electric' },
-  { value: 'grassy',   icon: '🌿', label: 'Grassy' },
-  { value: 'psychic',  icon: '🔮', label: 'Psychic' },
-  { value: 'misty',    icon: '🌫️', label: 'Misty' },
+const TERRAINS: { value: Terrain; icon: string; i18nKey: string }[] = [
+  { value: 'none',     icon: '—',  i18nKey: 'calc_terrain_none' },
+  { value: 'electric', icon: '⚡', i18nKey: 'calc_terrain_electric' },
+  { value: 'grassy',   icon: '🌿', i18nKey: 'calc_terrain_grassy' },
+  { value: 'psychic',  icon: '🔮', i18nKey: 'calc_terrain_psychic' },
+  { value: 'misty',    icon: '🌫️', i18nKey: 'calc_terrain_misty' },
 ];
 
 const EnvironmentPanel = ({ env, onChange }: Props) => {
@@ -42,7 +42,7 @@ const EnvironmentPanel = ({ env, onChange }: Props) => {
         <div className="flex flex-wrap gap-1.5">
           {WEATHERS.map(w => (
             <button key={w.value} onClick={() => onChange({ ...env, weather: w.value })} className={chipClass(env.weather === w.value)}>
-              <span className="mr-1">{w.icon}</span> {w.label}
+              <span className="mr-1">{w.icon}</span> {t(w.i18nKey)}
             </button>
           ))}
         </div>
@@ -56,7 +56,7 @@ const EnvironmentPanel = ({ env, onChange }: Props) => {
         <div className="flex flex-wrap gap-1.5">
           {TERRAINS.map(tr => (
             <button key={tr.value} onClick={() => onChange({ ...env, terrain: tr.value })} className={chipClass(env.terrain === tr.value)}>
-              <span className="mr-1">{tr.icon}</span> {tr.label}
+              <span className="mr-1">{tr.icon}</span> {t(tr.i18nKey)}
             </button>
           ))}
         </div>
