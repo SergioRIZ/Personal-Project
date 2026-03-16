@@ -79,3 +79,39 @@ export function computeTeamOffensive(memberTypes: string[][]): Record<PokemonTyp
 
   return coverage;
 }
+
+/** Offensive coverage based on actual move types (not just STAB) */
+export function computeMoveCoverage(moveTypes: PokemonType[]): Record<PokemonType, boolean> {
+  const coverage = Object.fromEntries(ALL_TYPES.map(t => [t, false])) as Record<PokemonType, boolean>;
+
+  for (const atkType of moveTypes) {
+    const row = TYPE_CHART[atkType];
+    if (!row) continue;
+    for (const defType of ALL_TYPES) {
+      if ((row[defType] ?? 1) >= 2) coverage[defType] = true;
+    }
+  }
+
+  return coverage;
+}
+
+/** Defensive profile that takes abilities into account */
+export function computeTeamDefensiveWithAbilities(
+  members: { types: string[]; ability: string | null }[],
+  abilityAdjustedMult: (atkType: PokemonType, defTypes: string[], ability: string | null) => number,
+): TeamDefensiveProfile {
+  const weaknesses  = Object.fromEntries(ALL_TYPES.map(t => [t, 0])) as Record<PokemonType, number>;
+  const immunities  = Object.fromEntries(ALL_TYPES.map(t => [t, 0])) as Record<PokemonType, number>;
+  const resistances = Object.fromEntries(ALL_TYPES.map(t => [t, 0])) as Record<PokemonType, number>;
+
+  for (const { types, ability } of members) {
+    for (const atkType of ALL_TYPES) {
+      const mult = abilityAdjustedMult(atkType, types, ability);
+      if (mult > 1)       weaknesses[atkType]++;
+      else if (mult === 0) immunities[atkType]++;
+      else if (mult < 1)  resistances[atkType]++;
+    }
+  }
+
+  return { weaknesses, immunities, resistances };
+}

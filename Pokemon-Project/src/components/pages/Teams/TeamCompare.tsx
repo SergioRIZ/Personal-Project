@@ -1,30 +1,56 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { useTeams } from '../../../context/TeamsContext';
 import { navigate } from '../../../navigation';
-import { ALL_TYPES, computeTeamDefensive, computeTeamOffensive, computeDefensiveMultiplier } from '../../../lib/typeChart';
+import {
+  ALL_TYPES, computeTeamDefensiveWithAbilities,
+  computeTeamOffensive, computeMoveCoverage,
+} from '../../../lib/typeChart';
+import { abilityAdjustedMultiplier } from '../../../lib/abilityDefense';
 import { translateType, getTypeSpriteUrl } from '../Pokedex/utils';
+import { useMoveDetails } from '../../../hooks/useMoveDetails';
+import type { MoveDetail } from '../../../hooks/useMoveDetails';
+import { useTeamBaseStats } from '../../../hooks/useTeamBaseStats';
+import { calcAllStats } from '../../../lib/statCalc';
+import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import type { Team, TeamMember } from '../../../lib/teams';
 import type { PokemonType } from '../../../lib/typeChart';
 
+const A_COLOR = '#3B82F6';
+const B_COLOR = '#EF4444';
+
 /* ─── Helpers ────────────────────────────────────────────────── */
 
-/** Count how many members of `defenders` each STAB type from `attackers` hits super-effectively */
-function computeMatchupScore(attackers: TeamMember[], defenders: TeamMember[]): {
+interface MatchupResult {
   total: number;
   details: { attacker: TeamMember; defenderHits: { defender: TeamMember; types: PokemonType[] }[] }[];
-} {
+}
+
+/** Matchup using actual move types (falls back to STAB if no moves) */
+function computeMatchupWithMoves(
+  attackers: TeamMember[],
+  defenders: TeamMember[],
+  moveMap: Record<string, MoveDetail>,
+): MatchupResult {
   let total = 0;
-  const details: { attacker: TeamMember; defenderHits: { defender: TeamMember; types: PokemonType[] }[] }[] = [];
+  const details: MatchupResult['details'] = [];
 
   for (const atk of attackers) {
+    // Get actual move types, or fallback to pokemon types for STAB
+    const moveTypes = new Set<string>();
+    for (const slug of atk.moves ?? []) {
+      const detail = moveMap[slug];
+      if (detail && detail.damageClass !== 'status') moveTypes.add(detail.type);
+    }
+    const atkTypes = moveTypes.size > 0 ? Array.from(moveTypes) : atk.pokemon_types;
+
     const defenderHits: { defender: TeamMember; types: PokemonType[] }[] = [];
     for (const def of defenders) {
       const seTypes: PokemonType[] = [];
-      for (const stabType of atk.pokemon_types) {
-        const mult = computeDefensiveMultiplier(stabType as PokemonType, def.pokemon_types);
-        if (mult >= 2) seTypes.push(stabType as PokemonType);
+      for (const atkType of atkTypes) {
+        const mult = abilityAdjustedMultiplier(atkType as PokemonType, def.pokemon_types, def.ability);
+        if (mult >= 2) seTypes.push(atkType as PokemonType);
       }
       if (seTypes.length > 0) {
         total += seTypes.length;
@@ -37,6 +63,7 @@ function computeMatchupScore(attackers: TeamMember[], defenders: TeamMember[]): 
   return { total, details };
 }
 
+
 /* ─── Sub-components ─────────────────────────────────────────── */
 
 const TeamSelector: React.FC<{
@@ -47,7 +74,7 @@ const TeamSelector: React.FC<{
   color: string;
 }> = ({ label, teams, selectedId, onSelect, color }) => {
   const { t } = useTranslation();
-  const selected = teams.find(t => t.id === selectedId);
+  const selected = teams.find(te => te.id === selectedId);
 
   return (
     <div className="flex-1 min-w-0">
@@ -56,14 +83,13 @@ const TeamSelector: React.FC<{
         value={selectedId ?? ''}
         onChange={e => onSelect(e.target.value)}
         className="w-full px-3 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--text-primary)] text-sm font-bold cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1"
-        style={{ fontFamily: 'var(--font-display)', focusRingColor: color } as React.CSSProperties}
+        style={{ fontFamily: 'var(--font-display)' }}
       >
         <option value="">{t('compare_select_team')}</option>
         {teams.map(team => (
           <option key={team.id} value={team.id}>{team.name} ({team.members.length}/6)</option>
         ))}
       </select>
-      {/* Mini sprites */}
       {selected && selected.members.length > 0 && (
         <div className="flex gap-1.5 mt-3 flex-wrap">
           {selected.members.sort((a, b) => a.slot - b.slot).map(m => (
@@ -107,20 +133,40 @@ const TypeBadgeList: React.FC<{
   );
 };
 
+/* ─── Defensive Section (with abilities) ────────────────────── */
+
 const DefensiveSection: React.FC<{
   team: Team;
+  moveMap: Record<string, MoveDetail>;
   color: string;
   lang: string;
-}> = ({ team, color, lang }) => {
+}> = ({ team, moveMap, color, lang }) => {
   const { t } = useTranslation();
+
+  const members = team.members.map(m => ({ types: m.pokemon_types, ability: m.ability }));
+  const { weaknesses, immunities, resistances } = computeTeamDefensiveWithAbilities(members, abilityAdjustedMultiplier);
+
+  // STAB coverage
   const memberTypes = team.members.map(m => m.pokemon_types);
-  const { weaknesses, immunities, resistances } = computeTeamDefensive(memberTypes);
-  const offensive = computeTeamOffensive(memberTypes);
+  const stabOffensive = computeTeamOffensive(memberTypes);
+  const stabCovered = ALL_TYPES.filter(type => stabOffensive[type]);
+
+  // Move coverage
+  const allMoveTypes: PokemonType[] = [];
+  for (const m of team.members) {
+    for (const slug of m.moves ?? []) {
+      const detail = moveMap[slug];
+      if (detail && detail.damageClass !== 'status') allMoveTypes.push(detail.type as PokemonType);
+    }
+  }
+  const moveCov = computeMoveCoverage(allMoveTypes);
+  const moveCovered = ALL_TYPES.filter(type => moveCov[type]);
+  const uncoveredTypes = ALL_TYPES.filter(type => !moveCov[type] && !stabOffensive[type]);
+  const hasMoves = allMoveTypes.length > 0;
 
   const weakTypes = ALL_TYPES.filter(type => weaknesses[type] > 0);
   const immuneTypes = ALL_TYPES.filter(type => immunities[type] > 0);
   const resistTypes = ALL_TYPES.filter(type => resistances[type] > 0);
-  const coveredTypes = ALL_TYPES.filter(type => offensive[type]);
 
   return (
     <div className="space-y-4">
@@ -147,43 +193,196 @@ const DefensiveSection: React.FC<{
         </div>
       </div>
 
-      {/* Offensive */}
+      {/* Offensive — STAB + Move coverage */}
       <div>
-        <p className="text-sm font-black uppercase tracking-wider mb-2" style={{ color }}>{t('compare_offensive_coverage')}</p>
-        <div className="p-3 rounded-xl bg-[var(--color-card-alt)]/50 border border-[var(--color-border)]/50">
-          <div className="flex items-center gap-2 mb-2">
+        <p className="text-sm font-black uppercase tracking-wider mb-2" style={{ color }}>
+          {hasMoves ? t('compare_move_coverage') : t('compare_stab_coverage')}
+        </p>
+        <div className="p-3 rounded-xl bg-[var(--color-card-alt)]/50 border border-[var(--color-border)]/50 space-y-2">
+          <div className="flex items-center gap-2">
             <div className="flex-1 h-2.5 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
-                  width: `${(coveredTypes.length / ALL_TYPES.length) * 100}%`,
+                  width: `${((hasMoves ? moveCovered.length : stabCovered.length) / ALL_TYPES.length) * 100}%`,
                   backgroundColor: color,
                 }}
               />
             </div>
-            <span className="text-sm font-black tabular-nums text-[var(--text-primary)]">{coveredTypes.length}/{ALL_TYPES.length}</span>
+            <span className="text-sm font-black tabular-nums text-[var(--text-primary)]">
+              {hasMoves ? moveCovered.length : stabCovered.length}/{ALL_TYPES.length}
+            </span>
           </div>
-          <TypeBadgeList types={coveredTypes} lang={lang} />
+          <TypeBadgeList types={hasMoves ? moveCovered : stabCovered} lang={lang} />
+          {uncoveredTypes.length > 0 && hasMoves && (
+            <div className="pt-2 border-t border-[var(--color-border)]/30">
+              <p className="text-xs font-bold text-[var(--text-muted)] mb-1">{t('compare_uncovered')} ({uncoveredTypes.length})</p>
+              <TypeBadgeList types={uncoveredTypes} lang={lang} />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-/* ─── Matchup Section ────────────────────────────────────────── */
+/* ─── Speed Tiers ─────────────────────────────────────────── */
+
+const SpeedTierSection: React.FC<{
+  teamA: Team;
+  teamB: Team;
+  statsMap: Record<number, BaseStats>;
+}> = ({ teamA, teamB, statsMap }) => {
+  const { t } = useTranslation();
+
+  const entries = useMemo(() => {
+    const result: { member: TeamMember; speed: number; team: 'a' | 'b' }[] = [];
+
+    for (const m of teamA.members) {
+      const base = statsMap[m.pokemon_id];
+      if (!base) continue;
+      const calced = calcAllStats(base, m.nature, m.evs, m.ivs);
+      result.push({ member: m, speed: calced.spe, team: 'a' });
+    }
+    for (const m of teamB.members) {
+      const base = statsMap[m.pokemon_id];
+      if (!base) continue;
+      const calced = calcAllStats(base, m.nature, m.evs, m.ivs);
+      result.push({ member: m, speed: calced.spe, team: 'b' });
+    }
+
+    return result.sort((a, b) => b.speed - a.speed);
+  }, [teamA.members, teamB.members, statsMap]);
+
+  if (entries.length === 0) return null;
+  const maxSpeed = entries[0]?.speed ?? 1;
+
+  return (
+    <div className="p-4 sm:p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-xl">
+      <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-4">
+        {t('compare_speed_tiers')}
+      </p>
+      <div className="space-y-1.5">
+        {entries.map(({ member, speed, team }, i) => {
+          const color = team === 'a' ? A_COLOR : B_COLOR;
+          return (
+            <div key={`${member.id}-${i}`} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-card-alt)] flex items-center justify-center shrink-0 overflow-hidden border-2" style={{ borderColor: color }}>
+                <img
+                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.pokemon_id}.png`}
+                  alt={member.pokemon_name}
+                  className="w-6 h-6 object-contain"
+                  loading="lazy"
+                />
+              </div>
+              <span className="text-xs font-bold w-28 truncate capitalize text-[var(--text-primary)]">
+                {member.pokemon_name.replace(/-/g, ' ')}
+              </span>
+              <div className="flex-1 h-3 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${(speed / maxSpeed) * 100}%`, backgroundColor: color }}
+                />
+              </div>
+              <span className="text-sm font-black tabular-nums w-10 text-right" style={{ color }}>
+                {speed}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Stats Overview ──────────────────────────────────────── */
+
+const StatsOverviewSection: React.FC<{
+  teamA: Team;
+  teamB: Team;
+  statsMap: Record<number, BaseStats>;
+}> = ({ teamA, teamB, statsMap }) => {
+  const { t } = useTranslation();
+
+  const compute = (team: Team) => {
+    const calced: BaseStats[] = [];
+    for (const m of team.members) {
+      const base = statsMap[m.pokemon_id];
+      if (!base) continue;
+      calced.push(calcAllStats(base, m.nature, m.evs, m.ivs));
+    }
+    if (calced.length === 0) return null;
+    const n = calced.length;
+    const avg = (fn: (s: BaseStats) => number) => Math.round(calced.reduce((s, c) => s + fn(c), 0) / n);
+    const avgHp = avg(s => s.hp);
+    return {
+      physBulk: Math.round(avgHp * avg(s => s.def) / 100),
+      specBulk: Math.round(avgHp * avg(s => s.spd) / 100),
+      avgAtk: avg(s => s.atk),
+      avgSpA: avg(s => s.spa),
+      avgSpe: avg(s => s.spe),
+    };
+  };
+
+  const a = compute(teamA);
+  const b = compute(teamB);
+  if (!a || !b) return null;
+
+  const rows = [
+    { label: t('compare_physical_bulk'), valA: a.physBulk, valB: b.physBulk },
+    { label: t('compare_special_bulk'), valA: a.specBulk, valB: b.specBulk },
+    { label: t('compare_avg_attack'), valA: a.avgAtk, valB: b.avgAtk },
+    { label: t('compare_avg_spatk'), valA: a.avgSpA, valB: b.avgSpA },
+    { label: t('compare_avg_speed'), valA: a.avgSpe, valB: b.avgSpe },
+  ];
+
+  return (
+    <div className="p-4 sm:p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-xl">
+      <p className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)] mb-4">
+        {t('compare_stats_overview')}
+      </p>
+      <div className="space-y-3">
+        {rows.map(({ label, valA, valB }) => {
+          const max = Math.max(valA, valB, 1);
+          return (
+            <div key={label}>
+              <p className="text-xs font-bold text-[var(--text-muted)] mb-1">{label}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold w-16 truncate" style={{ color: A_COLOR }}>{teamA.name}</span>
+                  <div className="flex-1 h-3 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(valA / max) * 100}%`, backgroundColor: A_COLOR }} />
+                  </div>
+                  <span className="text-xs font-black tabular-nums w-10 text-right" style={{ color: A_COLOR }}>{valA}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold w-16 truncate" style={{ color: B_COLOR }}>{teamB.name}</span>
+                  <div className="flex-1 h-3 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(valB / max) * 100}%`, backgroundColor: B_COLOR }} />
+                  </div>
+                  <span className="text-xs font-black tabular-nums w-10 text-right" style={{ color: B_COLOR }}>{valB}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Matchup Section (uses moves + abilities) ───────────── */
 
 const MatchupSection: React.FC<{
   teamA: Team;
   teamB: Team;
+  moveMap: Record<string, MoveDetail>;
   lang: string;
-}> = ({ teamA, teamB, lang }) => {
+}> = ({ teamA, teamB, moveMap, lang }) => {
   const { t } = useTranslation();
 
-  const scoreAvsB = useMemo(() => computeMatchupScore(teamA.members, teamB.members), [teamA.members, teamB.members]);
-  const scoreBvsA = useMemo(() => computeMatchupScore(teamB.members, teamA.members), [teamA.members, teamB.members]);
-
-  const aColor = '#3B82F6';
-  const bColor = '#EF4444';
+  const scoreAvsB = useMemo(() => computeMatchupWithMoves(teamA.members, teamB.members, moveMap), [teamA.members, teamB.members, moveMap]);
+  const scoreBvsA = useMemo(() => computeMatchupWithMoves(teamB.members, teamA.members, moveMap), [teamA.members, teamB.members, moveMap]);
 
   const maxScore = Math.max(scoreAvsB.total, scoreBvsA.total, 1);
 
@@ -195,27 +394,20 @@ const MatchupSection: React.FC<{
           {t('compare_super_effective')}
         </p>
 
-        {/* Visual bar comparison */}
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-bold w-24 truncate text-right" style={{ color: aColor }}>{teamA.name}</span>
+            <span className="text-sm font-bold w-24 truncate text-right" style={{ color: A_COLOR }}>{teamA.name}</span>
             <div className="flex-1 h-4 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${(scoreAvsB.total / maxScore) * 100}%`, backgroundColor: aColor }}
-              />
+              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(scoreAvsB.total / maxScore) * 100}%`, backgroundColor: A_COLOR }} />
             </div>
-            <span className="text-lg font-black tabular-nums w-8" style={{ color: aColor }}>{scoreAvsB.total}</span>
+            <span className="text-lg font-black tabular-nums w-8" style={{ color: A_COLOR }}>{scoreAvsB.total}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm font-bold w-24 truncate text-right" style={{ color: bColor }}>{teamB.name}</span>
+            <span className="text-sm font-bold w-24 truncate text-right" style={{ color: B_COLOR }}>{teamB.name}</span>
             <div className="flex-1 h-4 bg-black/[0.06] dark:bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${(scoreBvsA.total / maxScore) * 100}%`, backgroundColor: bColor }}
-              />
+              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(scoreBvsA.total / maxScore) * 100}%`, backgroundColor: B_COLOR }} />
             </div>
-            <span className="text-lg font-black tabular-nums w-8" style={{ color: bColor }}>{scoreBvsA.total}</span>
+            <span className="text-lg font-black tabular-nums w-8" style={{ color: B_COLOR }}>{scoreBvsA.total}</span>
           </div>
         </div>
 
@@ -223,37 +415,18 @@ const MatchupSection: React.FC<{
         <div className="mt-4 pt-4 border-t border-[var(--color-border)] text-center">
           <p className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)] mb-1">{t('compare_verdict')}</p>
           {scoreAvsB.total > scoreBvsA.total ? (
-            <p className="text-base font-black" style={{ color: aColor }}>
-              {teamA.name} {t('compare_verdict_a')}
-            </p>
+            <p className="text-base font-black" style={{ color: A_COLOR }}>{teamA.name} {t('compare_verdict_a')}</p>
           ) : scoreBvsA.total > scoreAvsB.total ? (
-            <p className="text-base font-black" style={{ color: bColor }}>
-              {teamB.name} {t('compare_verdict_b')}
-            </p>
+            <p className="text-base font-black" style={{ color: B_COLOR }}>{teamB.name} {t('compare_verdict_b')}</p>
           ) : (
-            <p className="text-base font-black text-[var(--text-primary)]">
-              {t('compare_verdict_tie')}
-            </p>
+            <p className="text-base font-black text-[var(--text-primary)]">{t('compare_verdict_tie')}</p>
           )}
         </div>
       </div>
 
-      {/* Detailed matchup: A attacks B */}
-      <MatchupDetail
-        attackTeam={teamA}
-        defendTeam={teamB}
-        result={scoreAvsB}
-        color={aColor}
-        lang={lang}
-      />
-      {/* Detailed matchup: B attacks A */}
-      <MatchupDetail
-        attackTeam={teamB}
-        defendTeam={teamA}
-        result={scoreBvsA}
-        color={bColor}
-        lang={lang}
-      />
+      {/* Detailed matchups */}
+      <MatchupDetail attackTeam={teamA} defendTeam={teamB} result={scoreAvsB} color={A_COLOR} lang={lang} />
+      <MatchupDetail attackTeam={teamB} defendTeam={teamA} result={scoreBvsA} color={B_COLOR} lang={lang} />
     </div>
   );
 };
@@ -261,7 +434,7 @@ const MatchupSection: React.FC<{
 const MatchupDetail: React.FC<{
   attackTeam: Team;
   defendTeam: Team;
-  result: ReturnType<typeof computeMatchupScore>;
+  result: MatchupResult;
   color: string;
   lang: string;
 }> = ({ attackTeam, defendTeam, result, color, lang }) => {
@@ -278,7 +451,6 @@ const MatchupDetail: React.FC<{
         <div className="space-y-2">
           {result.details.map(({ attacker, defenderHits }) => (
             <div key={attacker.id} className="flex items-start gap-3 p-2.5 rounded-xl bg-[var(--color-card-alt)]/50 border border-[var(--color-border)]/30">
-              {/* Attacker sprite */}
               <div className="w-10 h-10 rounded-full bg-[var(--color-card)] flex items-center justify-center shrink-0 border-2 overflow-hidden" style={{ borderColor: color }}>
                 <img
                   src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${attacker.pokemon_id}.png`}
@@ -287,7 +459,6 @@ const MatchupDetail: React.FC<{
                   loading="lazy"
                 />
               </div>
-              {/* Hits */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-[var(--text-primary)] capitalize mb-1">{attacker.pokemon_name.replace(/-/g, ' ')}</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -300,12 +471,7 @@ const MatchupDetail: React.FC<{
                         loading="lazy"
                       />
                       {types.map(tp => (
-                        <img
-                          key={tp}
-                          src={getTypeSpriteUrl(tp)}
-                          alt={translateType(tp, lang)}
-                          className="w-10 h-auto object-contain"
-                        />
+                        <img key={tp} src={getTypeSpriteUrl(tp)} alt={translateType(tp, lang)} className="w-10 h-auto object-contain" />
                       ))}
                     </span>
                   ))}
@@ -332,11 +498,35 @@ const TeamCompare: React.FC = () => {
   const [teamAId, setTeamAId] = useState<string | null>(null);
   const [teamBId, setTeamBId] = useState<string | null>(null);
 
-  const teamA = teams.find(t => t.id === teamAId) ?? null;
-  const teamB = teams.find(t => t.id === teamBId) ?? null;
+  const teamA = teams.find(te => te.id === teamAId) ?? null;
+  const teamB = teams.find(te => te.id === teamBId) ?? null;
+
+  // Collect all move slugs from both teams for batch fetch
+  const allMoveSlugs = useMemo(() => {
+    const slugs = new Set<string>();
+    for (const m of [...(teamA?.members ?? []), ...(teamB?.members ?? [])]) {
+      for (const s of m.moves ?? []) if (s) slugs.add(s);
+    }
+    return Array.from(slugs);
+  }, [teamA, teamB]);
+
+  const { details: moveMap, loading: movesLoading } = useMoveDetails(allMoveSlugs, lang);
+
+  // Collect all pokemon IDs for batch base stats
+  const allPokemonIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const m of [...(teamA?.members ?? []), ...(teamB?.members ?? [])]) {
+      ids.add(m.pokemon_id);
+    }
+    return Array.from(ids);
+  }, [teamA, teamB]);
+
+  const { statsMap, loading: statsLoading } = useTeamBaseStats(allPokemonIds);
+
+  const dataLoading = movesLoading || statsLoading;
 
   // Auth redirect
-  React.useEffect(() => {
+  useEffect(() => {
     if (!authLoading && !user) navigate('/login');
   }, [user, authLoading]);
 
@@ -352,8 +542,7 @@ const TeamCompare: React.FC = () => {
   }
   if (!user) return null;
 
-  const aColor = '#3B82F6';
-  const bColor = '#EF4444';
+  const bothSelected = teamA && teamB && teamA.members.length > 0 && teamB.members.length > 0;
 
   return (
     <div className="min-h-screen app-bg pt-20 sm:pt-8 pb-8 px-4">
@@ -362,7 +551,7 @@ const TeamCompare: React.FC = () => {
         {/* Header */}
         <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl overflow-hidden animate-slide-up">
           <div className="accent-bar" />
-          <div className="p-4 sm:p-6 flex items-center justify-between gap-3">
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                 {t('compare_title')}
@@ -398,37 +587,53 @@ const TeamCompare: React.FC = () => {
           <>
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl p-4 sm:p-6 animate-slide-up">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-4">
-                <TeamSelector label={t('compare_team_a')} teams={teams} selectedId={teamAId} onSelect={setTeamAId} color={aColor} />
+                <TeamSelector label={t('compare_team_a')} teams={teams} selectedId={teamAId} onSelect={setTeamAId} color={A_COLOR} />
                 <div className="flex items-center justify-center sm:pt-8">
                   <span className="text-2xl font-black text-[var(--text-muted)]" style={{ fontFamily: 'var(--font-display)' }}>
                     {t('compare_vs')}
                   </span>
                 </div>
-                <TeamSelector label={t('compare_team_b')} teams={teams} selectedId={teamBId} onSelect={setTeamBId} color={bColor} />
+                <TeamSelector label={t('compare_team_b')} teams={teams} selectedId={teamBId} onSelect={setTeamBId} color={B_COLOR} />
               </div>
             </div>
 
+            {/* Loading */}
+            {bothSelected && dataLoading && (
+              <div className="flex justify-center py-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 border-2 border-gray-200 dark:border-gray-600 border-t-[var(--color-primary)] rounded-full animate-spin" />
+                  <span className="text-sm text-[var(--text-muted)]">{t('compare_loading')}</span>
+                </div>
+              </div>
+            )}
+
             {/* Comparison content */}
-            {teamA && teamB && teamA.members.length > 0 && teamB.members.length > 0 ? (
+            {bothSelected && !dataLoading ? (
               <div className="space-y-6 animate-slide-up">
-                {/* Side-by-side defensive/offensive profiles */}
+                {/* Defensive/Offensive profiles side by side */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl p-4 sm:p-6">
-                    <DefensiveSection team={teamA} color={aColor} lang={lang} />
+                    <DefensiveSection team={teamA!} moveMap={moveMap} color={A_COLOR} lang={lang} />
                   </div>
                   <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl p-4 sm:p-6">
-                    <DefensiveSection team={teamB} color={bColor} lang={lang} />
+                    <DefensiveSection team={teamB!} moveMap={moveMap} color={B_COLOR} lang={lang} />
                   </div>
                 </div>
 
+                {/* Stats overview */}
+                <StatsOverviewSection teamA={teamA!} teamB={teamB!} statsMap={statsMap} />
+
+                {/* Speed tiers */}
+                <SpeedTierSection teamA={teamA!} teamB={teamB!} statsMap={statsMap} />
+
                 {/* Matchup analysis */}
-                <MatchupSection teamA={teamA} teamB={teamB} lang={lang} />
+                <MatchupSection teamA={teamA!} teamB={teamB!} moveMap={moveMap} lang={lang} />
               </div>
-            ) : (teamA || teamB) && (
+            ) : !bothSelected && (teamA || teamB) ? (
               <div className="text-center py-12 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl">
                 <p className="text-sm text-[var(--text-muted)]">{t('compare_select_both')}</p>
               </div>
-            )}
+            ) : null}
           </>
         )}
       </div>

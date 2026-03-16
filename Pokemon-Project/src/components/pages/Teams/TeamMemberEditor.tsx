@@ -55,14 +55,6 @@ const NATURE_NAMES_ES: Record<string, string> = {
   Quirky: 'Rara',
 };
 
-const STAT_BAR_COLORS: Record<keyof BaseStats, string> = {
-  hp: 'bg-gradient-to-r from-rose-500 to-red-500',
-  atk: 'bg-gradient-to-r from-amber-500 to-orange-500',
-  def: 'bg-gradient-to-r from-yellow-500 to-amber-500',
-  spa: 'bg-gradient-to-r from-blue-500 to-indigo-500',
-  spd: 'bg-gradient-to-r from-emerald-500 to-green-500',
-  spe: 'bg-gradient-to-r from-violet-500 to-purple-500',
-};
 
 function calcStat(base: number, ev: number, iv: number, isHP: boolean, natureMod: number): number {
   const level = 50, evC = Math.floor(ev / 4);
@@ -472,7 +464,6 @@ const TeamMemberEditor: React.FC<Props> = ({
                         {STAT_ORDER.map(stat => {
                           const isBoosted = natureMods[stat] === 1.1;
                           const isDropped = natureMods[stat] === 0.9;
-                          const barPct = Math.min(100, (evsLocal[stat] / 252) * 100);
                           const calc = baseStats ? calcStat(baseStats[stat], evsLocal[stat], ivsLocal[stat], stat === 'hp', natureMods[stat]) : null;
                           return (
                             <tr

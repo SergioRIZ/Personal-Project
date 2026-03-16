@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMoveDetails, type MoveDetail } from '../../../hooks/useMoveDetails';
+import { useMoveDetails } from '../../../hooks/useMoveDetails';
 import { translateType } from '../Pokedex/utils';
 
 interface Props {

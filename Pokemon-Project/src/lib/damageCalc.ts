@@ -88,7 +88,7 @@ const PINCH_ABILITIES: Record<string, string> = {
 
 // Move power modifiers from abilities
 function getAbilityMovePowerMod(
-  ability: string | null, moveType: string, movePower: number, damageClass: string,
+  ability: string | null, moveType: string, movePower: number, _damageClass: string,
   currentHPPercent: number,
 ): number {
   if (!ability) return 1;

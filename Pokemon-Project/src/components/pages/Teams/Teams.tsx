@@ -44,7 +44,7 @@ const Teams: React.FC = () => {
         {/* Page header */}
         <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-xl overflow-hidden animate-slide-up">
           <div className="accent-bar" />
-          <div className="p-4 sm:p-6 flex items-center justify-between gap-3 sm:gap-4">
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                 {t('teams_title')}
@@ -53,6 +53,7 @@ const Teams: React.FC = () => {
                 {t('teams_subtitle')}
               </p>
             </div>
+            <div className="flex items-center gap-2 shrink-0">
             {teams.length >= 2 && (
               <button
                 onClick={() => navigate('/teams/compare')}
@@ -84,6 +85,7 @@ const Teams: React.FC = () => {
               )}
               {t('teams_new_team')}
             </button>
+            </div>
           </div>
         </div>
 

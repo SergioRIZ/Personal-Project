@@ -7,7 +7,7 @@ import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
 import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import { useItemList } from '../../../hooks/useItemList';
 import TeamMemberEditor from './TeamMemberEditor';
-import { NATURES, getNatureModifiers } from '../../../lib/natures';
+import { getNatureModifiers } from '../../../lib/natures';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
 
 interface Props {
