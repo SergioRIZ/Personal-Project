@@ -6,7 +6,8 @@ export interface BaseStats {
 }
 
 // Module-level cache — survives component remounts, shared with useTeamBaseStats
-export const statsCache = new Map<number, BaseStats>();
+// Keyed by "formName" or "pokemonId" to avoid collisions between forms sharing the same ID
+export const statsCache = new Map<string, BaseStats>();
 
 const STAT_MAP: Record<string, keyof BaseStats> = {
   'hp':               'hp',
@@ -17,34 +18,52 @@ const STAT_MAP: Record<string, keyof BaseStats> = {
   'speed':            'spe',
 };
 
-export async function fetchBaseStats(pokemonId: number): Promise<BaseStats> {
-  if (statsCache.has(pokemonId)) return statsCache.get(pokemonId)!;
-  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+// Strip parentheses from stored names like "urshifu-(rapid-strike)" → "urshifu-rapid-strike"
+function sanitizeName(name: string): string {
+  return name.replace(/[()]/g, '');
+}
+
+async function fetchPokemonData(pokemonId: number, pokemonName?: string): Promise<Response> {
+  if (pokemonName) {
+    const clean = sanitizeName(pokemonName);
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${clean}`);
+    if (res.ok) return res;
+    // Name failed — fall back to numeric ID
+  }
+  return fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+}
+
+export async function fetchBaseStats(pokemonId: number, pokemonName?: string): Promise<BaseStats> {
+  const cacheKey = pokemonName ?? String(pokemonId);
+  if (statsCache.has(cacheKey)) return statsCache.get(cacheKey)!;
+  const res = await fetchPokemonData(pokemonId, pokemonName);
   const data: { stats: Array<{ base_stat: number; stat: { name: string } }> } = await res.json();
   const base: BaseStats = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
   for (const s of data.stats) {
     const key = STAT_MAP[s.stat.name];
     if (key) base[key] = s.base_stat;
   }
-  statsCache.set(pokemonId, base);
+  statsCache.set(cacheKey, base);
   return base;
 }
 
-export function usePokemonBaseStats(pokemonId: number | null): {
+export function usePokemonBaseStats(pokemonId: number | null, pokemonName?: string): {
   stats: BaseStats | null;
   loading: boolean;
 } {
+  const cacheKey = pokemonName ?? (pokemonId != null ? String(pokemonId) : null);
+
   const [stats, setStats] = useState<BaseStats | null>(
-    pokemonId != null ? (statsCache.get(pokemonId) ?? null) : null
+    cacheKey != null ? (statsCache.get(cacheKey) ?? null) : null
   );
   const [loading, setLoading] = useState(
-    pokemonId != null && !statsCache.has(pokemonId)
+    cacheKey != null && !statsCache.has(cacheKey)
   );
 
   useEffect(() => {
-    if (pokemonId === null) return;
-    if (statsCache.has(pokemonId)) {
-      setStats(statsCache.get(pokemonId)!);
+    if (pokemonId === null || cacheKey === null) return;
+    if (statsCache.has(cacheKey)) {
+      setStats(statsCache.get(cacheKey)!);
       setLoading(false);
       return;
     }
@@ -52,7 +71,7 @@ export function usePokemonBaseStats(pokemonId: number | null): {
     let cancelled = false;
     setLoading(true);
 
-    fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`)
+    fetchPokemonData(pokemonId, pokemonName)
       .then(r => r.json())
       .then((data: { stats: Array<{ base_stat: number; stat: { name: string } }> }) => {
         if (cancelled) return;
@@ -61,7 +80,7 @@ export function usePokemonBaseStats(pokemonId: number | null): {
           const key = STAT_MAP[s.stat.name];
           if (key) base[key] = s.base_stat;
         }
-        statsCache.set(pokemonId, base);
+        statsCache.set(cacheKey, base);
         setStats(base);
         setLoading(false);
       })
@@ -70,7 +89,7 @@ export function usePokemonBaseStats(pokemonId: number | null): {
       });
 
     return () => { cancelled = true; };
-  }, [pokemonId]);
+  }, [pokemonId, pokemonName, cacheKey]);
 
   return { stats, loading };
 }

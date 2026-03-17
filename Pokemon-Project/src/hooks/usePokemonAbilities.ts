@@ -9,7 +9,7 @@ export interface PokemonAbility {
 
 // Module-level caches — survive remounts, keyed by `lang:slug` (capped)
 const CACHE_MAX = 300;
-const pokemonAbilityListCache = new Map<number, { slug: string; isHidden: boolean }[]>();
+const pokemonAbilityListCache = new Map<string, { slug: string; isHidden: boolean }[]>();
 const abilityDetailCache = new Map<string, { name: string; shortEffect: string }>();
 
 function setAbilityCache(key: string, value: { name: string; shortEffect: string }) {
@@ -43,7 +43,7 @@ async function fetchAbilityDetail(slug: string, lang: string): Promise<{ name: s
   return { name: localName, shortEffect: localEffect.replace(/[\n\f\r]+/g, ' ').trim() };
 }
 
-export function usePokemonAbilities(pokemonId: number | null, lang = 'en'): {
+export function usePokemonAbilities(pokemonId: number | null, lang = 'en', pokemonName?: string): {
   abilities: PokemonAbility[];
   loading: boolean;
 } {
@@ -57,17 +57,25 @@ export function usePokemonAbilities(pokemonId: number | null, lang = 'en'): {
     async function load() {
       setLoading(true);
 
-      // Step 1 — ability slug list for this Pokémon
+      // Step 1 — ability slug list for this Pokémon (use form name if available)
+      const cacheKey = pokemonName ?? String(pokemonId!);
       let list: { slug: string; isHidden: boolean }[];
-      if (pokemonAbilityListCache.has(pokemonId!)) {
-        list = pokemonAbilityListCache.get(pokemonId!)!;
+      if (pokemonAbilityListCache.has(cacheKey)) {
+        list = pokemonAbilityListCache.get(cacheKey)!;
       } else {
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+        let res: Response;
+        if (pokemonName) {
+          const clean = pokemonName.replace(/[()]/g, '');
+          res = await fetch(`https://pokeapi.co/api/v2/pokemon/${clean}`);
+          if (!res.ok) res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId!}`);
+        } else {
+          res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId!}`);
+        }
         const data = await res.json() as {
           abilities: Array<{ ability: { name: string }; is_hidden: boolean }>;
         };
         list = data.abilities.map(a => ({ slug: a.ability.name, isHidden: a.is_hidden }));
-        pokemonAbilityListCache.set(pokemonId!, list);
+        pokemonAbilityListCache.set(cacheKey, list);
       }
 
       if (cancelled) return;
@@ -99,7 +107,7 @@ export function usePokemonAbilities(pokemonId: number | null, lang = 'en'): {
 
     load().catch(console.error);
     return () => { cancelled = true; };
-  }, [pokemonId, lang]);
+  }, [pokemonId, lang, pokemonName]);
 
   return { abilities, loading };
 }

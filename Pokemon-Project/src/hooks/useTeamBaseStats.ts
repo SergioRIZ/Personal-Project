@@ -22,11 +22,11 @@ export function useTeamBaseStats(pokemonIds: number[]): {
     // Seed with cached entries
     const cached: Record<number, BaseStats> = {};
     for (const id of pokemonIds) {
-      if (statsCache.has(id)) cached[id] = statsCache.get(id)!;
+      if (statsCache.has(String(id))) cached[id] = statsCache.get(String(id))!;
     }
     setStatsMap(cached);
 
-    const uncached = pokemonIds.filter(id => !statsCache.has(id));
+    const uncached = pokemonIds.filter(id => !statsCache.has(String(id)));
     if (uncached.length === 0) {
       setLoading(false);
       return;

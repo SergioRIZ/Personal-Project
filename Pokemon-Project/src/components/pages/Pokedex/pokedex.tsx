@@ -49,7 +49,7 @@ const Pokedex = () => {
       }
     };
     loadBasicData();
-  }, [t]);
+  }, [t, settings.language]);
 
   useEffect(() => {
     const debouncedSearch = setTimeout(async () => {

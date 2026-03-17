@@ -122,8 +122,8 @@ const TeamMemberEditor: React.FC<Props> = ({
 
   /* ── Data hooks ─────────────────────────────────────────────────────── */
   const { details: moveDetails } = useMoveDetails(member.moves ?? [], lang);
-  const { abilities, loading: abilitiesLoading } = usePokemonAbilities(member.pokemon_id, lang);
-  const { stats: baseStats } = usePokemonBaseStats(member.pokemon_id);
+  const { abilities, loading: abilitiesLoading } = usePokemonAbilities(member.pokemon_id, lang, member.pokemon_name);
+  const { stats: baseStats } = usePokemonBaseStats(member.pokemon_id, member.pokemon_name);
   const { items: allItems } = useItemList(lang);
 
   // Sync item input with localized name when items load
@@ -173,7 +173,12 @@ const TeamMemberEditor: React.FC<Props> = ({
   };
   const handleMoveRemove = (idx: number) => onUpdateMoves(slot, moves.filter((_, i) => i !== idx));
 
-  const handleItemBlur = () => onUpdateItem(slot, itemInput.trim() || null);
+  const handleItemBlur = () => {
+    const q = itemInput.toLowerCase().trim();
+    if (!q) { onUpdateItem(slot, null); return; }
+    const match = allItems.find(i => i.name.toLowerCase() === q || i.slug === q || i.slug === q.replace(/\s+/g, '-'));
+    onUpdateItem(slot, match ? match.slug : itemInput.trim());
+  };
 
   const handleEVChange = (stat: keyof EVSpread, raw: string) => {
     const val = Math.min(252, Math.max(0, parseInt(raw, 10) || 0));
@@ -387,7 +392,7 @@ const TeamMemberEditor: React.FC<Props> = ({
                             <button
                               key={item.slug}
                               onMouseDown={e => e.preventDefault()}
-                              onClick={() => { setItemInput(item.name); onUpdateItem(slot, item.name); setItemDropdownOpen(false); }}
+                              onClick={() => { setItemInput(item.name); onUpdateItem(slot, item.slug); setItemDropdownOpen(false); }}
                               className="w-full text-left px-3 py-2 flex items-start gap-2.5 hover:bg-red-50 dark:hover:bg-red-900/10 cursor-pointer transition-colors first:rounded-t-xl last:rounded-b-xl"
                             >
                               <img
@@ -682,6 +687,7 @@ const TeamMemberEditor: React.FC<Props> = ({
       {pickerMoveIndex !== null && (
         <MovePickerModal
           pokemonId={member.pokemon_id}
+          pokemonName={member.pokemon_name}
           currentMoves={moves}
           onSelect={handleMoveSelect}
           onClose={() => setPickerMoveIndex(null)}

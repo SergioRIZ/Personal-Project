@@ -160,6 +160,7 @@ const TeamCard: React.FC<Props> = ({ team }) => {
             {[1, 2, 3, 4, 5, 6].map(slot => (
               <TeamSlot
                 key={slot}
+                teamId={team.id}
                 slot={slot}
                 member={slotMap[slot]}
                 onAdd={() => setPickerSlot(slot)}

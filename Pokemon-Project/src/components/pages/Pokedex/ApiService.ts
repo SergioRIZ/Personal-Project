@@ -1,6 +1,7 @@
 export interface PokemonBasic {
   id: number;
   name: string;
+  displayName?: string;
   url: string;
 }
 

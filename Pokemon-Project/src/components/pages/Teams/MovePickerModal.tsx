@@ -6,6 +6,7 @@ import { translateType } from '../Pokedex/utils';
 
 interface Props {
   pokemonId: number;
+  pokemonName?: string;  // PokeAPI form name (e.g. "urshifu-rapid-strike")
   currentMoves: string[];
   onSelect: (slug: string) => void;
   onClose: () => void;
@@ -13,9 +14,9 @@ interface Props {
 
 // Module-level cache — re-opening the picker for the same Pokémon is instant (capped at 100)
 const MOVES_CACHE_MAX = 100;
-const pokemonMovesCache = new Map<number, string[]>();
+const pokemonMovesCache = new Map<string, string[]>();
 
-function setMovesCache(key: number, value: string[]) {
+function setMovesCache(key: string, value: string[]) {
   if (pokemonMovesCache.size >= MOVES_CACHE_MAX) {
     const firstKey = pokemonMovesCache.keys().next().value!;
     pokemonMovesCache.delete(firstKey);
@@ -41,7 +42,7 @@ const DAMAGE_CLASS_SPRITE: Record<string, string> = {
 const getTypeIconUrl = (type: string): string =>
   `/icons-types/${type.toLowerCase()}.svg`;
 
-const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, onClose }) => {
+const MovePickerModal: React.FC<Props> = ({ pokemonId, pokemonName, currentMoves, onSelect, onClose }) => {
   const { t, i18n } = useTranslation();
   const [search, setSearch] = useState('');
   const [allMoves, setAllMoves] = useState<string[]>([]);
@@ -69,23 +70,32 @@ const MovePickerModal: React.FC<Props> = ({ pokemonId, currentMoves, onSelect, o
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Fetch the Pokémon's learnable move list
+  // Fetch the Pokémon's learnable move list (use form name when available, fallback to ID)
+  const movesCacheKey = pokemonName ?? String(pokemonId);
   useEffect(() => {
-    if (pokemonMovesCache.has(pokemonId)) {
-      setAllMoves(pokemonMovesCache.get(pokemonId)!);
+    if (pokemonMovesCache.has(movesCacheKey)) {
+      setAllMoves(pokemonMovesCache.get(movesCacheKey)!);
       return;
     }
     setLoadingList(true);
-    fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`)
-      .then(r => r.json())
-      .then((data: { moves: Array<{ move: { name: string } }> }) => {
-        const slugs = [...new Set(data.moves.map(m => m.move.name))].sort();
-        setMovesCache(pokemonId, slugs);
-        setAllMoves(slugs);
-      })
-      .catch(console.error)
-      .finally(() => setLoadingList(false));
-  }, [pokemonId]);
+
+    const doFetch = async () => {
+      let res: Response;
+      if (pokemonName) {
+        const clean = pokemonName.replace(/[()]/g, '');
+        res = await fetch(`https://pokeapi.co/api/v2/pokemon/${clean}`);
+        if (!res.ok) res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+      } else {
+        res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+      }
+      const data: { moves: Array<{ move: { name: string } }> } = await res.json();
+      const slugs = [...new Set(data.moves.map(m => m.move.name))].sort();
+      setMovesCache(movesCacheKey, slugs);
+      setAllMoves(slugs);
+    };
+
+    doFetch().catch(console.error).finally(() => setLoadingList(false));
+  }, [pokemonId, pokemonName, movesCacheKey]);
 
   // Fetch type/power/category/description for every move (progressive batches of 10)
   const { details: moveDetails } = useMoveDetails(allMoves, i18n.language);

@@ -11,6 +11,7 @@ import { getNatureModifiers } from '../../../lib/natures';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
 
 interface Props {
+  teamId: string;
   slot: number;
   member?: TeamMember;
   onAdd: () => void;
@@ -77,18 +78,33 @@ function formatMoveName(slug: string): string {
    TeamSlot — compact card (stats view) + editor modal
    ═══════════════════════════════════════════════════════════════════════ */
 
+const EDITOR_STORAGE_KEY = 'pokemon-editor-open';
+
 const TeamSlot: React.FC<Props> = ({
-  slot, member, onAdd, onRemove, onUpdateMoves, onUpdateAbility,
+  teamId, slot, member, onAdd, onRemove, onUpdateMoves, onUpdateAbility,
   onUpdateItem, onUpdateNature, onUpdateEVs, onUpdateIVs,
 }) => {
   const { t, i18n } = useTranslation();
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const editorKey = `${teamId}:${slot}`;
+  const [isEditorOpen, setEditorOpen] = useState(() => {
+    try { return localStorage.getItem(EDITOR_STORAGE_KEY) === editorKey; }
+    catch { return false; }
+  });
+
+  const openEditor = () => {
+    setEditorOpen(true);
+    try { localStorage.setItem(EDITOR_STORAGE_KEY, editorKey); } catch { /* */ }
+  };
+  const closeEditor = () => {
+    setEditorOpen(false);
+    try { localStorage.removeItem(EDITOR_STORAGE_KEY); } catch { /* */ }
+  };
   const [hoveredMove, setHoveredMove] = useState<string | null>(null);
   const lang = i18n.language;
 
   const { details: moveDetails } = useMoveDetails(member?.moves ?? [], lang);
-  const { abilities } = usePokemonAbilities(member?.pokemon_id ?? null, lang);
-  const { stats: baseStats } = usePokemonBaseStats(member?.pokemon_id ?? null);
+  const { abilities } = usePokemonAbilities(member?.pokemon_id ?? null, lang, member?.pokemon_name);
+  const { stats: baseStats } = usePokemonBaseStats(member?.pokemon_id ?? null, member?.pokemon_name);
   const { items: allItems } = useItemList(lang);
 
   const matchedItem = useMemo(() => {
@@ -130,8 +146,8 @@ const TeamSlot: React.FC<Props> = ({
         role="button"
         tabIndex={0}
         aria-label={`${member.pokemon_name} #${member.pokemon_id} — ${t('teams_edit')}`}
-        onClick={() => setIsEditorOpen(true)}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsEditorOpen(true); } }}
+        onClick={() => openEditor()}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEditor(); } }}
       >
         {/* ── Header — full type-colored background ───────────── */}
         <div
@@ -289,41 +305,35 @@ const TeamSlot: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* ── Moves — colored left border + inline description ── */}
+        {/* ── Moves ────────────────────────────────────────── */}
         {moves.length > 0 && (
           <div className="px-2.5 pb-2.5 mt-auto">
-            <div className="rounded-lg overflow-hidden border border-[var(--color-border)]/60">
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5 px-0.5">{t('teams_moves')}</p>
+            <div className="flex flex-col gap-1">
               {moves.map((move, i) => {
                 const detail = moveDetails[move];
-                const typeHex = detail ? (TYPE_ACCENT[detail.type] ?? '#A8A878') : '#A8A878';
                 const isHovered = hoveredMove === move;
                 return (
                   <div
                     key={`${move}-${i}`}
-                    className={`${i < moves.length - 1 ? 'border-b border-b-[var(--color-border)]/30' : ''}`}
                     onMouseEnter={() => setHoveredMove(move)}
                     onMouseLeave={() => setHoveredMove(null)}
                   >
-                    <div
-                      className="flex items-center gap-2 pl-3 pr-2.5 py-2.5 border-l-[4px] transition-colors"
-                      style={{
-                        borderLeftColor: typeHex,
-                        background: `linear-gradient(90deg, ${typeHex}${isHovered ? '20' : '10'}, transparent)`,
-                      }}
-                    >
-                      {detail && (
-                        <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-5 h-5 object-contain" />
+                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/80">
+                      {detail ? (
+                        <img src={getTypeIconUrl(detail.type)} alt={detail.type} className="shrink-0 w-5 h-5 object-contain drop-shadow" />
+                      ) : (
+                        <span className="shrink-0 w-5 h-5 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
                       )}
-                      <span className="text-sm font-bold truncate text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+                      <span className="text-sm font-semibold truncate text-gray-800 dark:text-gray-100">
                         {detail?.name ?? formatMoveName(move)}
                       </span>
                     </div>
-                    {/* Inline description */}
                     <div
                       className="overflow-hidden transition-all duration-200 ease-out"
                       style={{ maxHeight: isHovered && detail?.shortEffect ? '6rem' : '0' }}
                     >
-                      <p className="px-3 pb-2 text-xs leading-relaxed text-[var(--text-muted)]">
+                      <p className="px-3 pb-1.5 pt-1 text-xs leading-relaxed text-[var(--text-muted)]">
                         {detail?.shortEffect}
                       </p>
                     </div>
@@ -337,7 +347,7 @@ const TeamSlot: React.FC<Props> = ({
         {/* ── Edit button ──────────────────────────────────────── */}
         <div className="px-2.5 pb-2.5 mt-auto">
           <button
-            onClick={e => { e.stopPropagation(); setIsEditorOpen(true); }}
+            onClick={e => { e.stopPropagation(); openEditor(); }}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-[var(--text-muted)] hover:text-white bg-[var(--color-card-alt)] hover:bg-[var(--color-primary)] transition-all cursor-pointer"
             style={{ fontFamily: 'var(--font-display)' }}
           >
@@ -354,7 +364,7 @@ const TeamSlot: React.FC<Props> = ({
         <TeamMemberEditor
           member={member}
           slot={slot}
-          onClose={() => setIsEditorOpen(false)}
+          onClose={() => closeEditor()}
           onRemove={onRemove}
           onUpdateMoves={onUpdateMoves}
           onUpdateAbility={onUpdateAbility}
