@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import i18next from 'i18next';
 import { MEGA_FORMS } from '../lib/megaData';
 import { REGIONAL_FORMS } from '../lib/regionalData';
@@ -14,13 +14,28 @@ export interface PokemonEntry {
   megaForm?: string;     // PokeAPI alternate form name (used for ALL form types)
   displayName?: string;  // Localized display name
   formType?: FormType;
+  formSpriteId?: number; // PokeAPI numeric ID for form sprites (e.g. 10167 for weezing-galar)
 }
 
 let allPokemonCache: PokemonEntry[] | null = null;
 let cachedLang: string | null = null;
+let formIdMap: Map<string, number> | null = null;
 
 function isSpanish(): boolean {
   return i18next.language?.startsWith('es') ?? false;
+}
+
+/** Build a name→id map from the PokeAPI pokemon list (includes all forms) */
+async function getFormIdMap(): Promise<Map<string, number>> {
+  if (formIdMap) return formIdMap;
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=2000');
+  const data = await res.json() as { results: Array<{ name: string; url: string }> };
+  formIdMap = new Map();
+  for (const p of data.results) {
+    const match = p.url.match(/\/pokemon\/(\d+)\//);
+    if (match) formIdMap.set(p.name, Number(match[1]));
+  }
+  return formIdMap;
 }
 
 async function fetchAllPokemon(): Promise<PokemonEntry[]> {
@@ -29,8 +44,11 @@ async function fetchAllPokemon(): Promise<PokemonEntry[]> {
   // Invalidate cache if language changed
   if (allPokemonCache && cachedLang === lang) return allPokemonCache;
 
-  const res = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
-  const data = await res.json() as { results: Array<{ name: string }> };
+  const [speciesRes, idMap] = await Promise.all([
+    fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025'),
+    getFormIdMap(),
+  ]);
+  const data = await speciesRes.json() as { results: Array<{ name: string }> };
   const es = lang === 'es';
 
   const entries: PokemonEntry[] = [];
@@ -53,6 +71,7 @@ async function fetchAllPokemon(): Promise<PokemonEntry[]> {
           megaForm: mega.name,
           displayName: es ? mega.labelEs : mega.label,
           formType: 'mega',
+          formSpriteId: idMap.get(mega.name),
         });
       }
     }
@@ -67,6 +86,7 @@ async function fetchAllPokemon(): Promise<PokemonEntry[]> {
           megaForm: form.name,
           displayName: es ? form.labelEs : form.label,
           formType: form.region,
+          formSpriteId: idMap.get(form.name),
         });
       }
     }
@@ -81,6 +101,7 @@ async function fetchAllPokemon(): Promise<PokemonEntry[]> {
           megaForm: form.name,
           displayName: es ? form.labelEs : form.label,
           formType: 'gmax',
+          formSpriteId: idMap.get(form.name),
         });
       }
     }
@@ -95,6 +116,7 @@ async function fetchAllPokemon(): Promise<PokemonEntry[]> {
           megaForm: form.name,
           displayName: es ? form.labelEs : form.label,
           formType: 'alt',
+          formSpriteId: idMap.get(form.name),
         });
       }
     }
@@ -129,4 +151,21 @@ export function usePokemonSearch() {
   }, []);
 
   return { allPokemon, loading };
+}
+
+/**
+ * Returns a function that resolves the correct PokeAPI sprite ID
+ * from a pokemon_name (e.g. "weezing-galar" → 10167).
+ * Falls back to the provided ID if the name isn't a form or the map hasn't loaded.
+ */
+export function useSpriteResolver() {
+  const [map, setMap] = useState<Map<string, number> | null>(null);
+
+  useEffect(() => {
+    getFormIdMap().then(setMap);
+  }, []);
+
+  return useCallback((pokemonName: string, fallbackId: number): number => {
+    return map?.get(pokemonName) ?? fallbackId;
+  }, [map]);
 }

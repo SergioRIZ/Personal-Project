@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 export interface MoveDetail {
   slug: string;
@@ -102,6 +102,7 @@ export function useMoveDetails(slugs: string[], lang = 'en'): {
   const [details, setDetails] = useState<Record<string, MoveDetail>>({});
   const [loading, setLoading] = useState(false);
   const runIdRef = useRef(0);
+  const slugsKey = useMemo(() => slugs.filter(Boolean).sort().join(','), [slugs]);
 
   useEffect(() => {
     const currentRun = ++runIdRef.current;
@@ -151,7 +152,7 @@ export function useMoveDetails(slugs: string[], lang = 'en'): {
       }
       if (runIdRef.current === currentRun) setLoading(false);
     })();
-  }, [slugs.join(','), lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slugsKey, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { details, loading };
 }

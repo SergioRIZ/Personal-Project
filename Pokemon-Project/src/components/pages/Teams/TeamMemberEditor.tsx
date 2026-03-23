@@ -9,6 +9,7 @@ import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import MovePickerModal from './MovePickerModal';
 import { useItemList } from '../../../hooks/useItemList';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
+import { useSpriteResolver } from '../../../hooks/usePokemonSearch';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */
 
@@ -105,6 +106,8 @@ const TeamMemberEditor: React.FC<Props> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
+  const resolveSprite = useSpriteResolver();
+  const spriteId = resolveSprite(member.pokemon_name, member.pokemon_id);
 
   /* ── Refs ──────────────────────────────────────────────────────────── */
   const modalRef = useRef<HTMLDivElement>(null);
@@ -140,14 +143,17 @@ const TeamMemberEditor: React.FC<Props> = ({
   const accentHex = TYPE_ACCENT[primaryType] ?? '#A8A878';
   const evTotal = Object.values(evsLocal).reduce((s, v) => s + v, 0);
 
-  const natureMods = { hp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 } as Record<keyof BaseStats, number>;
-  if (member.nature) {
-    const nat = NATURES.find(([n]) => n === member.nature);
-    if (nat?.[1]) {
-      natureMods[nat[1] as keyof BaseStats] = 1.1;
-      natureMods[nat[2] as keyof BaseStats] = 0.9;
+  const natureMods = useMemo(() => {
+    const mods = { hp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 } as Record<keyof BaseStats, number>;
+    if (member.nature) {
+      const nat = NATURES.find(([n]) => n === member.nature);
+      if (nat?.[1]) {
+        mods[nat[1] as keyof BaseStats] = 1.1;
+        mods[nat[2] as keyof BaseStats] = 0.9;
+      }
     }
-  }
+    return mods;
+  }, [member.nature]);
 
   const filteredItems = useMemo(() => {
     const q = itemInput.toLowerCase().trim();
@@ -278,13 +284,13 @@ const TeamMemberEditor: React.FC<Props> = ({
                 >
                   <div className="absolute inset-0 rounded-2xl blur-2xl opacity-40" style={{ backgroundColor: accentHex }} />
                   <img
-                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemon_id}.png`}
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${spriteId}.png`}
                     alt={member.pokemon_name}
                     className="relative w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-lg"
                     loading="lazy"
                     onError={e => {
                       (e.target as HTMLImageElement).src =
-                        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.pokemon_id}.png`;
+                        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
                     }}
                   />
                 </div>

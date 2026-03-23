@@ -73,7 +73,12 @@
       "mcp__chrome-devtools__get_network_request",
       "mcp__chrome-devtools__hover",
       "Bash(taskkill //F //IM node.exe 2>/dev/null; pkill -f \"vite\" 2>/dev/null; echo \"Done\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(xargs grep:*)",
+      "mcp__chrome-devtools__select_page",
+      "mcp__chrome-devtools__close_page",
+      "mcp__chrome-devtools__new_page",
+      "Bash(npx eslint:*)"
     ]
   }
 }

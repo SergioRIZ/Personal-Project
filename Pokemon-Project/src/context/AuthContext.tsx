@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -24,8 +24,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      // Only update state if the session actually changed (user id or access token).
+      // Supabase fires this callback on every visibility-change even when nothing changed,
+      // which would otherwise cause a full re-render cascade and re-fetch all data.
+      setSession(prev => {
+        const prevId = prev?.user?.id;
+        const nextId = newSession?.user?.id;
+        const prevToken = prev?.access_token;
+        const nextToken = newSession?.access_token;
+        if (prevId === nextId && prevToken === nextToken) return prev;
+        return newSession;
+      });
       // Clean up the hash fragment left by OAuth redirects
       if (_event === 'SIGNED_IN' && window.location.hash) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -35,8 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const value = useMemo(() => ({
+    session,
+    user: session?.user ?? null,
+    loading,
+  }), [session, loading]);
+
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,22 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { usePokemonSearch, type PokemonEntry, type FormType } from '../../../hooks/usePokemonSearch';
+import { usePokemonSearch, type PokemonEntry } from '../../../hooks/usePokemonSearch';
 
 interface Props {
   value: PokemonEntry | null;
   onSelect: (pokemon: PokemonEntry) => void;
   placeholder?: string;
 }
-
-const FORM_BADGE: Record<FormType, { gradient: string; labelKey: string; fallback: string }> = {
-  mega:   { gradient: 'from-amber-500 to-pink-500',    labelKey: 'calc_mega',    fallback: 'Mega' },
-  alola:  { gradient: 'from-sky-400 to-cyan-500',      labelKey: 'calc_alola',   fallback: 'Alola' },
-  galar:  { gradient: 'from-purple-500 to-indigo-500', labelKey: 'calc_galar',   fallback: 'Galar' },
-  hisui:  { gradient: 'from-amber-600 to-yellow-500',  labelKey: 'calc_hisui',   fallback: 'Hisui' },
-  paldea: { gradient: 'from-orange-500 to-red-500',    labelKey: 'calc_paldea',  fallback: 'Paldea' },
-  gmax:   { gradient: 'from-rose-500 to-red-600',      labelKey: 'calc_gmax',    fallback: 'GMax' },
-  alt:    { gradient: 'from-teal-500 to-emerald-500', labelKey: 'calc_alt',     fallback: 'Form' },
-};
 
 const SPRITE_URL = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -26,7 +15,6 @@ function getDisplayName(p: PokemonEntry): string {
 }
 
 const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...' }: Props) => {
-  const { t } = useTranslation();
   const { allPokemon } = usePokemonSearch();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -75,15 +63,10 @@ const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...
     <div ref={wrapperRef} className="relative">
       {value ? (
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-card-alt)] border border-[var(--color-border)]">
-          <img src={SPRITE_URL(value.id)} alt="" className="w-7 h-7 object-contain" loading="lazy" />
+          <img src={SPRITE_URL(value.formSpriteId ?? value.id)} alt="" className="w-7 h-7 object-contain" loading="lazy" />
           <span className="text-sm font-bold capitalize text-[var(--text-primary)] flex-1" style={{ fontFamily: 'var(--font-display)' }}>
             {getDisplayName(value)}
           </span>
-          {value.formType && FORM_BADGE[value.formType] && (
-            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-gradient-to-r ${FORM_BADGE[value.formType].gradient} text-white`}>
-              {t(FORM_BADGE[value.formType].labelKey, FORM_BADGE[value.formType].fallback).toUpperCase()}
-            </span>
-          )}
           <span className="text-[10px] font-bold text-[var(--color-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
             #{value.id.toString().padStart(4, '0')}
           </span>
@@ -131,13 +114,8 @@ const PokemonSearchInput = ({ value, onSelect, placeholder = 'Search Pokémon...
                   : 'hover:bg-[var(--color-card-alt)] text-[var(--text-primary)]'
               }`}
             >
-              <img src={SPRITE_URL(p.id)} alt="" className={`w-6 h-6 object-contain ${p.megaForm ? 'saturate-150 hue-rotate-15' : ''}`} loading="lazy" />
+              <img src={SPRITE_URL(p.formSpriteId ?? p.id)} alt="" className="w-6 h-6 object-contain" loading="lazy" />
               <span className="text-sm font-semibold capitalize flex-1 truncate">{getDisplayName(p)}</span>
-              {p.formType && FORM_BADGE[p.formType] && (
-                <span className={`px-1 py-0.5 rounded text-[7px] font-black uppercase bg-gradient-to-r ${FORM_BADGE[p.formType].gradient} text-white shrink-0`}>
-                  {t(FORM_BADGE[p.formType].labelKey, FORM_BADGE[p.formType].fallback).toUpperCase()}
-                </span>
-              )}
               <span className="text-[10px] font-bold text-[var(--text-muted)] shrink-0" style={{ fontFamily: 'var(--font-display)' }}>
                 #{p.id.toString().padStart(4, '0')}
               </span>

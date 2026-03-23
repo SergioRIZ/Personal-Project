@@ -6,6 +6,7 @@ import { usePokemonAbilities } from '../../../hooks/usePokemonAbilities';
 import { usePokemonBaseStats } from '../../../hooks/usePokemonBaseStats';
 import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import { useItemList } from '../../../hooks/useItemList';
+import { useSpriteResolver } from '../../../hooks/usePokemonSearch';
 import TeamMemberEditor from './TeamMemberEditor';
 import { getNatureModifiers } from '../../../lib/natures';
 import type { TeamMember, EVSpread, IVSpread } from '../../../lib/teams';
@@ -85,6 +86,8 @@ const TeamSlot: React.FC<Props> = ({
   onUpdateItem, onUpdateNature, onUpdateEVs, onUpdateIVs,
 }) => {
   const { t, i18n } = useTranslation();
+  const resolveSprite = useSpriteResolver();
+  const spriteId = member ? resolveSprite(member.pokemon_name, member.pokemon_id) : 0;
   const editorKey = `${teamId}:${slot}`;
   const [isEditorOpen, setEditorOpen] = useState(() => {
     try { return localStorage.getItem(EDITOR_STORAGE_KEY) === editorKey; }
@@ -177,13 +180,13 @@ const TeamSlot: React.FC<Props> = ({
           {/* Sprite */}
           <div className="relative z-[1] w-24 h-24 mb-2">
             <img
-              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemon_id}.png`}
+              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${spriteId}.png`}
               alt={member.pokemon_name}
               className="w-24 h-24 object-contain drop-shadow-lg group-hover/card:scale-110 transition-transform duration-500"
               loading="lazy"
               onError={e => {
                 (e.target as HTMLImageElement).src =
-                  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.pokemon_id}.png`;
+                  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
               }}
             />
           </div>

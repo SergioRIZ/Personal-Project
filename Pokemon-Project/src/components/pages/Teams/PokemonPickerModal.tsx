@@ -71,7 +71,7 @@ const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
       const types = data.types.map(t => t.type.name);
 
       const member: TeamMemberInput = {
-        pokemon_id: entry.id,
+        pokemon_id: entry.formSpriteId ?? entry.id,
         pokemon_name: formName,
         pokemon_types: types,
         slot,
@@ -161,7 +161,7 @@ const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
                       </div>
                     ) : (
                       <img
-                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${entry.id}.png`}
+                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${entry.formSpriteId ?? entry.id}.png`}
                         alt={getDisplayName(entry)}
                         className="w-10 h-10 object-contain"
                         loading="lazy"
@@ -170,11 +170,6 @@ const PokemonPickerModal: React.FC<Props> = ({ teamId, slot, onClose }) => {
                     <span className="text-[10px] font-medium capitalize text-gray-700 dark:text-gray-200 text-center truncate w-full">
                       {getDisplayName(entry)}
                     </span>
-                    {entry.formType && (
-                      <span className="text-[8px] font-bold text-white px-1.5 py-0.5 rounded bg-gray-400 dark:bg-gray-500 uppercase">
-                        {entry.formType === 'alt' ? 'form' : entry.formType}
-                      </span>
-                    )}
                     <span className="text-[9px] text-gray-400 dark:text-gray-500">
                       #{entry.id.toString().padStart(4, '0')}
                     </span>

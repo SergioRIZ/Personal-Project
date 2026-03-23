@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from './AuthContext';
 import {
   fetchCollection,
@@ -36,9 +36,8 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
 
   const collectedIds = useMemo(() => new Set(collectionItems.map(item => item.pokemon_id)), [collectionItems]);
 
-  const addPokemon = async (id: number, name: string) => {
+  const addPokemon = useCallback(async (id: number, name: string) => {
     if (!user) return;
-    // Optimistic update
     const newItem: CollectionItem = {
       pokemon_id: id,
       pokemon_name: name,
@@ -48,27 +47,28 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
     try {
       await addToCollection(user.id, id, name);
     } catch (err) {
-      // Rollback on error
       setCollectionItems(prev => prev.filter(item => item.pokemon_id !== id));
       console.error(err);
     }
-  };
+  }, [user]);
 
-  const removePokemon = async (id: number) => {
+  const removePokemon = useCallback(async (id: number) => {
     if (!user) return;
-    // Optimistic update
     setCollectionItems(prev => prev.filter(item => item.pokemon_id !== id));
     try {
       await removeFromCollection(user.id, id);
     } catch (err) {
-      // Rollback: re-fetch to restore state
-      fetchCollection(user.id).then(setCollectionItems).catch(console.error);
+      if (user) fetchCollection(user.id).then(setCollectionItems).catch(console.error);
       console.error(err);
     }
-  };
+  }, [user]);
+
+  const value = useMemo(() => ({
+    collectedIds, collectionItems, loading, addPokemon, removePokemon,
+  }), [collectedIds, collectionItems, loading, addPokemon, removePokemon]);
 
   return (
-    <CollectionContext.Provider value={{ collectedIds, collectionItems, loading, addPokemon, removePokemon }}>
+    <CollectionContext.Provider value={value}>
       {children}
     </CollectionContext.Provider>
   );

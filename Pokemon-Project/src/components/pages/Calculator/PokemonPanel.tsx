@@ -10,16 +10,6 @@ import type { BaseStats } from '../../../hooks/usePokemonBaseStats';
 import PokemonSearchInput from './PokemonSearchInput';
 import type { PokemonEntry, FormType } from '../../../hooks/usePokemonSearch';
 
-const FORM_BADGE: Record<FormType, { gradient: string; labelKey: string; fallback: string }> = {
-  mega:   { gradient: 'from-amber-500 to-pink-500',    labelKey: 'calc_mega',    fallback: 'Mega' },
-  alola:  { gradient: 'from-sky-400 to-cyan-500',      labelKey: 'calc_alola',   fallback: 'Alola' },
-  galar:  { gradient: 'from-purple-500 to-indigo-500', labelKey: 'calc_galar',   fallback: 'Galar' },
-  hisui:  { gradient: 'from-amber-600 to-yellow-500',  labelKey: 'calc_hisui',   fallback: 'Hisui' },
-  paldea: { gradient: 'from-orange-500 to-red-500',    labelKey: 'calc_paldea',  fallback: 'Paldea' },
-  gmax:   { gradient: 'from-rose-500 to-red-600',      labelKey: 'calc_gmax',    fallback: 'GMax' },
-  alt:    { gradient: 'from-teal-500 to-emerald-500', labelKey: 'calc_alt',     fallback: 'Form' },
-};
-
 const SPRITE_URL = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
@@ -58,6 +48,7 @@ export interface PanelState {
   currentHPPercent: number;
   megaForm: string | null;
   formType: FormType | null;
+  formSpriteId: number | null;
 }
 
 export const DEFAULT_PANEL: PanelState = {
@@ -72,6 +63,7 @@ export const DEFAULT_PANEL: PanelState = {
   currentHPPercent: 100,
   megaForm: null,
   formType: null,
+  formSpriteId: null,
 };
 
 interface Props {
@@ -98,10 +90,12 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
 
   // Auto-select first non-hidden ability when pokemon loads
   const abilities = data?.abilities ?? [];
-  if (data && !state.ability && abilities.length > 0) {
-    const first = abilities.find(a => !a.isHidden) ?? abilities[0];
-    onChange({ ...state, ability: first.slug });
-  }
+  useEffect(() => {
+    if (data && !state.ability && abilities.length > 0) {
+      const first = abilities.find(a => !a.isHidden) ?? abilities[0];
+      onChange({ ...state, ability: first.slug });
+    }
+  }, [data?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync item input with selected item name
   useEffect(() => {
@@ -121,7 +115,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
 
   const handleSelect = (p: PokemonEntry | null) => {
     if (!p) { onChange({ ...DEFAULT_PANEL }); return; }
-    onChange({ ...state, pokemonId: p.id, ability: null, megaForm: p.megaForm ?? null, formType: p.formType ?? null });
+    onChange({ ...state, pokemonId: p.id, ability: null, megaForm: p.megaForm ?? null, formType: p.formType ?? null, formSpriteId: p.formSpriteId ?? null });
   };
 
   // Filtered items for dropdown
@@ -150,7 +144,7 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
 
   // Value for PokemonSearchInput — include form info
   const searchValue: PokemonEntry | null = state.pokemonId && data
-    ? { id: data.id, name: data.name, megaForm: state.megaForm ?? undefined, displayName: state.megaForm ? state.megaForm.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : undefined, formType: state.formType ?? undefined }
+    ? { id: data.id, name: data.name, megaForm: state.megaForm ?? undefined, displayName: state.megaForm ? state.megaForm.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : undefined, formType: state.formType ?? undefined, formSpriteId: state.formSpriteId ?? undefined }
     : null;
 
   return (
@@ -183,13 +177,6 @@ const PokemonPanel = ({ label, accentColor, state, onChange }: Props) => {
                 <circle cx="100" cy="100" r="24" stroke={accentColor} strokeWidth="4" fill="none" />
               </svg>
             </div>
-
-            {/* Form badge (Mega / Regional / GMax) */}
-            {state.formType && FORM_BADGE[state.formType] && (
-              <span className={`absolute top-2 left-2 z-20 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r ${FORM_BADGE[state.formType].gradient} text-white shadow-md`}>
-                {t(FORM_BADGE[state.formType].labelKey, FORM_BADGE[state.formType].fallback).toUpperCase()}
-              </span>
-            )}
 
             <img
               src={SPRITE_URL(megaData?.spriteId ?? data.id)}
